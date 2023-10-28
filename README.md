@@ -1,8 +1,4 @@
-<img src="/assets/Slaanesh.png" width="auto" height="100"/>
-
----
-
-# Slaanesh
+<img src="/assets/Slaanesh.png" width="auto" height="50"/> # Slaanesh
 The self-hosted video game tracker
 
 ---
