@@ -1,7 +1,5 @@
-<img src="/assets/Slaanesh.png" width="auto" height="50"/>
-
-# Slaanesh
-The self-hosted video game tracker
+<h1 align="center"><img src="/assets/Slaanesh.png" width="auto" height="50"/>Slaanesh</h1>
+<h3 align="center">The self-hosted video game tracker</h3>
 
 ---
 
