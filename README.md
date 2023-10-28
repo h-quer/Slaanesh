@@ -1,11 +1,9 @@
-<img src="/assets/Slaanesh.png" width="auto" height="200"/>
+<img src="/assets/Slaanesh.png" width="auto" height="100"/>
 
 ---
 
 #Slaanesh
 ##The self-hosted video game tracker
-
----
 
 ## What is Slaanesh about?
 Slaanesh Game Tracker
