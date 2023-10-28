@@ -1,4 +1,5 @@
-<h1 align="center"><img src="/assets/Slaanesh.png" width="auto" height="40"/>  Slaanesh</h1>
+<p align="center"><img src="/assets/Slaanesh.png" width="auto" height="48"/></p>
+<h1 align="center">Slaanesh</h1>
 <h3 align="center">The self-hosted video game tracker</h3>
 
 ---
