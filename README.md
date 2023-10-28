@@ -2,8 +2,8 @@
 
 ---
 
-#Slaanesh
-##The self-hosted video game tracker
+# Slaanesh
+## The self-hosted video game tracker
 
 ## What is Slaanesh about?
 Slaanesh Game Tracker
