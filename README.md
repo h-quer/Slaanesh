@@ -2,7 +2,7 @@
   <img src="/assets/Slaanesh.png" width="auto" height="48"/>
   <br>
   Slaanesh</h1>
-<h3 align="center">The self-hosted video game tracker</h3>
+<p align="center">The self-hosted video game tracker</p>
 
 ---
 
