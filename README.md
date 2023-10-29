@@ -13,8 +13,22 @@ Slaanesh is a game tracker, allowing for keeping track of games played as well a
 Yes, absolutely! This is why Slaanesh has a simple csv export functionality. Even if Slaanesh somehow corrupts its database, as long as you at least occasionally press the csv export button, all your data will be safe in a very easy to read and easily accessible text format. Just make sure that both the database and export directory are part of the 3-2-1 backup system you are using for your server already anyway. If you don't run a 3-2-1 backup system on your server, then you have bigger things to worry about than Slaanesh ;)
 
 ## Screenshots
-<img src="/images/playing.png" width="45%" height="auto" style="vertical-align:middle;margin:25px 25px"/> <img src="/images/game_editor.png" width="45%" height="auto" style="vertical-align:middle;margin:25px 25px"/>
-<img src="/images/backlog.png" width="45%" height="auto" style="vertical-align:middle;margin:25px 25px"/> <img src="/images/add_game.png" width="45%" height="auto" style="vertical-align:middle;margin:25px 25px"/>
+<div class="row">
+  <div class="column">
+    <img src="/images/playing.png" alt="playing" width="100%"/>
+  </div>
+  <div class="column">
+    <img src="/images/game_editor.png" alt="game editor" width="100%"/>
+  </div>
+</div>
+<div class="row">
+  <div class="column">
+    <img src="/images/backlog.png" alt="backlog" width="100%"/>
+  </div>
+  <div class="column">
+    <img src="/images/add_game.png" alt="add game dialog" width="100%"/>
+  </div>
+</div>
 
 ## Setup and installation
 ### Docker compose
