@@ -9,18 +9,27 @@ gl = pd.DataFrame()
 pt = pd.DataFrame()
 
 
+# todo: automatically create empty dataframes if none are found on startup
+def create_empty_dataframes():
+    return True
+
+
 def load_dataframes():
     global gl, pt
-    gl = pd.read_feather(config.game_list)
-    pt = pd.read_feather(config.playthrough_list)
+    try:
+        gl = pd.read_feather(config.game_list)
+        pt = pd.read_feather(config.playthrough_list)
+    except Exception as e:
+        print(str(e))
+        create_empty_dataframes()
 
 
-def write_dataframes(execute=False):
+# execute allows for temporarily turning off automatic writes, manually writing possible via UI
+def write_dataframes(execute=True):
     if execute:
         global gl, pt
         gl.to_feather(config.game_list)
         pt.to_feather(config.playthrough_list)
-    return True
 
 
 def update_igdb_data(new_data):
