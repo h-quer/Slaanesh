@@ -33,6 +33,22 @@ This is why Slaanesh has a simple csv export functionality. Even if Slaanesh som
 </div>
 
 ## Setup and installation
+I will set up a docker image to use soon, then simply running the compose file will suffice. For now, it has to be built since I haven't figured out the Github build pipeline yet.
+
+First, navigate to the directory you want to use for the build and get the repository:
+```
+git clone https://github.com/h-quer/Slaanesh
+```
+Create all necessary directories, adjust config file (IGDB token data!) and copy it to the config directory.
+Also adjust the docker-compose.yml to match your setup.
+
+Next, simply build the image:
+```
+docker compose up -d
+```
+
+Slaanesh should now be running on your specified port (8428 by default).
+
 ### Docker compose
 ```yaml
 ---
