@@ -15,18 +15,18 @@ Yes, absolutely! This is why Slaanesh has a simple csv export functionality. Eve
 ## Screenshots
 <div class="row">
   <div class="column">
-    <img src="/images/playing.png" alt="playing" width="100%"/>
+    <img src="/images/playing.png" alt="playing" width="50%"/>
   </div>
   <div class="column">
-    <img src="/images/game_editor.png" alt="game editor" width="100%"/>
+    <img src="/images/backlog.png" alt="backlog" width="50%"/>
   </div>
 </div>
 <div class="row">
   <div class="column">
-    <img src="/images/backlog.png" alt="backlog" width="100%"/>
+    <img src="/images/game_editor.png" alt="game editor" width="50%"/>
   </div>
   <div class="column">
-    <img src="/images/add_game.png" alt="add game dialog" width="100%"/>
+    <img src="/images/add_game.png" alt="add game dialog" width="50%"/>
   </div>
 </div>
 
