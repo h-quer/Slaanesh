@@ -35,7 +35,8 @@ Slaanesh does not and will not include:
 * Anything other than video games
 * Social media features
 * The ability to download or start games from within Slaanesh - it's a tracker, not a launcher
-* Translations, at least not unless this really picks up and a proper use case for translating it arises
+* Translations: At least not unless this really picks up and a proper use case for translating it arises
+* Authentication: There are amazing tools for that, for example caddy or authentik, that allow for user authentication and redirecting to their own instance of Slaanesh - for now I don't see a reason to replicate that with an auth system, which I wouldn't be able to build with any reasonably degree of security anyway. The risk of someone exposing my hacky auth code to the web is way too high, better not offer the option in the first place and rely on professional tools for that instead!
 
 ### Feature wishlist
 Pull requests to implement these are extremely welcome. I'm not currently working on these, but might after the completing the roadmap:
