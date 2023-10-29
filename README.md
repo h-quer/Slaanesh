@@ -17,7 +17,25 @@ Nice screenshots
 
 ## Setup and installation
 ### Docker compose
-todo
+```yaml
+---
+version: "3.9"
+
+services:
+  slaanesh:
+    image: [todo]:latest
+    container_name: slaanesh
+    user: 1000:1000
+    restart: unless-stopped
+    volumes:
+      - your_config_dir:/files/config
+      - your_import_dir:/files/import
+      - your_export_dir:/files/export
+      - your_covers_dir:/files/covers
+      - your_database_dir:/files/database
+    ports:
+      - 8428:8080
+```
 
 ### Directories and the config file
 Make sure to place the sample config file in the config directory. Slaanesh will not work without a config file and at least the mandatory IGDB info.
@@ -26,6 +44,7 @@ Folders used and to mount are:
 * config - place for the config file (and potentially the encrypted IGDB access information once encrypted is implemented)
 * import - place csv files for import here, must be names gamelist.csv and playthroughs.csv
 * export - receive exported files from here, both database exports (gamelist.csv and playthroughs.csv) as well as the name to IGDB ID matching tool output
+* covers - game covers are saved here, you can manually edit them if necessary
 * database - location of the Slaanesh database, do not touch but if you value your data, make sure it is part of your 3-2-1 backup system, and also make sure to check backup integrety and practise restores regularly
 
 ### IGDB API token
