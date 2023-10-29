@@ -21,10 +21,12 @@ You then need to save your client id and client secret in the Slaanesh config fi
 
 ## Scope and roadmap
 ### Roadmap
-Features I am currently actively working on (pull requests still very welcome for support on these!):
+Features I am currently slowly but actively working on (pull requests still very welcome for support on these!):
 * Overview page UI improvements - table alignment, graphs, additional stats, configurability in config file
 * Cover cleanup - setting button to delete downloaded covers of games that are no longer in the game list
 * Option to add a custom icon and name (the big central part of the UI header)
+* Expand settings dialog to enable modifying the config file from within the UI
+* Once Twitch client ID and secret can be added via the UI, save them not in plain text in the config file but encrypted somewhere else
 * File picker and file downloads for csv import/export
 * General UI improvements, especially considering responsiveness - there is probably a lot that can be done with asyncio which I have barely used so far
 
@@ -41,7 +43,6 @@ Pull requests to implement these are extremely welcome. I'm not currently workin
 * Adding time played or time to complete to games, ideally linking to the howlongtobeat.com API to pull the completion times - although I don't think there is a good way to match IGDB IDs to HLTB IDs and search by name is quite error-prone
 * Ratings for games (including config option to enable/disable)
 * More store IDs than just Steam (including config options to enable/disable)
-* Expand settings dialog to enable modifying the config file from within the UI
 * General code cleanup, making things neat and doing some proper coding paradigm stuff instead of randomly mashing functions
 
 ## How to contribute
