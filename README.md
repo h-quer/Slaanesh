@@ -16,6 +16,12 @@ Nice screenshots
 stuff
 
 ## Scope and roadmap
+### Roadmap
+Features I am currently actively working on (pull requests very welcome for support on these!):
+* Overview page UI improvements - table alignment, graphs, additional stats, configurability in config file
+* Cover cleanup - setting button to delete downloaded covers of games that are no longer in the game list
+* General UI improvements, especially considering responsiveness - there is probably a lot that can be done with asyncio which I have barely used so far
+
 ### Not in scope
 Slaanesh does not and will not include:
 * Anything other than video games
@@ -27,12 +33,6 @@ Pull requests to implement these are extremely welcome, I'm not working on those
 * Ratings for games (including config option to enable/disable)
 * More store IDs than just Steam (including config options to enable/disable)
 * Expand settings dialog to enable modifying the config file from within the UI
-
-### Roadmap
-Features I am currently actively working on (pull requests very welcome for support on these!):
-* Overview page UI improvements - table alignment, graphs, additional stats, configurability in config file
-* Cover cleanup - setting button to delete downloaded covers of games that are no longer in the game list
-* General UI improvements, especially considering responsiveness - there is probably a lot that can be done with asyncio which I have barely used so far
 
 ## How to contribute
 Bug reports are always useful.
