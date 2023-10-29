@@ -17,7 +17,7 @@ stuff
 
 ## Scope and roadmap
 ### Roadmap
-Features I am currently actively working on (pull requests very welcome for support on these!):
+Features I am currently actively working on (pull requests still very welcome for support on these!):
 * Overview page UI improvements - table alignment, graphs, additional stats, configurability in config file
 * Cover cleanup - setting button to delete downloaded covers of games that are no longer in the game list
 * File picker and file downloads for csv import/export
@@ -30,12 +30,13 @@ Slaanesh does not and will not include:
 * The ability to download or start games from within Slaanesh - it's a tracker, not a launcher
 
 ### Feature wishlist
-Pull requests to implement these are extremely welcome, I'm not working on those myself, though:
+Pull requests to implement these are extremely welcome. I'm not currently working on these, but might after the completing the roadmap:
 * A proper fuzzy search with a list of games matching the game name when adding games by name, complete with a selection dialog including covers to pick the correct one easily
 * Adding time played or time to complete to games, ideally linking to the howlongtobeat.com API to pull the completion times - although I don't think there is a good way to match IGDB IDs to HLTB IDs and search by name is quite error-prone
 * Ratings for games (including config option to enable/disable)
 * More store IDs than just Steam (including config options to enable/disable)
 * Expand settings dialog to enable modifying the config file from within the UI
+* General code cleanup, making things neat and doing some proper coding paradigm stuff instead of randomly mashing functions
 
 ## How to contribute
 Bug reports are always useful.
