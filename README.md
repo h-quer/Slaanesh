@@ -85,7 +85,9 @@ Folders used and to mount are:
 
 ### IGDB API token
 Slaanesh uses the IGDB API for all game data. For Slaanesh to work, you need to be able to acces the IGDB API. This is how you can register: https://api-docs.igdb.com/#account-creation.
-You then need to save your client id and client secret in the Slaanesh config file. Be aware: Client id and secret are (for now) stored in plain text. Doing so for your regular Twitch account (in case you already have one) is obviously a bad idea. In that case, best create an additional one, for dedicated use only as Slaanesh API slave.
+You then need to save your client id and client secret in the Slaanesh config file.
+
+Be aware: Client id and secret are (for now) stored in plain text. Doing so for your regular Twitch account (in case you already have one) is obviously a bad idea. In that case, best create an additional one, for dedicated use only as Slaanesh API slave.
 
 ## Scope and roadmap
 ### Roadmap
@@ -118,5 +120,6 @@ Pull requests to implement these are extremely welcome. I'm not currently workin
 
 ## How to contribute
 Bug reports are always useful (if you run into bugs, which of course I hope won't happen ...).
+
 Even better, it'd be absolutely awesome if you could submit a pull request for anything that might need fixing or improving :)
 
