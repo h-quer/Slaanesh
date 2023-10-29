@@ -29,6 +29,7 @@ Slaanesh does not and will not include:
 * Anything other than video games
 * Social media features
 * The ability to download or start games from within Slaanesh - it's a tracker, not a launcher
+* Translations, at least not unless this really picks up and a proper use case for translating it arises
 
 ### Feature wishlist
 Pull requests to implement these are extremely welcome. I'm not currently working on these, but might after the completing the roadmap:
