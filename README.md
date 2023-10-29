@@ -31,6 +31,7 @@ Slaanesh does not and will not include:
 
 ### Feature wishlist
 Pull requests to implement these are extremely welcome, I'm not working on those myself, though:
+* A proper fuzzy search with a list of games matching the game name when adding games by name, complete with a selection dialog including covers to pick the correct one easily
 * Ratings for games (including config option to enable/disable)
 * More store IDs than just Steam (including config options to enable/disable)
 * Expand settings dialog to enable modifying the config file from within the UI
