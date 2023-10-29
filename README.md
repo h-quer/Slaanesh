@@ -80,6 +80,6 @@ Pull requests to implement these are extremely welcome. I'm not currently workin
 * General code cleanup, making things neat and doing some proper coding paradigm stuff instead of randomly mashing functions
 
 ## How to contribute
-Bug reports are always useful.
+Bug reports are always useful (if you run into bugs, which of course I hope won't happen ...).
 Even better, it'd be absolutely awesome if you could submit a pull request for anything that might need fixing or improving :)
 
