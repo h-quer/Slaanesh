@@ -55,6 +55,7 @@ You then need to save your client id and client secret in the Slaanesh config fi
 ## Scope and roadmap
 ### Roadmap
 Features I am currently slowly but actively working on (pull requests still very welcome for support on these!):
+* Proper dark mode support (currently works for everything but the tables)
 * Overview page UI improvements - table alignment, graphs, additional stats, configurability in config file
 * Cover cleanup - setting button to delete downloaded covers of games that are no longer in the game list
 * Option to add a custom icon and name (the big central part of the UI header)
