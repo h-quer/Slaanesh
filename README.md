@@ -36,6 +36,7 @@ services:
     ports:
       - 8428:8080
 ```
+Of course, change the left side of the volumes and port as needed. Same goes for UID/GID or simply remove to run as root. You can also of course remove the port part completely if using a reverse proxy and accessing the container via its name.
 
 ### Directories and the config file
 Make sure to place the sample config file in the config directory. Slaanesh will not work without a config file and at least the mandatory IGDB info.
