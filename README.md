@@ -72,6 +72,7 @@ You then need to save your client id and client secret in the Slaanesh config fi
 ## Scope and roadmap
 ### Roadmap
 Features I am currently slowly but actively working on (pull requests still very welcome for support on these!):
+* Set up a proper build pipeline and publish a docker image, so that docker compose can simply pull it instead of having to build
 * Proper dark mode support (currently works for everything but the tables)
 * Overview page UI improvements - table alignment, graphs, additional stats, configurability in config file
 * Cover cleanup - setting button to delete downloaded covers of games that are no longer in the game list
