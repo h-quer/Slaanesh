@@ -1,0 +1,18 @@
+---
+version: "3.9"
+
+services:
+  slaanesh:
+    build: .
+    container_name: slaanesh
+    user: 1000:1000
+    restart: unless-stopped
+    volumes:
+      - /containers/slaanesh/config:/files/config
+      - /containers/slaanesh/import:/files/import
+      - /containers/slaanesh/export:/files/export
+      - /containers/slaanesh/covers:/files/covers
+      - /containers/slaanesh/data/:/files/database
+    ports:
+      - 8428:8080
+      
