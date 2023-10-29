@@ -56,7 +56,9 @@ version: "3.9"
 
 services:
   slaanesh:
-    image: [todo]:latest
+    build: .
+    # coming up soon, but not quite ready yet
+    # image: ghcr.io/h-quer/slaanesh:latest
     container_name: slaanesh
     user: 1000:1000
     restart: unless-stopped
