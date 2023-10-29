@@ -9,8 +9,8 @@
 ## What is Slaanesh about?
 Slaanesh is a game tracker, allowing for keeping track of games played as well as maintaining a wishlist and backlog.
 
-## It's an alpha release, is it safe to use?
-Yes, absolutely! This is why Slaanesh comes with simply csv export functionality. If if Slaanesh somehow corrupts its database, as long as you at least occasionally press the csv export button, all your data will be safe in a very easy to read and easily accessible text format. Just make sure that both the database and export directory are part of the 3-2-1 backup system you are using for your server already anyway - you do have backups, right? If not, then Slaanesh being safe to use or not is the least of your problems ;)
+## It's a beta release, is it safe to use?
+Yes, absolutely! This is why Slaanesh has a simple csv export functionality. Even if Slaanesh somehow corrupts its database, as long as you at least occasionally press the csv export button, all your data will be safe in a very easy to read and easily accessible text format. Just make sure that both the database and export directory are part of the 3-2-1 backup system you are using for your server already anyway. If you don't run a 3-2-1 backup system on your server, then you have bigger things to worry about than Slaanesh ;)
 
 ## Screenshots
 Nice screenshots
