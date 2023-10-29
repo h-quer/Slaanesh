@@ -14,6 +14,16 @@ Nice screenshots
 
 ## Setup and installation
 ### Docker compose
+todo
+
+### Directories and the config file
+Make sure to place the sample config file in the config directory. Slaanesh will not work without a config file and at least the mandatory IGDB info.
+
+Folders used and to mount are:
+* config - place for the config file (and potentially the encrypted IGDB access information once encrypted is implemented)
+* import - place csv files for import here, must be names gamelist.csv and playthroughs.csv
+* export - receive exported files from here, both database exports (gamelist.csv and playthroughs.csv) as well as the name to IGDB ID matching tool output
+* database - location of the Slaanesh database, do not touch but if you value your data, make sure it is part of your 3-2-1 backup system, and also make sure to check backup integrety and practise restores regularly
 
 ### IGDB API token
 Slaanesh uses the IGDB API for all game data. For Slaanesh to work, you need to be able to acces the IGDB API. This is how you can register: https://api-docs.igdb.com/#account-creation.
