@@ -20,6 +20,7 @@ stuff
 Features I am currently actively working on (pull requests still very welcome for support on these!):
 * Overview page UI improvements - table alignment, graphs, additional stats, configurability in config file
 * Cover cleanup - setting button to delete downloaded covers of games that are no longer in the game list
+* Option to add a custom icon and name (the big central part of the UI header)
 * File picker and file downloads for csv import/export
 * General UI improvements, especially considering responsiveness - there is probably a lot that can be done with asyncio which I have barely used so far
 
