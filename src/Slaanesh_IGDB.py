@@ -86,6 +86,8 @@ def collect_game_info(query_list: tuple) -> pd.DataFrame:
         columns={"id": "IGDB_ID", "name": "Name", "url": "IGDB_url", "first_release_date": "Release_date", "status": "IGDB_status"})
     if 'IGDB_status' not in name_url_status_release.columns:
         name_url_status_release['IGDB_status'] = 0
+    if 'Release_date' not in name_url_status_release.columns:
+        name_url_status_release['Release_date'] = 0
     steam_id = process_api_data(query_websites(query_str)).rename(columns={"game": "IGDB_ID", "url": "Steam_ID"})
     if steam_id.empty:
         steam_id = pd.DataFrame(columns=['IGDB_ID', 'Steam_ID'])
