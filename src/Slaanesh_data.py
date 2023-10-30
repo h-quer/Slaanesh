@@ -41,8 +41,8 @@ def update_igdb_data(new_data):
         gl.loc[[gl_index], ['Name']] = row['Name']
         gl.loc[[gl_index], ['IGDB_queried']] = row['IGDB_queried']
         gl.loc[[gl_index], ['Steam_ID']] = int(re.findall("\\d+", row['Steam_ID'])[0]) if type(row['Steam_ID']) is str else int(0)
-        gl.loc[[gl_index], ['Release_date']] = row['Release_date'] if type(row['Release_date']) is int else int(0)
-        gl.loc[[gl_index], ['IGDB_status']] = row['IGDB_status'] if type(row['IGDB_status']) is int else int(0)
+        gl.loc[[gl_index], ['Release_date']] = int(row['Release_date'])
+        gl.loc[[gl_index], ['IGDB_status']] = int(row['IGDB_status'])
         gl.loc[[gl_index], ['IGDB_url']] = row['IGDB_url']
     write_dataframes()
 
