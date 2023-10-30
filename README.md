@@ -14,6 +14,8 @@ Yes, absolutely!
 
 This is why Slaanesh has a simple csv export functionality. Even if Slaanesh somehow corrupts its database, as long as you at least occasionally press the csv export button, all your data will be safe in a very easy to read and easily accessible text format. Just make sure that both the database and export directory are part of the 3-2-1 backup system you are using for your server already anyway. If you don't run a 3-2-1 backup system on your server, then you have bigger things to worry about than Slaanesh ;)
 
+With that in mind, this still absolutely is a beta release. Not a "I've been using it for months and just calling it beta" release, but a true beta. Maybe alpha. Expect bugs - and ideally report or even help fix them, please.
+
 ## Screenshots
 <div class="row">
   <div class="column">
