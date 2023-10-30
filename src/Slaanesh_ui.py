@@ -59,6 +59,7 @@ def dialog_settings():
                     confirm = await confirmation
                     if confirm:
                         action_import_csv()
+
                 ui.button('Import CSV', on_click=import_csv)
                 ui.button('Export CSV', on_click=lambda: action_export_csv())
         with ui.card():
@@ -84,6 +85,7 @@ def dialog_settings():
                     confirm = await confirmation
                     if confirm:
                         action_purge_all_data()
+
                 ui.button('Check database consistency', on_click=lambda: action_check_database_consistency())
                 ui.button('Purge all data', on_click=purge_data)
 
@@ -218,18 +220,19 @@ def panel_overview():
                 rows = []
                 year = dt.datetime.now().year
                 res = pd.merge(data.pt, data.gl, how='left', on='IGDB_ID').sort_values(by=['Date'], ascending=False)
-                for x in range(year, year-7, -1):
+                for x in range(year, year - 7, -1):
                     a = res['Date'] > dt.datetime(x, 1, 1)
-                    b = res['Date'] < dt.datetime(x+1, 1, 1)
+                    b = res['Date'] < dt.datetime(x + 1, 1, 1)
                     tmp = res.loc[a & b, 'Status']
                     f = sum(tmp.isin(["completed", "mastered"]))
                     d = sum(tmp == "discarded")
-                    rows.append({'cat': x, 'played': f+d, 'finished': f, 'dropped': d, 'perc': f'{(100*f/(f+d) if (f+d)>0 else 0):.1f}%'})
-                a = res['Date'] < dt.datetime(year-6, 1, 1)
+                    rows.append({'cat': x, 'played': f + d, 'finished': f, 'dropped': d, 'perc': f'{(100 * f / (f + d) if (f + d) > 0 else 0):.1f}%'})
+                a = res['Date'] < dt.datetime(year - 6, 1, 1)
                 tmp = res.loc[a, 'Status']
                 f = sum(tmp.isin(["completed", "mastered"]))
                 d = sum(tmp == "discarded")
-                rows.append({'cat': f'{year-7} and before', 'played': f+d, 'finished': f, 'dropped': d, 'perc': f'{(100*f/(f+d) if (+d)>0 else 0):.1f}%'})
+                rows.append({'cat': f'{year - 7} and before', 'played': f + d, 'finished': f, 'dropped': d,
+                             'perc': f'{(100 * f / (f + d) if (+d) > 0 else 0):.1f}%'})
                 ui.table(columns=columns, rows=rows, title="Totals").classes('w-full')
 
 
@@ -458,7 +461,7 @@ def display_aggrid(aggrid_data: pd.DataFrame, has_playthroughs=True, show_releas
         today = dt.date.today()
         aggrid_data['Release_status'] = aggrid_data.apply(lambda x: get_release_status(x['Release_date'], x['IGDB_status'], today), axis=1)
     if has_playthroughs:
-        aggrid_data['Comment'] = aggrid_data['Game_comment'] + "\n" + aggrid_data['Playthrough_comment']
+        aggrid_data['Comment'] = aggrid_data['Game_comment'].replace({None: " "}) + " " + aggrid_data['Playthrough_comment'].replace({None: " "})
         aggrid_data.drop(['Game_comment', 'Playthrough_comment'], axis=1, inplace=True)
     aggrid_data.drop(['IGDB_queried', 'Release_date', 'Steam_ID', 'IGDB_status', 'IGDB_url'], axis=1, inplace=True)
     with ui.row().classes('justify-center w-full h-full'):
@@ -479,23 +482,18 @@ def display_aggrid(aggrid_data: pd.DataFrame, has_playthroughs=True, show_releas
             {'headerName': 'Name', 'field': 'Name', 'cellDataType': 'text', 'filter': 'agTextColumnFilter',
              'cellClass': 'justify-start items-center text-base font-medium', 'width': 150},
             {'headerName': 'Status', 'field': 'Status', 'cellDataType': 'text', 'filter': 'agTextColumnFilter',
-             'editable': True, 'cellEditor': 'agSelectCellEditor',
-             'cellEditorParams': {'values': config.status_list_played if has_playthroughs else config.status_list_unplayed},
              'cellClassRules': {'bg-red-50': 'x == "discarded"', 'bg-green-50': '["completed", "mastered"].includes(x)'}}]
         if has_playthroughs:
-            columns.append({'headerName': 'Date', 'field': 'Date', 'cellDataType': 'dateString',
-                            'editable': True, 'cellEditor': 'agDateStringCellEditor', 'filter': 'agTextColumnFilter'})
+            columns.append({'headerName': 'Date', 'field': 'Date', 'cellDataType': 'dateString', 'filter': 'agTextColumnFilter'})
         if show_release_status:
-            columns.append({'headerName': 'Release Status', 'field': 'Release_status', 'cellDataType': 'text',
-                            'editable': False, 'filter': 'agTextColumnFilter'})
-        columns.append({'headerName': 'Platform', 'field': 'Platform', 'cellDataType': 'text', 'filter': 'agTextColumnFilter',
-                        'editable': True, 'cellEditor': 'agSelectCellEditor', 'cellEditorParams': {'values': config.platform_list}})
+            columns.append({'headerName': 'Release Status', 'field': 'Release_status', 'cellDataType': 'text', 'filter': 'agTextColumnFilter'})
+        columns.append({'headerName': 'Platform', 'field': 'Platform', 'cellDataType': 'text', 'filter': 'agTextColumnFilter'})
         if has_playthroughs:
-            columns.append({'headerName': 'Comment', 'field': 'Comment', 'cellDataType': 'text', 'editable': True, 'cellEditor': 'agTextCellEditor',
-                            'filter': 'agTextColumnFilter', 'cellClass': 'justify-start items-center text-base font-normal'})
+            columns.append({'headerName': 'Comment', 'field': 'Comment', 'cellDataType': 'text', 'filter': 'agTextColumnFilter',
+                            'cellClass': 'justify-start items-center text-base font-normal', 'width': 150})
         else:
-            columns.append({'headerName': 'Comment', 'field': 'Game_comment', 'cellDataType': 'text', 'editable': True, 'cellEditor': 'agTextCellEditor',
-                            'filter': 'agTextColumnFilter', 'cellClass': 'justify-start items-center text-base font-normal'})
+            columns.append({'headerName': 'Comment', 'field': 'Game_comment', 'cellDataType': 'text', 'filter': 'agTextColumnFilter',
+                            'cellClass': 'justify-start items-center text-base font-normal', 'width': 150})
         table.options['columnDefs'] = columns
         table.props(':html_columns="[0]"')
         table.on('cellClicked', lambda e: dialog_game_editor(e.args['data']['IGDB_ID']))
@@ -692,4 +690,3 @@ def action_match_ids_to_names(names: str):
         ui.notify('Name-to-ID list export not successful: ' + str(e))
         return
     ui.notify('Name-to-ID list successfully exported')
-    
