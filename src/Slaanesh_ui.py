@@ -461,7 +461,7 @@ def display_aggrid(aggrid_data: pd.DataFrame, has_playthroughs=True, show_releas
         today = dt.date.today()
         aggrid_data['Release_status'] = aggrid_data.apply(lambda x: get_release_status(x['Release_date'], x['IGDB_status'], today), axis=1)
     if has_playthroughs:
-        aggrid_data['Comment'] = aggrid_data['Game_comment'].replace({None: " "}) + " " + aggrid_data['Playthrough_comment'].replace({None: " "})
+        aggrid_data['Comment'] = aggrid_data['Playthrough_comment'].replace({None: " "}) + " " + aggrid_data['Game_comment'].replace({None: " "})
         aggrid_data.drop(['Game_comment', 'Playthrough_comment'], axis=1, inplace=True)
     aggrid_data.drop(['IGDB_queried', 'Release_date', 'Steam_ID', 'IGDB_status', 'IGDB_url'], axis=1, inplace=True)
     with ui.row().classes('justify-center w-full h-full'):
