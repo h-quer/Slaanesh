@@ -140,11 +140,11 @@ def check_consistency():
     if sum(res['Status'].isin(config.status_list_unplayed)) > 0:
         raise Exception('Game with playthrough has unplayed status')
     # check whether all games without playthoughs have an unplayed status
-    tes = gl.drop(res.index, axis=0)
-    if sum(tes['Status'].isin(config.status_list_played)) > 0:
+    tes = ~gl['IGDB_ID'].isin(pt['IGDB_ID'])
+    if sum(gl.loc[tes, 'Status'].isin(config.status_list_played)) > 0:
         raise Exception('Game without playthrough has played status')
     # check whether all games have valid status
-    if sum(~tes['Status'].isin(config.status_list_played + config.status_list_unplayed)) > 0:
+    if sum(~gl['Status'].isin(config.status_list_played + config.status_list_unplayed)) > 0:
         raise Exception('Game has invalid status')
     # check whether all games have valid platform
     if sum(~gl['Platform'].isin(config.platform_list)) > 0:
