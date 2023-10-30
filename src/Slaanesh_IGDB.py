@@ -14,7 +14,7 @@ import queue
 igdb = IGDBWrapper(config.client_id, config.auth_token)
 update_id_queue = queue.Queue()
 
-request_limit = 205
+request_limit = 55
 
 
 def init_api() -> bool:
