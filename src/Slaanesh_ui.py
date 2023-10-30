@@ -65,6 +65,7 @@ def dialog_settings():
                 ui.label('IGDB').classes('text-lg font-bold')
             with ui.row():
                 ui.button('Update API data', on_click=lambda: action_update_api_data())
+                ui.button('Update release dates', on_click=lambda: action_update_release_dates())
                 ui.button('Refresh access token', on_click=lambda: action_refresh_acces_token())
         with ui.card().classes('w-full'):
             with ui.row():
@@ -566,6 +567,13 @@ def action_update_api_data():
     for x in tmp:
         igdb.update_id_queue.put(x)
     ui.notify('API data update queued')
+
+
+def action_update_release_dates():
+    tmp = data.gl[data.gl['Release_date'] == 0]['IGDB_ID'].tolist()
+    for x in tmp:
+        igdb.update_id_queue.put(x)
+    ui.notify('API data update for all unknown release dates queued')
 
 
 def action_refresh_acces_token():
