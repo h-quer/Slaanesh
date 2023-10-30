@@ -256,7 +256,7 @@ def dialog_game_editor(igdb_id: int):
         with ui.column().classes('w-full'):
             with ui.row().classes('w-full justify-between'):
                 ui.label('')
-                ui.label(game_info['Name'][game_index]).classes('text-xl font-bold')
+                ui.label(game_info['Name'][game_index]).classes('text-xl flex-1 flex-wrap font-bold')
                 with ui.row().classes('justify-end'):
                     async def remove_game():
                         delete = await confirmation
