@@ -20,7 +20,7 @@ def refresh_ui():
 def display_ui():
     ui_header()
     tabs_lists()
-    ui.run(title='Slaanesh', favicon=config.server_file_icon, reload=False, dark=config.dark_mode)
+    ui.run(title='Slaanesh', favicon=config.file_icon, reload=False, dark=config.dark_mode)
 
 
 def ui_header():
@@ -30,7 +30,7 @@ def ui_header():
             ui.button('Add game with playthrough', on_click=lambda: dialog_add_played_game())
         with ui.column().classes('items-center justify-items-center'):
             with ui.row().classes('items-center justify-items-center'):
-                ui.image(config.server_file_icon).classes('w-20')
+                ui.image(config.file_icon).classes('w-20')
                 ui.label('Slaanesh').classes('text-6xl')
         with ui.column().classes('items-center justify-items-center'):
             with ui.row().classes('items-center justify-items-center'):
