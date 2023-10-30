@@ -18,7 +18,7 @@ def refresh_ui():
 
 
 def display_ui():
-    with ui.column().classes('w-full h-full flex-nowrap'):
+    with ui.column().classes('w-full h-[90vh] flex-nowrap'):
         ui_header()
         tabs_lists()
     ui.run(title='Slaanesh', favicon=config.file_icon, reload=False, dark=config.dark_mode)
@@ -416,7 +416,7 @@ def display_table(table_data: pd.DataFrame, has_playthroughs=False, show_release
     with ui.row().classes('justify-center w-full'):
         table_filter = ui.input(label='Search')  # .classes('bg-slate-200 box-decoration-clone')
     with (ui.row().classes('justify-center w-full h-full')):
-        table = ui.table(columns=columns, rows=rows, pagination=50).classes('w-11/12 h-[44rem] self-stretch items-stretch')
+        table = ui.table(columns=columns, rows=rows, pagination=50).classes('w-11/12 h-full self-stretch items-stretch')
         table.add_slot('body', r'''
             <q-tr :props="props">
                 <q-td
@@ -462,7 +462,7 @@ def display_aggrid(aggrid_data: pd.DataFrame, has_playthroughs=True, show_releas
         aggrid_data.drop(['Game_comment', 'Playthrough_comment'], axis=1, inplace=True)
     aggrid_data.drop(['IGDB_queried', 'Release_date', 'Steam_ID', 'IGDB_status', 'IGDB_url'], axis=1, inplace=True)
     with ui.row().classes('justify-center w-full h-full'):
-        table = ui.aggrid.from_pandas(aggrid_data).classes('w-11/12 h-[44rem]')
+        table = ui.aggrid.from_pandas(aggrid_data).classes('w-11/12 h-full')
         table.options['rowHeight'] = config.row_height
         table.options['defaultColDef'] = {'flex': 1,
                                           'width': 96,
