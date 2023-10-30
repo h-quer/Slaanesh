@@ -629,7 +629,7 @@ def dialog_add_played_game():
         with ui.grid(columns=2):
             igdb_id = ui.input(label="IGDB ID")
             name = ui.input(label="Name")
-            status = ui.select(config.status_list_played, label="Status", with_input=True, value=config.status_list_backlog[0])
+            status = ui.select(config.status_list_played, label="Status", with_input=True, value=config.status_list_played[0])
             platform = ui.select(config.platform_list, label="Platform", with_input=True, value=config.platform_list[0])
         with ui.row():
             with ui.input('Date') as date:
