@@ -18,8 +18,9 @@ def refresh_ui():
 
 
 def display_ui():
-    ui_header()
-    tabs_lists()
+    with ui.column().classes('w-full h-full flex-nowrap'):
+        ui_header()
+        tabs_lists()
     ui.run(title='Slaanesh', favicon=config.file_icon, reload=False, dark=config.dark_mode)
 
 
@@ -110,23 +111,23 @@ def dialog_about():
 
 
 def tabs_lists():
-    with ui.row().classes('w-full h-full justify-center items-stretch self-stretch'):
-        with ui.tabs().classes('w-full h-full') as tabs:
+    with ui.row().classes('w-full h-full justify-center'):
+        with ui.tabs().classes('w-full') as tabs:
             tab_ov = ui.tab('Overview').classes('w-1/6')
             tab_pl = ui.tab('Playing').classes('w-1/6')
             tab_pt = ui.tab('Played').classes('w-1/6')
             tab_bl = ui.tab('Backlog').classes('w-1/6')
             tab_wl = ui.tab('Wishlist').classes('w-1/6')
         with ui.tab_panels(tabs, value=tab_pt).classes('w-full h-full'):
-            with ui.tab_panel(tab_ov).classes('w-full h-full'):
+            with ui.tab_panel(tab_ov):
                 panel_overview()
-            with ui.tab_panel(tab_pl).classes('w-full h-full'):
+            with ui.tab_panel(tab_pl):
                 panel_playing()
-            with ui.tab_panel(tab_pt).classes('w-full h-full'):
+            with ui.tab_panel(tab_pt):
                 panel_played()
-            with ui.tab_panel(tab_bl).classes('w-full h-full'):
+            with ui.tab_panel(tab_bl):
                 panel_backlog()
-            with ui.tab_panel(tab_wl).classes('w-full h-full'):
+            with ui.tab_panel(tab_wl):
                 panel_wishlist()
 
 
@@ -691,3 +692,4 @@ def action_match_ids_to_names(names: str):
         ui.notify('Name-to-ID list export not successful: ' + str(e))
         return
     ui.notify('Name-to-ID list successfully exported')
+    
