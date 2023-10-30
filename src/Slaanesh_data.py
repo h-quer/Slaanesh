@@ -126,6 +126,9 @@ def check_consistency():
         raise Exception('Gamelist ID not valid')
     if not pt['IGDB_ID'].dtype.kind in 'iu':
         raise Exception('Playthroughs ID not valid')
+    # check for duplicate IGDB IDs in game list
+    if sum(gl['IGDB_ID'].duplicated()) > 0:
+        raise Exception('Duplicate IGDB IDs in game list')
     # check whether all playthroughs have a date
     if sum(pt['Date'].isnull()) + sum(pt['Date'].isna()) + sum(pt['Date'] == "") > 0:
         raise Exception('Not all playthroughs have a date')
