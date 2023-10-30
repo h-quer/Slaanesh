@@ -115,6 +115,7 @@ Slaanesh does not and will not include:
 
 ### Feature wishlist
 Pull requests to implement these are extremely welcome. I'm not currently working on these, but might after the completing the roadmap:
+* Make it render properly on mobile
 * A proper fuzzy search with a list of games matching the game name when adding games by name, complete with a selection dialog including covers to pick the correct one easily
 * Adding time played or time to complete to games, ideally linking to the howlongtobeat.com API to pull the completion times - although I don't think there is a good way to match IGDB IDs to HLTB IDs and search by name is quite error-prone
 * Ratings for games (including config option to enable/disable)
