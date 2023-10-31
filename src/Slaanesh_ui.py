@@ -467,32 +467,30 @@ def display_aggrid(aggrid_data: pd.DataFrame, has_playthroughs=True, show_releas
     with ui.row().classes('justify-center w-full h-full'):
         table = ui.aggrid.from_pandas(aggrid_data).classes('w-11/12 h-full')
         table.options['rowHeight'] = config.row_height
-        table.options['defaultColDef'] = {'flex': 1,
-                                          'width': 96,
-                                          'floatingFilter': config.show_filters,
+        table.options['defaultColDef'] = {'floatingFilter': config.show_filters,
                                           'filter': 'agTextColumnFilter',
+                                          'minWidth': 128,
                                           'sortable': True,
                                           'resizable': True,
                                           'cellStyle': {'display': 'flex'},
                                           'cellClass': 'justify-center items-center text-base font-normal'
                                           }
         columns = [
-            {'headerName': '', 'field': 'IGDB_image', 'cellDataType': 'object',
-             'minWidth': 128, 'maxWidth': 128, 'cellClass': 'justify-center', 'filter': False},
+            {'headerName': '', 'field': 'IGDB_image', 'cellDataType': 'object', 'maxWidth': 128, 'cellClass': 'justify-center', 'filter': False},
             {'headerName': 'ID', 'field': 'IGDB_id', 'hide': True},
-            {'headerName': 'Name', 'field': 'Name', 'cellDataType': 'text', 'cellClass': 'justify-start items-center text-base font-medium', 'width': 600},
-            {'headerName': 'Status', 'field': 'Status', 'cellDataType': 'text', 'width': 200,
+            {'headerName': 'Name', 'field': 'Name', 'cellDataType': 'text', 'cellClass': 'justify-start items-center text-base font-medium', 'flex': 6},
+            {'headerName': 'Status', 'field': 'Status', 'cellDataType': 'text', 'flex': 2,
              'cellClassRules': {'bg-red-50': 'x == "discarded"', 'bg-green-50': '["completed", "mastered"].includes(x)'}}]
         if has_playthroughs:
-            columns.append({'headerName': 'Date', 'field': 'Date', 'cellDataType': 'dateString', 'width': 200})
+            columns.append({'headerName': 'Date', 'field': 'Date', 'cellDataType': 'dateString', 'flex': 2})
         if show_release_status:
-            columns.append({'headerName': 'Release Status', 'field': 'Release_status', 'cellDataType': 'text', 'width': 200})
-        columns.append({'headerName': 'Platform', 'field': 'Platform', 'cellDataType': 'text', 'width': 200})
+            columns.append({'headerName': 'Release Status', 'field': 'Release_status', 'cellDataType': 'text', 'flex': 2})
+        columns.append({'headerName': 'Platform', 'field': 'Platform', 'cellDataType': 'text', 'flex': 2})
         if has_playthroughs:
-            columns.append({'headerName': 'Comment', 'field': 'Comment', 'cellDataType': 'text', 'width': 500,
+            columns.append({'headerName': 'Comment', 'field': 'Comment', 'cellDataType': 'text', 'flex': 5,
                             'cellClass': 'justify-start items-center text-base font-normal'})
         else:
-            columns.append({'headerName': 'Comment', 'field': 'Game_comment', 'cellDataType': 'text', 'width': 500,
+            columns.append({'headerName': 'Comment', 'field': 'Game_comment', 'cellDataType': 'text', 'flex': 5,
                             'cellClass': 'justify-start items-center text-base font-normal'})
         table.options['columnDefs'] = columns
         table.props(':html_columns="[0]"')
