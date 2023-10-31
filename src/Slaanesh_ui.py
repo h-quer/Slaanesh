@@ -461,7 +461,7 @@ def display_aggrid(aggrid_data: pd.DataFrame, has_playthroughs=True, show_releas
         today = dt.date.today()
         aggrid_data['Release_status'] = aggrid_data.apply(lambda x: get_release_status(x['Release_date'], x['IGDB_status'], today), axis=1)
     if has_playthroughs:
-        aggrid_data['Comment'] = aggrid_data['Playthrough_comment'].replace({None: " "}) + " " + aggrid_data['Game_comment'].replace({None: " "})
+        aggrid_data['Comment'] = aggrid_data['Game_comment'].replace({None: " "}) + " " + aggrid_data['Playthrough_comment'].replace({None: " "})
         aggrid_data.drop(['Game_comment', 'Playthrough_comment'], axis=1, inplace=True)
     aggrid_data.drop(['IGDB_queried', 'Release_date', 'Steam_ID', 'IGDB_status', 'IGDB_url'], axis=1, inplace=True)
     with ui.row().classes('justify-center w-full h-full'):
@@ -469,31 +469,31 @@ def display_aggrid(aggrid_data: pd.DataFrame, has_playthroughs=True, show_releas
         table.options['rowHeight'] = config.row_height
         table.options['defaultColDef'] = {'flex': 1,
                                           'width': 96,
-                                          'filter': True,
                                           'floatingFilter': config.show_filters,
+                                          'filter': 'agTextColumnFilter',
                                           'sortable': True,
                                           'resizable': True,
                                           'cellStyle': {'display': 'flex'},
                                           'cellClass': 'justify-center items-center text-base font-normal'
                                           }
         columns = [
-            {'headerName': '', 'field': 'IGDB_image', 'cellDataType': 'object', 'width': 48, 'cellClass': 'justify-center', 'filter': False},
+            {'headerName': '', 'field': 'IGDB_image', 'cellDataType': 'object',
+             'minWidth': 128, 'maxWidth': 128, 'cellClass': 'justify-center', 'filter': False},
             {'headerName': 'ID', 'field': 'IGDB_id', 'hide': True},
-            {'headerName': 'Name', 'field': 'Name', 'cellDataType': 'text', 'filter': 'agTextColumnFilter',
-             'cellClass': 'justify-start items-center text-base font-medium', 'width': 150},
-            {'headerName': 'Status', 'field': 'Status', 'cellDataType': 'text', 'filter': 'agTextColumnFilter',
+            {'headerName': 'Name', 'field': 'Name', 'cellDataType': 'text', 'cellClass': 'justify-start items-center text-base font-medium', 'width': 600},
+            {'headerName': 'Status', 'field': 'Status', 'cellDataType': 'text', 'width': 200,
              'cellClassRules': {'bg-red-50': 'x == "discarded"', 'bg-green-50': '["completed", "mastered"].includes(x)'}}]
         if has_playthroughs:
-            columns.append({'headerName': 'Date', 'field': 'Date', 'cellDataType': 'dateString', 'filter': 'agTextColumnFilter'})
+            columns.append({'headerName': 'Date', 'field': 'Date', 'cellDataType': 'dateString', 'width': 200})
         if show_release_status:
-            columns.append({'headerName': 'Release Status', 'field': 'Release_status', 'cellDataType': 'text', 'filter': 'agTextColumnFilter'})
-        columns.append({'headerName': 'Platform', 'field': 'Platform', 'cellDataType': 'text', 'filter': 'agTextColumnFilter'})
+            columns.append({'headerName': 'Release Status', 'field': 'Release_status', 'cellDataType': 'text', 'width': 200})
+        columns.append({'headerName': 'Platform', 'field': 'Platform', 'cellDataType': 'text', 'width': 200})
         if has_playthroughs:
-            columns.append({'headerName': 'Comment', 'field': 'Comment', 'cellDataType': 'text', 'filter': 'agTextColumnFilter',
-                            'cellClass': 'justify-start items-center text-base font-normal', 'width': 150})
+            columns.append({'headerName': 'Comment', 'field': 'Comment', 'cellDataType': 'text', 'width': 500,
+                            'cellClass': 'justify-start items-center text-base font-normal'})
         else:
-            columns.append({'headerName': 'Comment', 'field': 'Game_comment', 'cellDataType': 'text', 'filter': 'agTextColumnFilter',
-                            'cellClass': 'justify-start items-center text-base font-normal', 'width': 150})
+            columns.append({'headerName': 'Comment', 'field': 'Game_comment', 'cellDataType': 'text', 'width': 500,
+                            'cellClass': 'justify-start items-center text-base font-normal'})
         table.options['columnDefs'] = columns
         table.props(':html_columns="[0]"')
         table.on('cellClicked', lambda e: dialog_game_editor(e.args['data']['IGDB_ID']))
