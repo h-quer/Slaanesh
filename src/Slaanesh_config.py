@@ -32,7 +32,7 @@ data_refresh_limit = 1
 show_filters = False
 row_height = 96
 dark_mode = None
-cards_grid = 5
+cards_width = 24
 
 config = configparser.ConfigParser(allow_no_value=True)
 config.optionxform = str
@@ -57,7 +57,7 @@ def load_config():
 		show_filters = config.getboolean('ui', 'show_filters', fallback=show_filters)
 		row_height = config.getint('ui', 'row_height', fallback=row_height)
 		dark_mode = config.getboolean('ui', 'dark_mode', fallback=dark_mode)
-		cards_grid = config.getint('ui', 'cards_grid', fallback=cards_grid)
+		cards_width = config.getint('ui', 'cards_width', fallback=cards_width)
 	if 'platforms' in config:
 		global platform_list
 		platform_list.clear()
