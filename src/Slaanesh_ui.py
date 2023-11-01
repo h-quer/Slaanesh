@@ -97,9 +97,9 @@ def dialog_about():
         with ui.card():
             with ui.grid(columns=2).classes('items-center'):
                 ui.label('Documentation').classes('text-lg font-bold')
-                ui.link('https://github.com/h-quer/Slaanesh/wiki', new_tab=True)
+                ui.link('https://github.com/h-quer/Slaanesh/wiki', 'https://github.com/h-quer/Slaanesh/wiki', new_tab=True)
                 ui.label('Github').classes('text-lg font-bold')
-                ui.link('https://github.com/h-quer/Slaanesh', new_tab=True)
+                ui.link('https://github.com/h-quer/Slaanesh', 'https://github.com/h-quer/Slaanesh', new_tab=True)
                 # ui.label('Discord').classes('text-lg font-bold')
                 # ui.link("TBD", "TBD", new_tab=True)
                 ui.label('Icon attribution').classes('text-lg font-bold')
