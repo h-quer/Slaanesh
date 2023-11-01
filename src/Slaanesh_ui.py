@@ -35,7 +35,7 @@ def ui_header():
                 ui.label('Slaanesh').classes('text-6xl')
         with ui.column().classes('items-center justify-items-center'):
             with ui.row().classes('items-center justify-items-center'):
-                # ui.button(icon='refresh', on_click=lambda: refresh_ui()).props('round')
+                ui.button(icon='refresh', on_click=lambda: refresh_ui()).props('round')
                 ui.button(icon='save', on_click=lambda: action_save_db()).props('round')
                 ui.button(icon='settings', on_click=lambda: dialog_settings()).props('round')
                 ui.button(icon='question_mark', on_click=lambda: dialog_about()).props('round')
@@ -499,26 +499,26 @@ def display_aggrid(aggrid_data: pd.DataFrame, has_playthroughs=True, show_releas
 
 
 def display_cards(card_data: pd.DataFrame, has_playthroughs=False, show_release_status=True):
-    with (ui.grid(columns=config.cards_grid)):
+    with ui.row().classes('w-full h-0 justify-center'):
         for index, row in card_data.iterrows():
-            with ui.card().on('click', lambda x=row: dialog_game_editor(igdb_id=x['IGDB_ID'])):
-                with ui.row().classes('justify-center w-full'):
+            with ui.card().classes(f'w-[{config.cards_width}rem]').on('click', lambda x=row['IGDB_ID']: dialog_game_editor(igdb_id=x)):
+                with ui.row().classes('self-center'):
                     ui.label(row['Name']).classes('text-xl font-bold')
-                with ui.row().classes('justify-center w-full'):
-                    with ui.column().classes('w-8/12'):
+                with ui.row().classes('w-full'):
+                    with ui.column().classes('w-8/12 h-full'):
                         ui.image(row['IGDB_image'])
-                    with ui.column().classes('w-3/12 h-full items-center justify-center'):
-                        ui.label(row['Status']).classes('text-lg justify-center')
+                    with ui.column().classes('w-3/12 h-full items-center self-center'):
+                        ui.label(row['Status']).classes('text-lg')
                         if has_playthroughs:
-                            ui.label(row['Date'].strftime("%Y-%m-%d")).classes('text-lg justify-center items-center')
+                            ui.label(row['Date'].strftime("%Y-%m-%d")).classes('text-lg')
                         if show_release_status:
                             ui.label(get_release_status(
-                                row['Release_date'], row['IGDB_status'], dt.date.today())).classes('text-lg items-center justify-center')
-                        ui.label(row['Platform']).classes('text-lg items-center justify-center')
+                                row['Release_date'], row['IGDB_status'], dt.date.today())).classes('text-lg')
+                        ui.label(row['Platform']).classes('text-lg')
                         if has_playthroughs:
-                            ui.label(row['Playthrough_comment'] + "\n" + row['Game_comment']).classes('justify-center items-center')
+                            ui.label(row['Playthrough_comment'] + "\n" + row['Game_comment'])
                         else:
-                            ui.label(row['Game_comment']).classes('justify-center items-center')
+                            ui.label(row['Game_comment'])
 
 
 def get_release_status(timestamp: int, status: int, today: dt.date) -> str:
