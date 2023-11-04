@@ -169,69 +169,87 @@ def panel_wishlist():
 
 @ui.refreshable
 def panel_overview():
-    # todo: rework, make nicer tables, add some interestng graphs etc
+    res = pd.merge(data.pt, data.gl, how='left', on='IGDB_ID').sort_values(by=['Date'], ascending=False)
+    # Totals
     with ui.grid(columns=3).classes('w-full'):
         with ui.card().classes('w-full'):
             with ui.row().classes('justify-center w-full'):
                 ui.label('Stats by category').classes('text-xl font-bold')
             with ui.row().classes('justify-center w-full'):
-                columns = [
-                    {'field': 'category', 'label': 'Category', 'align': 'center'},
-                    {'field': 'content', 'label': 'Count', 'align': 'center'},
-                ]
-                rows = [
-                    {'category': 'Games', 'content': len(data.gl.index.to_list())},
-                    {'category': 'Playthroughs', 'content': len(data.pt.index.to_list())},
-                ]
-                ui.table(columns=columns, rows=rows, title="Totals").classes('w-full')
+                ui.echart({
+                    'yAxis': {'type': 'value'},
+                    'xAxis': {'type': 'category', 'data': ['Games', 'Playthroughs']},
+                    'series': {'type': 'bar', 'data': [len(data.gl.index.to_list()), len(data.pt.index.to_list())],
+                               'label': {'normal': {'show': True, 'position': 'top'}}},
+                })
             with ui.row().classes('justify-center w-full'):
-                rows = [
-                    {'category': 'Playing', 'content': sum(data.gl['Status'].isin(config.status_list_playing))},
-                    {'category': 'Played', 'content': sum(data.gl['Status'].isin(config.status_list_played))},
-                    {'category': 'Backlog', 'content': sum(data.gl['Status'].isin(config.status_list_backlog))},
-                    {'category': 'Wishlist', 'content': sum(data.gl['Status'].isin(config.status_list_wishlist))},
-                ]
-                ui.table(columns=columns, rows=rows, title="Categories").classes('w-full')
-        with ui.card().classes('w-full'):
-            with ui.row().classes('justify-center w-full'):
-                ui.label('Platform stats').classes('text-xl font-bold')
-            with ui.row().classes('w-full'):
-                columns = [
-                    {'field': 'category', 'label': 'Platform', 'align': 'center'},
-                    {'field': 'content', 'label': 'Count', 'align': 'center'},
-                ]
-                rows = []
+                ui.echart({
+                    'yAxis': {'type': 'log'},
+                    'xAxis': {'type': 'category', 'data': ['Playing', 'Played', 'Backlog', 'Wishlist']},
+                    'series': {'type': 'bar', 'data': [sum(data.gl['Status'].isin(config.status_list_playing)),
+                                                       sum(data.gl['Status'].isin(config.status_list_played)),
+                                                       sum(data.gl['Status'].isin(config.status_list_backlog)),
+                                                       sum(data.gl['Status'].isin(config.status_list_wishlist))],
+                               'label': {'normal': {'show': True, 'position': 'top'}}},
+                })
+
+        with ui.column().classes('w-full'):
+            # Completion rate
+            graph_data = []
+            for status in config.status_list_played:
+                graph_data.append({'value': sum(res.loc[:, 'Status'] == str(status)), 'name': status})
+
+            with ui.card().classes('w-full'):
+                with ui.row().classes('justify-center w-full'):
+                    ui.label('Completion').classes('text-xl font-bold')
+                with ui.row().classes('w-full'):
+                    ui.echart({'tooltip': {'trigger': 'item'},
+                               'series': {'type': 'pie', 'data': graph_data}})
+
+            # Platform stats
+            with ui.card().classes('w-full'):
+                graph_data = []
+                platform_names = []
                 for x in config.platform_list:
-                    rows.append({'category': x, 'content': sum(data.gl['Platform'].isin([x, ]))})
-                ui.table(columns=columns, rows=rows, title="Totals").classes('w-full')
+                    platform_names.append(x)
+                    graph_data.append(sum(data.gl['Platform'].isin([x, ])))
+
+                with ui.row().classes('justify-center w-full'):
+                    ui.label('Platform stats').classes('text-xl font-bold')
+                with ui.row().classes('w-full'):
+                    ui.echart({
+                        'yAxis': {'type': 'log'},
+                        'xAxis': {'type': 'category', 'data': platform_names},
+                        'series': {'type': 'bar', 'data': graph_data,
+                                   'label': {'normal': {'show': True, 'position': 'top'}}},
+                    })
+
+        # Yearly stats
         with ui.card().classes('w-full'):
             with ui.row().classes('justify-center w-full'):
                 ui.label('Yearly stats').classes('text-xl font-bold')
             with ui.row().classes('w-full'):
-                columns = [
-                    {'field': 'cat', 'label': 'Year', 'align': 'center'},
-                    {'field': 'played', 'label': 'Played', 'align': 'center'},
-                    {'field': 'finished', 'label': 'Completed', 'align': 'center'},
-                    {'field': 'dropped', 'label': 'Discarded', 'align': 'center'},
-                    {'field': 'perc', 'label': 'Perentage', 'align': 'center'},
-                ]
-                rows = []
-                year = dt.datetime.now().year
-                res = pd.merge(data.pt, data.gl, how='left', on='IGDB_ID').sort_values(by=['Date'], ascending=False)
-                for x in range(year, year - 7, -1):
-                    a = res['Date'] > dt.datetime(x, 1, 1)
-                    b = res['Date'] < dt.datetime(x + 1, 1, 1)
-                    tmp = res.loc[a & b, 'Status']
-                    f = sum(tmp.isin(["completed", "mastered"]))
-                    d = sum(tmp == "discarded")
-                    rows.append({'cat': x, 'played': f + d, 'finished': f, 'dropped': d, 'perc': f'{(100 * f / (f + d) if (f + d) > 0 else 0):.1f}%'})
-                a = res['Date'] < dt.datetime(year - 6, 1, 1)
-                tmp = res.loc[a, 'Status']
-                f = sum(tmp.isin(["completed", "mastered"]))
-                d = sum(tmp == "discarded")
-                rows.append({'cat': f'{year - 7} and before', 'played': f + d, 'finished': f, 'dropped': d,
-                             'perc': f'{(100 * f / (f + d) if (+d) > 0 else 0):.1f}%'})
-                ui.table(columns=columns, rows=rows, title="Totals").classes('w-full')
+                graph_data = []
+                list_years = list(range(dt.datetime.now().year, dt.datetime.now().year-7, -1))
+                list_years.append(str(dt.datetime.now().year-7) + " and before")
+                for status in config.status_list_played:
+                    yearly_data = []
+                    for year in range(dt.datetime.now().year, dt.datetime.now().year-7, -1):
+                        a = res['Date'] >= dt.datetime(year, 1, 1)
+                        b = res['Date'] < dt.datetime(year + 1, 1, 1)
+                        tmp = res.loc[a & b, 'Status']
+                        count = sum(tmp == str(status))
+                        yearly_data.append(count)
+                    b = res['Date'] < dt.datetime(dt.datetime.now().year-6, 1, 1)
+                    yearly_data.append(sum(res.loc[b, 'Status'] == str(status)))
+                    graph_data.append({'type': 'bar', 'name': status, 'data': yearly_data, 'label': {'normal': {'show': True, 'position': 'right'}}})
+
+                ui.echart({
+                    'xAxis': {'type': 'value'},
+                    'yAxis': {'type': 'category', 'data': list_years, 'inverse': True},
+                    'legend': {},
+                    'series': graph_data,
+                }).classes('w-full h-[60vh]')
 
 
 @ui.refreshable
@@ -391,21 +409,21 @@ def dialog_game_editor(igdb_id: int):
                             ui.button(icon='remove_circle', on_click=lambda x=pt: remove_pt(x, game_index)).props('round color=red-10 size=sm')
 
 
-# todo: outdated and not used, can probably be removed, keeping for now for code reference
-def display_table(table_data: pd.DataFrame, has_playthroughs=False, show_release_status=True):
+def display_table(table_data: pd.DataFrame, has_playthroughs=False, show_release_status=False):
     if show_release_status:
         today = dt.date.today()
         table_data['Release_status'] = table_data.apply(lambda x: get_release_status(x['Release_date'], x['IGDB_status'], today), axis=1)
     if has_playthroughs:
-        table_data['StrDate'] = table_data['Date'].apply(lambda x: x.strftime("%Y-%m-%d"))
-        table_data['Comment'] = table_data['Game_comment'] + "\n" + table_data['Playthrough_comment']
-        table_data.drop(['Date', 'Game_comment', 'Playthrough_comment'], axis=1, inplace=True)
+        table_data['Date'] = table_data['Date'].dt.strftime('%Y-%m-%d')
+        table_data['Comment'] = table_data['Playthrough_comment'].replace({None: " "}) + " " + table_data['Game_comment'].replace({None: " "})
+        table_data.drop(['Game_comment', 'Playthrough_comment'], axis=1, inplace=True)
     table_data.drop(['IGDB_queried', 'Release_date', 'Steam_ID', 'IGDB_status', 'IGDB_url'], axis=1, inplace=True)
+
     columns = [{'name': 'Image', 'label': '', 'field': 'IGDB_image', 'align': 'center'},
                {'name': 'Name', 'label': 'Name', 'field': 'Name', 'align': 'left', 'sortable': True},
                {'name': 'Status', 'label': 'Status', 'field': 'Status', 'align': 'center', 'sortable': True}]
     if has_playthroughs:
-        columns.append({'name': 'Date', 'label': 'Date', 'field': 'StrDate', 'align': 'center'})
+        columns.append({'name': 'Date', 'label': 'Date', 'field': 'StrDate', 'align': 'center', 'sortable': True})
     if show_release_status:
         columns.append({'name': 'Release Status', 'label': 'Release Status', 'field': 'Release_status', 'align': 'center', 'sortable': True})
     columns.append({'name': 'Platform', 'label': 'Platform', 'field': 'Platform', 'align': 'center', 'sortable': True})
@@ -414,32 +432,48 @@ def display_table(table_data: pd.DataFrame, has_playthroughs=False, show_release
     else:
         columns.append({'name': 'Game_comment', 'label': 'Comment', 'field': 'Game_comment', 'align': 'left', 'sortable': True})
     rows = table_data.to_dict('records')
-    with ui.row().classes('justify-center w-full'):
-        table_filter = ui.input(label='Search')  # .classes('bg-slate-200 box-decoration-clone')
-    with (ui.row().classes('justify-center w-full h-full')):
-        table = ui.table(columns=columns, rows=rows, pagination=50).classes('w-11/12 h-full self-stretch items-stretch')
-        table.add_slot('body', r'''
-            <q-tr :props="props">
-                <q-td
-                    v-for="col in props.cols"
-                    :key="col.name"
-                    :props="props"
-                    @click="() => $parent.$emit('edit', props.row.IGDB_ID)"
-                    >
-                    <span v-if="col.name !='Image'" >
-                    {{ col.value }}</span>
-                    <q-img v-if="col.name =='Image'"
-                        :src="props.row.IGDB_image"
-                        style="max-height: 128px; width: 64px"
-                    />
-                </q-td>
-            </q-tr>
+
+#    with ui.row().classes('justify-center w-full'):
+#        table_filter = ui.input(label='Search')  # .classes('bg-slate-200 box-decoration-clone')
+    with ui.row().classes('justify-center w-full h-0'):
+        table = ui.table(columns=columns, rows=rows, pagination=50).classes('w-11/12')
+        table.props(add='grid')
+        table.props(add=r'''
+            <div class="q-pa-xs col-xs-12 col-sm-6 col-md-4">
+              <q-card flat bordered>
+                <q-card-section class="text-center">
+                  <strong>{{ props.row.Name }}</strong>
+                </q-card-section>
+                <q-separator />
+                <q-card-section class="flex flex-center"">
+                  <div>{{ props.row.Status }} g</div>
+                </q-card-section>
+              </q-card>
+            </div>
         ''')
-        table.on("edit", lambda x: dialog_game_editor(x.args))
-        table.bind_filter(table_filter, 'value')
+#        table.add_slot('body', r'''
+#            <q-tr :props="props">
+#                <q-td
+#                    v-for="col in props.cols"
+#                    :key="col.name"
+#                    :props="props"
+#                    @click="() => $parent.$emit('edit', props.row.IGDB_ID)"
+#                    >
+#                    <span v-if="col.name !='Image'" >
+#                    {{ col.value }}</span>
+#                    <q-img v-if="col.name =='Image'"
+#                        :src="props.row.IGDB_image"
+#                        style="max-height: 128px; width: 64px"
+#                    />
+#                </q-td>
+#            </q-tr>
+#        ''')
+#        table.on("edit", lambda x: dialog_game_editor(x.args))
+        table.on('rowClick', lambda x: dialog_game_editor(x.args[1]['IGDB_ID']))
+#        table.bind_filter(table_filter, 'value')
 
 
-def display_aggrid(aggrid_data: pd.DataFrame, has_playthroughs=True, show_release_status=False):
+def display_aggrid(aggrid_data: pd.DataFrame, has_playthroughs=False, show_release_status=False):
     # todo: header styling, doesn't align/center headers, though, fix for that still open
     #       line height, flex and align seem to be ignored?
     ui.add_head_html("""
@@ -496,7 +530,7 @@ def display_aggrid(aggrid_data: pd.DataFrame, has_playthroughs=True, show_releas
         table.update()
 
 
-def display_cards(card_data: pd.DataFrame, has_playthroughs=False, show_release_status=True):
+def display_cards(card_data: pd.DataFrame, has_playthroughs=False, show_release_status=False):
     with ui.row().classes('w-full h-0 justify-center'):
         for index, row in card_data.iterrows():
             with ui.card().classes(f'w-[{config.cards_width}rem]').on('click', lambda x=row['IGDB_ID']: dialog_game_editor(igdb_id=x)):
@@ -593,7 +627,7 @@ def action_add_unplayed_game(name: str, igdb_id: int, platform: str, status: str
         refresh_ui()
         ui.notify('Game added succesfully')
         if dialog is not None:
-            dialog.close()
+            dialog.delete()
     except Exception as e:
         ui.notify('Add game not succesful: ' + str(e))
         return
@@ -617,7 +651,7 @@ def action_add_played_game(name: str, igdb_id: int, platform: str, date: dt.date
         refresh_ui()
         ui.notify('Playthrough added succesfully')
         if dialog is not None:
-            dialog.close()
+            dialog.delete()
     except Exception as e:
         ui.notify('Add playthrough not succesful: ' + str(e))
         try:
