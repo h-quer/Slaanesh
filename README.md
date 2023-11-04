@@ -96,7 +96,6 @@ Be aware: Client id and secret are (for now) stored in plain text. Doing so for 
 Features I am currently slowly but actively working on (pull requests still very welcome for support on these!):
 * Set up a proper build pipeline and publish a docker image, so that docker compose can simply pull it instead of having to build
 * Proper dark mode support (currently works for everything but the tables)
-* Overview page UI improvements - table alignment, graphs, additional stats, configurability in config file
 * Option to add a custom icon and name (the big central part of the UI header)
 * Expand settings dialog to enable modifying the config file from within the UI
 * Once Twitch client ID and secret can be added via the UI, save them not in plain text in the config file but encrypted somewhere else
