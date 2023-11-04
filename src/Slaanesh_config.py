@@ -1,6 +1,6 @@
 import configparser
 
-version = "0.1-beta"
+version = "0.2-beta"
 
 # local files
 game_list = r'/files/database/gamelist.feather'
@@ -32,7 +32,7 @@ data_refresh_limit = 1
 show_filters = False
 row_height = 96
 dark_mode = None
-cards_width = 24
+cards_width = 22
 
 config = configparser.ConfigParser(allow_no_value=True)
 config.optionxform = str
@@ -53,7 +53,7 @@ def load_config():
 		print('IGDB parameters not set')
 		return
 	if 'ui' in config:
-		global show_filters, row_height, dark_mode, cards_grid
+		global show_filters, row_height, dark_mode, cards_width
 		show_filters = config.getboolean('ui', 'show_filters', fallback=show_filters)
 		row_height = config.getint('ui', 'row_height', fallback=row_height)
 		dark_mode = config.getboolean('ui', 'dark_mode', fallback=dark_mode)
