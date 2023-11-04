@@ -20,11 +20,10 @@ def load_dataframes():
 
 
 # execute allows for temporarily turning off automatic writes, manually writing possible via UI
-def write_dataframes(execute=True):
-    if execute:
-        global gl, pt
-        gl.to_feather(config.game_list)
-        pt.to_feather(config.playthrough_list)
+def write_dataframes():
+    global gl, pt
+    gl.to_feather(config.game_list)
+    pt.to_feather(config.playthrough_list)
 
 
 def update_igdb_data(new_data):
