@@ -85,7 +85,6 @@ Folders used and to mount are:
 ## Scope and roadmap
 ### Roadmap
 Features I am currently slowly but actively working on (pull requests still very welcome for support on these!):
-* Set up a proper build pipeline and publish a docker image, so that docker compose can simply pull it instead of having to build
 * Proper dark mode support (currently works for everything but the tables)
 * Option to add a custom icon and name (the big central part of the UI header)
 * Expand settings dialog to enable modifying the config file from within the UI
