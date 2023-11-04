@@ -6,7 +6,6 @@ import pandas as pd
 import time
 import Slaanesh_config as config
 import Slaanesh_data as data
-import Slaanesh_ui as s_ui
 import Slaanesh_importexport as imex
 import threading
 import queue
@@ -14,7 +13,7 @@ import queue
 igdb = IGDBWrapper(config.client_id, config.auth_token)
 update_id_queue = queue.Queue()
 
-request_limit = 55
+request_limit = 105
 
 
 def init_api() -> bool:
@@ -51,7 +50,6 @@ def igdb_update_daemon():
             id_tuple = tuple(id_list)
             new_data = collect_game_info(id_tuple)
             data.update_igdb_data(new_data)
-            s_ui.refresh_ui()
 
 
 def check_igdb_token() -> bool:
@@ -146,7 +144,7 @@ def get_id_to_name(name: str) -> int:
     return int(output['id'][0])
 
 
-def match_ids_to_names(names_string: str) -> bool:
+def match_ids_to_names(names_string: str):
     import numpy as npy
     import math
     split_string = names_string.split("\n")
@@ -167,4 +165,4 @@ def match_ids_to_names(names_string: str) -> bool:
         )
         collection.append(process_api_data(byte_array))
     res = pd.concat(collection, ignore_index=True)
-    return imex.export_id_name_list(res)
+    imex.export_id_name_list(res)
