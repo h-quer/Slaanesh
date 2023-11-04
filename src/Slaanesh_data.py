@@ -5,13 +5,9 @@ import Slaanesh_IGDB as igdb
 import re
 import requests
 
-gl = pd.DataFrame()
-pt = pd.DataFrame()
-
-
-# todo: automatically create empty dataframes if none are found on startup
-def create_empty_dataframes():
-    return True
+gl = pd.DataFrame(columns=['IGDB_image', 'IGDB_ID', 'Name', 'Platform', 'Status', 'IGDB_queried',
+                           'Steam_ID', 'Release_date', 'IGDB_status', 'IGDB_url', 'Game_comment'])
+pt = pd.DataFrame(columns=['IGDB_ID', 'Date', 'Playthrough_comment'])
 
 
 def load_dataframes():
@@ -21,7 +17,6 @@ def load_dataframes():
         pt = pd.read_feather(config.playthrough_list)
     except Exception as e:
         print(str(e))
-        create_empty_dataframes()
 
 
 # execute allows for temporarily turning off automatic writes, manually writing possible via UI
@@ -90,7 +85,7 @@ def rem_pt(pt_index, gl_index):
 def add_game(name: str, igdb_id: int, platform: str, status: str, comment: str):
     global gl
     if igdb_id in gl['IGDB_ID']:
-        return False
+        return
     pt.reset_index(drop=True, inplace=True)
     gl.loc[len(gl.index)] = ["", int(igdb_id), name, platform, status,
                              dt.datetime(1900, 1, 1, 1, 1, 1, 1), int(0), int(0), int(0), "", comment]
