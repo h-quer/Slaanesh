@@ -109,6 +109,11 @@ def rem_game(index_gl, index_pt=None):
     if (index_pt is not None) and (not index_pt.empty):
         pt.drop(index_pt, axis=0, inplace=True)
         pt.reset_index(drop=True, inplace=True)
+    try:
+        import os
+        os.remove(config.path_covers + str(gl.loc[index_gl, 'IGDB_ID']) + '.png')
+    except Exception as e:
+        print('Removal of cover failed: ' + str(e))
     gl.drop(index_gl, axis=0, inplace=True)
     gl.reset_index(drop=True, inplace=True)
     write_dataframes()
