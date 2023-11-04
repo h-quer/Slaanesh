@@ -100,8 +100,6 @@ def dialog_about():
                 ui.link('https://github.com/h-quer/Slaanesh/wiki', 'https://github.com/h-quer/Slaanesh/wiki', new_tab=True)
                 ui.label('Github').classes('text-lg font-bold')
                 ui.link('https://github.com/h-quer/Slaanesh', 'https://github.com/h-quer/Slaanesh', new_tab=True)
-                # ui.label('Discord').classes('text-lg font-bold')
-                # ui.link("TBD", "TBD", new_tab=True)
                 ui.label('Icon attribution').classes('text-lg font-bold')
                 ui.link('Game folder icons created by juicy_fish - Flaticon', 'https://www.flaticon.com/free-icons/game-folder', new_tab=True)
                 ui.label('User Interface').classes('text-lg font-bold')
@@ -534,7 +532,7 @@ def get_release_status(timestamp: int, status: int, today: dt.date) -> str:
 
 def action_save_db():
     try:
-        data.write_dataframes(True)
+        data.write_dataframes()
         ui.notify('Database successfully updated')
     except Exception as e:
         ui.notify('Database update failed: ' + str(e))
