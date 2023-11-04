@@ -35,6 +35,13 @@ With that in mind, this still absolutely is a beta release. Not a "I've been usi
 </div>
 
 ## Setup and installation
+### IGDB API token
+Slaanesh uses the IGDB API for all game data. For Slaanesh to work, you need to be able to acces the IGDB API. This is how you can register: https://api-docs.igdb.com/#account-creation.
+You then need to save your client id and client secret in the Slaanesh config file.
+
+Be aware: Client id and secret are (for now) stored in plain text. Doing so for your regular Twitch account (in case you already have one) is obviously a bad idea. In that case, best create a fresh one for dedicated use only as Slaanesh API slave.
+
+### Docker setup
 I will set up a docker image to use soon, then simply running the compose file will suffice. For now, it has to be built since I haven't figured out the Github build pipeline yet.
 
 First, navigate to the directory you want to use for the build and get the repository:
@@ -84,12 +91,6 @@ Folders used and to mount are:
 * export - receive exported files from here, both database exports (gamelist.csv and playthroughs.csv) as well as the name to IGDB ID matching tool output
 * covers - game covers are saved here, you can manually edit them if necessary
 * database - location of the Slaanesh database, do not touch but if you value your data, make sure it is part of your 3-2-1 backup system, and also make sure to check backup integrety and practise restores regularly
-
-### IGDB API token
-Slaanesh uses the IGDB API for all game data. For Slaanesh to work, you need to be able to acces the IGDB API. This is how you can register: https://api-docs.igdb.com/#account-creation.
-You then need to save your client id and client secret in the Slaanesh config file.
-
-Be aware: Client id and secret are (for now) stored in plain text. Doing so for your regular Twitch account (in case you already have one) is obviously a bad idea. In that case, best create a fresh one for dedicated use only as Slaanesh API slave.
 
 ## Scope and roadmap
 ### Roadmap
