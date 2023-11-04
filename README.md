@@ -42,16 +42,8 @@ You then need to save your client id and client secret in the Slaanesh config fi
 Be aware: Client id and secret are (for now) stored in plain text. Doing so for your regular Twitch account (in case you already have one) is obviously a bad idea. In that case, best create a fresh one for dedicated use only as Slaanesh API slave.
 
 ### Docker setup
-I will set up a docker image to use soon, then simply running the compose file will suffice. For now, it has to be built since I haven't figured out the Github build pipeline yet.
-
-First, navigate to the directory you want to use for the build and get the repository:
-```
-git clone https://github.com/h-quer/Slaanesh
-```
 Create all necessary directories, adjust config file (IGDB token data!) and copy it to the config directory.
-Also adjust the docker-compose.yml to match your setup.
-
-Next, simply build the image:
+Also adjust the docker-compose.yml to match your setup. Once it's set, simply build the image:
 ```
 docker compose up -d
 ```
@@ -65,9 +57,7 @@ version: "3.9"
 
 services:
   slaanesh:
-    build: .
-    # coming up soon, but not quite ready yet
-    # image: ghcr.io/h-quer/slaanesh:latest
+    image: ghcr.io/h-quer/slaanesh:main
     container_name: slaanesh
     user: 1000:1000
     restart: unless-stopped
