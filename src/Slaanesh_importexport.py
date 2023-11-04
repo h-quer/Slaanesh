@@ -43,7 +43,6 @@ def export_csv():
     data.pt.to_csv(config.path_export + 'playthroughs.csv', sep=separator, escapechar=escapechar, quotechar=quotechar, index=False)
 
 
-def export_id_name_list(id_name_list: pd.DataFrame) -> bool:
+def export_id_name_list(id_name_list: pd.DataFrame):
     global separator
     id_name_list.to_csv(config.path_export + 'ids_to_names.csv', sep=separator, escapechar=escapechar, quotechar=quotechar, index=False)
-    return True
