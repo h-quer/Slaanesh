@@ -44,8 +44,6 @@ git clone https://github.com/h-quer/Slaanesh
 Create all necessary directories, adjust config file (IGDB token data!) and copy it to the config directory.
 Also adjust the docker-compose.yml to match your setup.
 
-For now, also copy the empty database (the two .feather files) into the database directory.
-
 Next, simply build the image:
 ```
 docker compose up -d
@@ -97,15 +95,14 @@ Be aware: Client id and secret are (for now) stored in plain text. Doing so for 
 ### Roadmap
 Features I am currently slowly but actively working on (pull requests still very welcome for support on these!):
 * Set up a proper build pipeline and publish a docker image, so that docker compose can simply pull it instead of having to build
-* Automatically create database if db files not present - manually copying the empty database will not be necessary then
 * Proper dark mode support (currently works for everything but the tables)
 * Overview page UI improvements - table alignment, graphs, additional stats, configurability in config file
-* Cover cleanup - setting button to delete downloaded covers of games that are no longer in the game list
 * Option to add a custom icon and name (the big central part of the UI header)
 * Expand settings dialog to enable modifying the config file from within the UI
 * Once Twitch client ID and secret can be added via the UI, save them not in plain text in the config file but encrypted somewhere else
 * File picker and file downloads for csv import/export
 * General UI improvements, especially considering responsiveness - there is probably a lot that can be done with asyncio which I have barely used so far
+* Build a native mode version for local (not self-hosted) usage
 
 ### Not in scope
 Slaanesh does not and will not include:
