@@ -43,14 +43,8 @@ Be aware: Client id and secret are (for now) stored in plain text. Doing so for 
 
 ### Docker setup
 Create all necessary directories, adjust config file (IGDB token data!) and copy it to the config directory.
-Also adjust the docker-compose.yml to match your setup. Once it's set, simply pull and start the image:
-```
-docker compose up -d
-```
+Also adjust the docker-compose.yml to match your setup.
 
-Slaanesh should now be running on your specified port (8428 by default).
-
-### Docker compose
 ```yaml
 ---
 version: "3.9"
@@ -72,20 +66,28 @@ services:
 ```
 Of course, change the left side of the volumes and port as needed. Same goes for UID/GID or simply remove to run as root. You can also of course remove the port part completely if using a reverse proxy and accessing the container via its name.
 
-### Directories and the config file
-Make sure to place the sample config file in the config directory. Slaanesh will not work without a config file and at least the mandatory IGDB info.
+Once it's set, simply pull and start the image:
+```
+docker compose up -d
+```
 
-Folders used and to mount are:
-* config - place for the config file (and potentially the encrypted IGDB access information once encrypted is implemented)
-* import - place csv files for import here, must be names gamelist.csv and playthroughs.csv
+Slaanesh should now be running on your specified port (8428 by default).
+
+### Directories and the config file
+Make sure to place the sample config file in the config directory. Slaanesh will not work without a config file containing least the mandatory IGDB info.
+
+Folders to mount are:
+* config - Config file location (and potentially the encrypted IGDB access information once encrypted is implemented)
+* import - place csv files for import here, must be named gamelist.csv and playthroughs.csv
 * export - receive exported files from here, both database exports (gamelist.csv and playthroughs.csv) as well as the name to IGDB ID matching tool output
 * covers - game covers are saved here, you can manually edit them if necessary
-* database - location of the Slaanesh database, do not touch but if you value your data, make sure it is part of your 3-2-1 backup system, and also make sure to check backup integrety and practise restores regularly
+* database - location of the Slaanesh database, do not edit manually but if you value your data, make sure it is part of your 3-2-1 backup system, and also make sure to check backup integrety and practise restores regularly
 
 ## Scope and roadmap
 ### Roadmap
 Features I am currently slowly but actively working on (pull requests still very welcome for support on these!):
 * Proper dark mode support (currently works for everything but the tables)
+* Make it render properly on mobile
 * Option to add a custom icon and name (the big central part of the UI header)
 * Expand settings dialog to enable modifying the config file from within the UI
 * Once Twitch client ID and secret can be added via the UI, save them not in plain text in the config file but encrypted somewhere else
@@ -103,7 +105,6 @@ Slaanesh does not and will not include:
 
 ### Feature wishlist
 Pull requests to implement these are extremely welcome. I'm not currently working on these, but might after the completing the roadmap:
-* Make it render properly on mobile
 * A proper fuzzy search with a list of games matching the game name when adding games by name, complete with a selection dialog including covers to pick the correct one easily
 * Adding time played or time to complete to games, ideally linking to the howlongtobeat.com API to pull the completion times - although I don't think there is a good way to match IGDB IDs to HLTB IDs and search by name is quite error-prone
 * Ratings for games (including config option to enable/disable)
