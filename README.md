@@ -51,7 +51,7 @@ version: "3.9"
 
 services:
   slaanesh:
-    image: ghcr.io/h-quer/slaanesh:main
+    image: ghcr.io/h-quer/slaanesh:latest
     container_name: slaanesh
     user: 1000:1000
     restart: unless-stopped
