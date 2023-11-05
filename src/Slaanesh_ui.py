@@ -407,60 +407,6 @@ def dialog_game_editor(igdb_id: int):
                             ui.button(icon='remove_circle', on_click=lambda x=pt: remove_pt(x, game_index)).props('round color=red-10 size=sm')
 
 
-def display_table(table_data: pd.DataFrame, has_playthroughs=False, show_release_status=False):
-    if show_release_status:
-        today = dt.date.today()
-        table_data['Release_status'] = table_data.apply(lambda x: get_release_status(x['Release_date'], x['IGDB_status'], today), axis=1)
-    if has_playthroughs:
-        table_data['StrDate'] = table_data['Date'].apply(lambda x: x.strftime('%Y-%m-%d'))
-        table_data['Comment'] = table_data['Playthrough_comment'].replace({None: " "}) + " " + table_data['Game_comment'].replace({None: " "})
-        table_data.drop(['Game_comment', 'Playthrough_comment', 'Date'], axis=1, inplace=True)
-    table_data.drop(['IGDB_queried', 'Release_date', 'Steam_ID', 'IGDB_status', 'IGDB_url'], axis=1, inplace=True)
-
-    columns = [{'name': 'Image', 'label': '', 'field': 'IGDB_image', 'align': 'center'},
-               {'name': 'Name', 'label': 'Name', 'field': 'Name', 'align': 'left', 'sortable': True},
-               {'name': 'Status', 'label': 'Status', 'field': 'Status', 'align': 'center', 'sortable': True}]
-    if has_playthroughs:
-        columns.append({'name': 'Date', 'label': 'Date', 'field': 'StrDate', 'align': 'center', 'sortable': True})
-    if show_release_status:
-        columns.append({'name': 'Release Status', 'label': 'Release Status', 'field': 'Release_status', 'align': 'center', 'sortable': True})
-    columns.append({'name': 'Platform', 'label': 'Platform', 'field': 'Platform', 'align': 'center', 'sortable': True})
-    if has_playthroughs:
-        columns.append({'name': 'Comment', 'label': 'Comment', 'field': 'Comment', 'align': 'center', 'sortable': True})
-    else:
-        columns.append({'name': 'Game_comment', 'label': 'Comment', 'field': 'Game_comment', 'align': 'left', 'sortable': True})
-    rows = table_data.to_dict('records')
-    with ui.row().classes('justify-center w-full'):
-        table_filter = ui.input(label='Search')  # .classes('bg-slate-200 box-decoration-clone')
-    with ui.row().classes('justify-center w-full h-0'):
-        table = ui.table(columns=columns, rows=rows, pagination=50).classes('w-11/12')
-        table.props(add='grid')
-        table.props(add=r'''
-            <div class="q-pa-xs col-xs-12 col-sm-6 col-md-4">
-              <q-card flat bordered>
-                <q-card-section class="text-center">
-                  Test line
-                  <br>
-                  <strong>{{ props.row.Name }}</strong>
-                </q-card-section>
-                <q-separator />
-                <q-card-section class="flex flex-center"">
-                  <div>{{ props.row.Status }} g</div>
-                </q-card-section>
-              </q-card>
-            </div>
-        ''')
-
-#        table.add_slot('body-cell-Image', f'''
-#            <q-td :props="props">
-#                <q-img :src="props.row.IGDB_image" style="max-height: {config.row_height}px">
-#            </q-td>
-#        ''')
-
-        table.on('rowClick', lambda x: dialog_game_editor(x.args[1]['IGDB_ID']))
-        table.bind_filter(table_filter, 'value')
-
-
 def display_aggrid(aggrid_data: pd.DataFrame, has_playthroughs=False, show_release_status=False):
     # todo: header styling, doesn't align/center headers, though, fix for that still open
     #       line height, flex and align seem to be ignored?
