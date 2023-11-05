@@ -25,20 +25,18 @@ def display_ui():
 
 
 def ui_header():
-    with ui.row().classes('justify-around items-center w-full'):
-        with ui.column():
+    with ui.grid(columns=3).classes('w-full'):
+        with ui.row().classes('justify-center items-center'):
             ui.button('Add game', on_click=lambda: dialog_add_unplayed_game())
             ui.button('Add game with playthrough', on_click=lambda: dialog_add_played_game())
-        with ui.column().classes('items-center justify-items-center'):
-            with ui.row().classes('items-center justify-items-center'):
-                ui.image(config.file_icon).classes('w-20')
-                ui.label('Slaanesh').classes('text-6xl')
-        with ui.column().classes('items-center justify-items-center'):
-            with ui.row().classes('items-center justify-items-center'):
-                ui.button(icon='refresh', on_click=lambda: refresh_ui()).props('round')
-                ui.button(icon='save', on_click=lambda: action_save_db()).props('round')
-                ui.button(icon='settings', on_click=lambda: dialog_settings()).props('round')
-                ui.button(icon='question_mark', on_click=lambda: dialog_about()).props('round')
+        with ui.row().classes('justify-center items-center'):
+            ui.image(config.file_icon).classes('w-14')
+            ui.label('Slaanesh').classes('text-4xl')
+        with ui.row().classes('justify-center items-center'):
+            ui.button(icon='refresh', on_click=lambda: refresh_ui()).props('round')
+            ui.button(icon='save', on_click=lambda: action_save_db()).props('round')
+            ui.button(icon='settings', on_click=lambda: dialog_settings()).props('round')
+            ui.button(icon='question_mark', on_click=lambda: dialog_about()).props('round')
     ui.separator()
 
 
@@ -231,7 +229,7 @@ def panel_overview():
             with ui.row().classes('w-full'):
                 graph_data = []
                 list_years = list(range(dt.datetime.now().year, dt.datetime.now().year-7, -1))
-                list_years.append(str(dt.datetime.now().year-7) + " and before")
+                list_years.append(str(dt.datetime.now().year-7) + "\nand\nbefore")
                 for status in config.status_list_played:
                     yearly_data = []
                     for year in range(dt.datetime.now().year, dt.datetime.now().year-7, -1):
@@ -409,6 +407,60 @@ def dialog_game_editor(igdb_id: int):
                             ui.button(icon='remove_circle', on_click=lambda x=pt: remove_pt(x, game_index)).props('round color=red-10 size=sm')
 
 
+def display_table(table_data: pd.DataFrame, has_playthroughs=False, show_release_status=False):
+    if show_release_status:
+        today = dt.date.today()
+        table_data['Release_status'] = table_data.apply(lambda x: get_release_status(x['Release_date'], x['IGDB_status'], today), axis=1)
+    if has_playthroughs:
+        table_data['StrDate'] = table_data['Date'].apply(lambda x: x.strftime('%Y-%m-%d'))
+        table_data['Comment'] = table_data['Playthrough_comment'].replace({None: " "}) + " " + table_data['Game_comment'].replace({None: " "})
+        table_data.drop(['Game_comment', 'Playthrough_comment', 'Date'], axis=1, inplace=True)
+    table_data.drop(['IGDB_queried', 'Release_date', 'Steam_ID', 'IGDB_status', 'IGDB_url'], axis=1, inplace=True)
+
+    columns = [{'name': 'Image', 'label': '', 'field': 'IGDB_image', 'align': 'center'},
+               {'name': 'Name', 'label': 'Name', 'field': 'Name', 'align': 'left', 'sortable': True},
+               {'name': 'Status', 'label': 'Status', 'field': 'Status', 'align': 'center', 'sortable': True}]
+    if has_playthroughs:
+        columns.append({'name': 'Date', 'label': 'Date', 'field': 'StrDate', 'align': 'center', 'sortable': True})
+    if show_release_status:
+        columns.append({'name': 'Release Status', 'label': 'Release Status', 'field': 'Release_status', 'align': 'center', 'sortable': True})
+    columns.append({'name': 'Platform', 'label': 'Platform', 'field': 'Platform', 'align': 'center', 'sortable': True})
+    if has_playthroughs:
+        columns.append({'name': 'Comment', 'label': 'Comment', 'field': 'Comment', 'align': 'center', 'sortable': True})
+    else:
+        columns.append({'name': 'Game_comment', 'label': 'Comment', 'field': 'Game_comment', 'align': 'left', 'sortable': True})
+    rows = table_data.to_dict('records')
+    with ui.row().classes('justify-center w-full'):
+        table_filter = ui.input(label='Search')  # .classes('bg-slate-200 box-decoration-clone')
+    with ui.row().classes('justify-center w-full h-0'):
+        table = ui.table(columns=columns, rows=rows, pagination=50).classes('w-11/12')
+        table.props(add='grid')
+        table.props(add=r'''
+            <div class="q-pa-xs col-xs-12 col-sm-6 col-md-4">
+              <q-card flat bordered>
+                <q-card-section class="text-center">
+                  Test line
+                  <br>
+                  <strong>{{ props.row.Name }}</strong>
+                </q-card-section>
+                <q-separator />
+                <q-card-section class="flex flex-center"">
+                  <div>{{ props.row.Status }} g</div>
+                </q-card-section>
+              </q-card>
+            </div>
+        ''')
+
+#        table.add_slot('body-cell-Image', f'''
+#            <q-td :props="props">
+#                <q-img :src="props.row.IGDB_image" style="max-height: {config.row_height}px">
+#            </q-td>
+#        ''')
+
+        table.on('rowClick', lambda x: dialog_game_editor(x.args[1]['IGDB_ID']))
+        table.bind_filter(table_filter, 'value')
+
+
 def display_aggrid(aggrid_data: pd.DataFrame, has_playthroughs=False, show_release_status=False):
     # todo: header styling, doesn't align/center headers, though, fix for that still open
     #       line height, flex and align seem to be ignored?
@@ -463,7 +515,6 @@ def display_aggrid(aggrid_data: pd.DataFrame, has_playthroughs=False, show_relea
         table.options['columnDefs'] = columns
         table.props(':html_columns="[0]"')
         table.on('cellClicked', lambda e: dialog_game_editor(e.args['data']['IGDB_ID']))
-        table.update()
 
 
 def display_cards(card_data: pd.DataFrame, has_playthroughs=False, show_release_status=False):
@@ -639,7 +690,7 @@ def action_check_database_consistency():
     except Exception as e:
         ui.notify('Consistency issues found: ' + str(e))
         return
-    ui.notify('No database consistency issues found')
+    ui.notify('The database looks fine!')
 
 
 def action_purge_all_data():
