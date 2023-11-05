@@ -25,20 +25,18 @@ def display_ui():
 
 
 def ui_header():
-    with ui.row().classes('justify-around items-center w-full'):
-        with ui.column():
+    with ui.grid(columns=3).classes('w-full'):
+        with ui.row().classes('justify-center items-center'):
             ui.button('Add game', on_click=lambda: dialog_add_unplayed_game())
             ui.button('Add game with playthrough', on_click=lambda: dialog_add_played_game())
-        with ui.column().classes('items-center justify-items-center'):
-            with ui.row().classes('items-center justify-items-center'):
-                ui.image(config.file_icon).classes('w-20')
-                ui.label('Slaanesh').classes('text-6xl')
-        with ui.column().classes('items-center justify-items-center'):
-            with ui.row().classes('items-center justify-items-center'):
-                ui.button(icon='refresh', on_click=lambda: refresh_ui()).props('round')
-                ui.button(icon='save', on_click=lambda: action_save_db()).props('round')
-                ui.button(icon='settings', on_click=lambda: dialog_settings()).props('round')
-                ui.button(icon='question_mark', on_click=lambda: dialog_about()).props('round')
+        with ui.row().classes('justify-center items-center'):
+            ui.image(config.file_icon).classes('w-14')
+            ui.label('Slaanesh').classes('text-4xl')
+        with ui.row().classes('justify-center items-center'):
+            ui.button(icon='refresh', on_click=lambda: refresh_ui()).props('round')
+            ui.button(icon='save', on_click=lambda: action_save_db()).props('round')
+            ui.button(icon='settings', on_click=lambda: dialog_settings()).props('round')
+            ui.button(icon='question_mark', on_click=lambda: dialog_about()).props('round')
     ui.separator()
 
 
@@ -231,7 +229,7 @@ def panel_overview():
             with ui.row().classes('w-full'):
                 graph_data = []
                 list_years = list(range(dt.datetime.now().year, dt.datetime.now().year-7, -1))
-                list_years.append(str(dt.datetime.now().year-7) + " and before")
+                list_years.append(str(dt.datetime.now().year-7) + "\nand\nbefore")
                 for status in config.status_list_played:
                     yearly_data = []
                     for year in range(dt.datetime.now().year, dt.datetime.now().year-7, -1):
@@ -463,7 +461,6 @@ def display_aggrid(aggrid_data: pd.DataFrame, has_playthroughs=False, show_relea
         table.options['columnDefs'] = columns
         table.props(':html_columns="[0]"')
         table.on('cellClicked', lambda e: dialog_game_editor(e.args['data']['IGDB_ID']))
-        table.update()
 
 
 def display_cards(card_data: pd.DataFrame, has_playthroughs=False, show_release_status=False):
@@ -639,7 +636,7 @@ def action_check_database_consistency():
     except Exception as e:
         ui.notify('Consistency issues found: ' + str(e))
         return
-    ui.notify('No database consistency issues found')
+    ui.notify('The database looks fine!')
 
 
 def action_purge_all_data():

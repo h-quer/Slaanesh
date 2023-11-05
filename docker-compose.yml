@@ -3,16 +3,15 @@ version: "3.9"
 
 services:
   slaanesh:
-    build: .
+    image: ghcr.io/h-quer/slaanesh:latest
     container_name: slaanesh
     user: 1000:1000
     restart: unless-stopped
     volumes:
-      - /containers/slaanesh/config:/files/config
-      - /containers/slaanesh/import:/files/import
-      - /containers/slaanesh/export:/files/export
-      - /containers/slaanesh/covers:/files/covers
-      - /containers/slaanesh/data/:/files/database
+      - your_config_dir:/files/config
+      - your_import_dir:/files/import
+      - your_export_dir:/files/export
+      - your_covers_dir:/files/covers
+      - your_database_dir:/files/database
     ports:
       - 8428:8080
-      
