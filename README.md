@@ -43,7 +43,7 @@ Be aware: Client id and secret are (for now) stored in plain text. Doing so for 
 
 ### Docker setup
 Create all necessary directories, adjust config file (IGDB token data!) and copy it to the config directory.
-Also adjust the docker-compose.yml to match your setup. Once it's set, simply build the image:
+Also adjust the docker-compose.yml to match your setup. Once it's set, simply pull and start the image:
 ```
 docker compose up -d
 ```
