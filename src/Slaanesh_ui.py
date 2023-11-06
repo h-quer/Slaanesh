@@ -177,6 +177,7 @@ def panel_overview():
                 ui.echart({
                     'yAxis': {'type': 'value'},
                     'xAxis': {'type': 'category', 'data': ['Games', 'Playthroughs']},
+                    'tooltip': {'trigger': 'item'},
                     'series': {'type': 'bar', 'data': [len(data.gl.index.to_list()), len(data.pt.index.to_list())],
                                'label': {'normal': {'show': True, 'position': 'top'}}},
                 })
@@ -184,6 +185,7 @@ def panel_overview():
                 ui.echart({
                     'yAxis': {'type': 'log'},
                     'xAxis': {'type': 'category', 'data': ['Playing', 'Played', 'Backlog', 'Wishlist']},
+                    'tooltip': {'trigger': 'item'},
                     'series': {'type': 'bar', 'data': [sum(data.gl['Status'].isin(config.status_list_playing)),
                                                        sum(data.gl['Status'].isin(config.status_list_played)),
                                                        sum(data.gl['Status'].isin(config.status_list_backlog)),
@@ -218,6 +220,7 @@ def panel_overview():
                     ui.echart({
                         'yAxis': {'type': 'log'},
                         'xAxis': {'type': 'category', 'data': platform_names},
+                        'tooltip': {'trigger': 'item'},
                         'series': {'type': 'bar', 'data': graph_data,
                                    'label': {'normal': {'show': True, 'position': 'top'}}},
                     })
@@ -246,6 +249,7 @@ def panel_overview():
                     'xAxis': {'type': 'value'},
                     'yAxis': {'type': 'category', 'data': list_years, 'inverse': True},
                     'legend': {},
+                    'tooltip': {'trigger': 'item'},
                     'series': graph_data,
                 }).classes('w-full h-[60vh]')
 
@@ -444,9 +448,12 @@ def display_aggrid(aggrid_data: pd.DataFrame, has_playthroughs=False, show_relea
         columns = [
             {'headerName': '', 'field': 'IGDB_image', 'cellDataType': 'object', 'maxWidth': 128, 'cellClass': 'justify-center', 'filter': False},
             {'headerName': 'ID', 'field': 'IGDB_id', 'hide': True},
-            {'headerName': 'Name', 'field': 'Name', 'cellDataType': 'text', 'cellClass': 'justify-start items-center text-base font-medium', 'flex': 6},
-            {'headerName': 'Status', 'field': 'Status', 'cellDataType': 'text', 'flex': 2,
-             'cellClassRules': {'bg-red-50': 'x == "discarded"', 'bg-green-50': '["completed", "mastered"].includes(x)'}}]
+            {'headerName': 'Name', 'field': 'Name', 'cellDataType': 'text', 'cellClass': 'justify-start items-center text-base font-medium', 'flex': 6}]
+        if config.color_coding:
+            columns.append({'headerName': 'Status', 'field': 'Status', 'cellDataType': 'text', 'flex': 2,
+                            'cellClassRules': {'bg-red-50': 'x == "discarded"', 'bg-green-50': '["completed", "mastered"].includes(x)'}})
+        else:
+            columns.append({'headerName': 'Status', 'field': 'Status', 'cellDataType': 'text', 'flex': 2})
         if has_playthroughs:
             columns.append({'headerName': 'Date', 'field': 'Date', 'cellDataType': 'dateString', 'flex': 2})
         if show_release_status:
