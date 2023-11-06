@@ -26,7 +26,7 @@ def init_api() -> bool:
 
 def igdb_update_daemon():
     while True:
-        time.sleep(10)
+        time.sleep(5)
         id_list = list()
         i = 0
         while (i < request_limit - 5) and (not update_id_queue.empty()):
