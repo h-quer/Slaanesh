@@ -17,21 +17,12 @@ This is why Slaanesh has a simple csv export functionality. Even if Slaanesh som
 With that in mind, this still absolutely is a beta release. Not a "I've been using it for months and just calling it beta" release, but a true beta. Maybe alpha. Expect bugs - and ideally report or even help fix them, please.
 
 ## Screenshots
-<div class="row">
-  <div class="column">
-    <img src="/images/playing.png" alt="playing" width="50%"/>
-  </div>
-  <div class="column">
-    <img src="/images/backlog.png" alt="backlog" width="50%"/>
-  </div>
-</div>
-<div class="row">
-  <div class="column">
-    <img src="/images/game_editor.png" alt="game editor" width="50%"/>
-  </div>
-  <div class="column">
-    <img src="/images/add_game.png" alt="add game dialog" width="50%"/>
-  </div>
+<div class="column">
+  <img src="/images/playing.png" alt="playing" width="70%"/>
+  <img src="/images/backlog.png" alt="backlog" width="70%"/>
+  <img src="/images/game_editor.png" alt="game editor" width="70%"/>
+  <img src="/images/add_game.png" alt="add game dialog" width="70%"/>
+  <img src="/images/overivew.png" alt="stats page" width="70%"/>
 </div>
 
 ## Setup and installation
