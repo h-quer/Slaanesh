@@ -7,6 +7,13 @@ import Slaanesh_data as data
 import Slaanesh_importexport as imex
 import Slaanesh_IGDB as igdb
 
+# general confirmation dialog
+with ui.dialog() as confirmation, ui.card():
+    ui.label('Are you sure?')
+    with ui.row():
+        ui.button('Yes', on_click=lambda: confirmation.submit(True))
+        ui.button('Cancel', on_click=lambda: confirmation.submit(False))
+
 
 def refresh_ui():
     # dialog_game_editor.refresh()
@@ -35,17 +42,70 @@ def ui_header():
         with ui.row().classes('justify-center items-center'):
             ui.button(icon='refresh', on_click=lambda: refresh_ui()).props('round')
             ui.button(icon='save', on_click=lambda: action_save_db()).props('round')
+            ui.button(icon='build', on_click=lambda: dialog_tools()).props('round')
             ui.button(icon='settings', on_click=lambda: dialog_settings()).props('round')
             ui.button(icon='question_mark', on_click=lambda: dialog_about()).props('round')
     ui.separator()
 
 
 def dialog_settings():
-    with ui.dialog() as confirmation, ui.card():
-        ui.label('Are you sure?')
-        with ui.row():
-            ui.button('Confirm', on_click=lambda: confirmation.submit(True))
-            ui.button('Cancel', on_click=lambda: confirmation.submit(False))
+    async def update_config(button=None, platforms=None, played_pos=None, played_neg=None, playing=None, backlog=None, wishlist=None):
+        confirm = await confirmation
+        if button:
+            button.set_visibility(False)
+        if confirm:
+            try:
+                config.update_config(new_platform_list=platforms, new_backlog=backlog, new_playing=playing,
+                                     new_wishlist=wishlist, new_played_neg=played_neg, new_played_pos=played_pos)
+                ui.notify('Successfully updated config file')
+            except Exception as e:
+                ui.notify('Config update failed: ' + str(e))
+
+    with ui.dialog(value=True) as dialog, ui.card().classes('w-full'):
+        with ui.row().classes('w-full justify-end'):
+            ui.button(icon='close', on_click=lambda: dialog.delete()).props('round size=sm')
+        with ui.card().classes('w-full'):
+            with ui.row():
+                ui.label('Platforms and categories').classes('text-lg font-bold w-full')
+            with ui.row().classes('justify-between items-center flex-nowrap w-full'):
+                new_platform_list = ui.input(label='Platforms', value=config.platform_list,
+                                             on_change=lambda: save_platforms.set_visibility(True)).classes('w-full')
+                save_platforms = ui.button(icon='save', on_click=lambda: update_config(button=save_platforms,
+                                                                                       platforms=new_platform_list.value)).props('round size=sm')
+                save_platforms.set_visibility(False)
+            with ui.row().classes('justify-between items-center flex-nowrap w-full'):
+                new_playing = ui.input(label='Playing', value=config.status_list_playing,
+                                       on_change=lambda: save_playing.set_visibility(True)).classes('w-full')
+                save_playing = ui.button(icon='save', on_click=lambda: update_config(button=save_playing,
+                                                                                     playing=new_playing.value)).props('round size=sm')
+                save_playing.set_visibility(False)
+            with ui.row().classes('justify-between items-center flex-nowrap w-full'):
+                new_played_pos = ui.input(label='Played positive', value=config.status_list_played_pos,
+                                          on_change=lambda: save_played_pos.set_visibility(True)).classes('w-full')
+                save_played_pos = ui.button(icon='save', on_click=lambda: update_config(button=save_played_pos,
+                                                                                        played_pos=new_played_pos.value)).props('round size=sm')
+                save_played_pos.set_visibility(False)
+            with ui.row().classes('justify-between items-center flex-nowrap w-full'):
+                new_played_neg = ui.input(label='Played negative', value=config.status_list_played_neg,
+                                          on_change=lambda: save_played_neg.set_visibility(True)).classes('w-full')
+                save_played_neg = ui.button(icon='save', on_click=lambda: update_config(button=save_played_neg,
+                                                                                        played_neg=new_played_neg.value)).props('round size=sm')
+                save_played_neg.set_visibility(False)
+            with ui.row().classes('justify-between items-center flex-nowrap w-full'):
+                new_backlog = ui.input(label='Backlog', value=config.status_list_backlog,
+                                       on_change=lambda: save_backlog.set_visibility(True)).classes('w-full')
+                save_backlog = ui.button(icon='save', on_click=lambda: update_config(button=save_backlog,
+                                                                                     backlog=new_backlog.value)).props('round size=sm')
+                save_backlog.set_visibility(False)
+            with ui.row().classes('justify-between items-center flex-nowrap w-full'):
+                new_wishlist = ui.input(label='Wishlist', value=config.status_list_wishlist,
+                                        on_change=lambda: save_wishlist.set_visibility(True)).classes('w-full')
+                save_wishlist = ui.button(icon='save', on_click=lambda: update_config(button=save_wishlist,
+                                                                                      wishlist=new_wishlist.value)).props('round size=sm')
+                save_wishlist.set_visibility(False)
+
+
+def dialog_tools():
     with ui.dialog(value=True) as dialog, ui.card():
         with ui.row().classes('w-full justify-end'):
             ui.button(icon='close', on_click=lambda: dialog.delete()).props('round size=sm')
@@ -266,13 +326,6 @@ def dialog_game_editor(igdb_id: int):
     pt_index = pt_info.index
     has_pt = not pt_info.empty
 
-    # general confirmation dialog
-    with ui.dialog() as confirmation, ui.card():
-        ui.label('Are you sure?')
-        with ui.row():
-            ui.button('Delete', on_click=lambda: confirmation.submit(True))
-            ui.button('Cancel', on_click=lambda: confirmation.submit(False))
-
     # game info section
     # with ui.dialog(value=True).props('persistent') as game_editor, ui.card().classes('w-1/3 h-3/4 items-center'):
     with ui.dialog(value=True).props('persistent'), ui.card().classes('w-1/3 h-3/4 items-center'):
@@ -409,6 +462,83 @@ def dialog_game_editor(igdb_id: int):
                         with ui.row().classes('justify-end flex-0 items-center'):
                             ui.button(icon='edit', on_click=lambda x=pt: edit_pt(x)).props('round color=yellow-10 size=sm')
                             ui.button(icon='remove_circle', on_click=lambda x=pt: remove_pt(x, game_index)).props('round color=red-10 size=sm')
+
+
+def display_table(table_data: pd.DataFrame, has_playthroughs=False, show_release_status=False, use_cards=False):
+    if show_release_status:
+        today = dt.date.today()
+        table_data['Release_status'] = table_data.apply(lambda x: get_release_status(x['Release_date'], x['IGDB_status'], today), axis=1)
+    if has_playthroughs:
+        table_data['StrDate'] = table_data['Date'].apply(lambda x: x.strftime('%Y-%m-%d'))
+        table_data['Comment'] = table_data['Playthrough_comment'].replace({None: " "}) + " " + table_data['Game_comment'].replace({None: " "})
+        table_data.drop(['Game_comment', 'Playthrough_comment', 'Date'], axis=1, inplace=True)
+    table_data.drop(['IGDB_queried', 'Release_date', 'Steam_ID', 'IGDB_status', 'IGDB_url'], axis=1, inplace=True)
+
+    columns = [{'name': 'Image', 'label': '', 'field': 'IGDB_image', 'align': 'center'},
+               {'name': 'Name', 'label': 'Name', 'field': 'Name', 'align': 'left',
+                'sortable': True, 'headerStyle': 'font-size: 1.25rem; font-weight: 600', 'style': 'font-size: 1rem;'},
+               {'name': 'Status', 'label': 'Status', 'field': 'Status', 'align': 'center',
+                'sortable': True, 'headerStyle': 'font-size: 1.25rem; font-weight: 600', 'style': 'font-size: 1rem;'}]
+    if has_playthroughs:
+        columns.append({'name': 'Date', 'label': 'Date', 'field': 'StrDate', 'align': 'center',
+                        'sortable': True, 'headerStyle': 'font-size: 1.25rem; font-weight: 600', 'style': 'font-size: 1rem;'})
+    if show_release_status:
+        columns.append({'name': 'Release Status', 'label': 'Release Status', 'field': 'Release_status', 'align': 'center',
+                        'sortable': True, 'headerStyle': 'font-size: 1.25rem; font-weight: 600', 'style': 'font-size: 1rem;'})
+    columns.append({'name': 'Platform', 'label': 'Platform', 'field': 'Platform', 'align': 'center',
+                    'sortable': True, 'headerStyle': 'font-size: 1.25rem; font-weight: 600', 'style': 'font-size: 1rem;'})
+    if has_playthroughs:
+        columns.append({'name': 'Comment', 'label': 'Comment', 'field': 'Comment', 'align': 'left',
+                        'sortable': True, 'headerStyle': 'font-size: 1.25rem; font-weight: 600', 'style': 'font-size: 1rem;'})
+    else:
+        columns.append({'name': 'Game_comment', 'label': 'Comment', 'field': 'Game_comment', 'align': 'left',
+                        'sortable': True, 'headerStyle': 'font-size: 1.25rem; font-weight: 600', 'style': 'font-size: 1rem;'})
+    rows = table_data.to_dict('records')
+    with ui.row().classes('justify-center w-full h-0'):
+        table = ui.table(columns=columns, rows=rows, pagination=10).classes('w-11/12')
+
+        if use_cards:
+            table.props(add='grid')
+            # todo: not working properly, fix
+            table.props(add=r'''
+                <div class="q-pa-xs col-xs-12 col-sm-6 col-md-4">
+                  <q-card flat bordered>
+                    <q-card-section class="text-center">
+                      Test line
+                      <br>
+                      <strong>{{ props.row.Name }}</strong>
+                    </q-card-section>
+                    <q-separator />
+                    <q-card-section class="flex flex-center">
+                      <div>{{ props.row.Status }}</div>
+                    </q-card-section>
+                  </q-card>
+                </div>
+            ''')
+        else:
+            table.on('rowClick', lambda x: dialog_game_editor(x.args[1]['IGDB_ID']))
+            if config.show_filters:
+                with table.add_slot('top-right'):
+                    table_filter = ui.input(label='Search')
+                table.bind_filter(table_filter, 'value')
+
+            if config.color_coding:
+                table.add_slot('body-cell-Status', f'''
+                    <q-td v-if="{config.status_list_played_neg}.includes(props.value)" key="Status" :props="props">
+                        <q-badge color='red-10'><p style='font-size: 1rem;'>{{{{ props.value }}}}</p></q-badge>
+                    </q-td>
+                    <q-td v-else-if="{config.status_list_played_pos}.includes(props.value)" key="Status" :props="props">
+                        <q-badge color='green-10'><p style='font-size: 1rem;'>{{{{ props.value }}}}</p></q-badge>
+                    </q-td>
+                    <q-td v-else key="Status" :props="props">
+                        <p style='font-size: 1rem;'>{{{{ props.value }}}}</p>
+                    </q-td>
+                ''')
+            table.add_slot('body-cell-Image', f'''
+                <q-td :props="props" style="width: {config.row_height}px;">
+                    <q-img :src="props.row.IGDB_image" style="height: {config.row_height}px;">
+                </q-td>
+            ''')
 
 
 def display_aggrid(aggrid_data: pd.DataFrame, has_playthroughs=False, show_release_status=False):
