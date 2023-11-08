@@ -451,7 +451,8 @@ def display_aggrid(aggrid_data: pd.DataFrame, has_playthroughs=False, show_relea
             {'headerName': 'Name', 'field': 'Name', 'cellDataType': 'text', 'cellClass': 'justify-start items-center text-base font-medium', 'flex': 6}]
         if config.color_coding:
             columns.append({'headerName': 'Status', 'field': 'Status', 'cellDataType': 'text', 'flex': 2,
-                            'cellClassRules': {'bg-red-50': 'x == "discarded"', 'bg-green-50': '["completed", "mastered"].includes(x)'}})
+                            'cellClassRules': {'bg-red-50': f'{config.status_list_played_pos}.includes(x)',
+                                               'bg-green-50': f'{config.status_list_played_neg}.includes(x)'}})
         else:
             columns.append({'headerName': 'Status', 'field': 'Status', 'cellDataType': 'text', 'flex': 2})
         if has_playthroughs:
