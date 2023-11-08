@@ -3,13 +3,13 @@ import configparser
 version = "0.3-beta"
 
 # local files
-game_list = r'/files/database/gamelist.feather'
-playthrough_list = r'/files/database/playthroughs.feather'
-file_icon = r'/files/assets/Slaanesh.png'
-file_config = r'/files/config/config.ini'
-path_covers = r'/files/covers/'
-path_import = r'/files/import/'
-path_export = r'/files/export/'
+game_list = r'./files/database/gamelist.feather'
+playthrough_list = r'./files/database/playthroughs.feather'
+file_icon = r'./files/assets/Slaanesh.png'
+file_config = r'./files/config/config.ini'
+path_covers = r'./files/covers/'
+path_import = r'./files/import/'
+path_export = r'./files/export/'
 
 # serving files
 server_file_icon = r'/assets/Slaanesh.png'
@@ -121,14 +121,14 @@ def update_config(new_access_token=None, new_expiry_timestamp=None,
                   new_row_height=None, new_dark_mode=None, new_cards_width=None, new_color_coding=None,
                   new_type_playing=None, new_type_played=None, new_type_backlog=None, new_type_wishlist=None,
                   new_filter_playing=None, new_filter_played=None, new_filter_backlog=None, new_filter_wishlist=None):
-    if new_access_token:
+    if new_access_token is not None:
         global auth_token
         config['igdb']['auth_token'] = auth_token = new_access_token
-    if new_expiry_timestamp:
+    if new_expiry_timestamp is not None:
         global token_timestamp
         config['igdb']['token_timestamp'] = token_timestamp = new_expiry_timestamp
 
-    if new_platform_list:
+    if new_platform_list is not None:
         if 'platforms' not in config:
             config.add_section('platforms')
         global platform_list
@@ -136,7 +136,7 @@ def update_config(new_access_token=None, new_expiry_timestamp=None,
         config['platforms'].clear()
         for item in platform_list:
             config.set('platforms', item)
-    if new_playing:
+    if new_playing is not None:
         if 'playing' not in config:
             config.add_section('playing')
         global status_list_playing
@@ -144,7 +144,7 @@ def update_config(new_access_token=None, new_expiry_timestamp=None,
         config['playing'].clear()
         for item in status_list_playing:
             config.set('playing', item)
-    if new_backlog:
+    if new_backlog is not None:
         if 'backlog' not in config:
             config.add_section('backlog')
         global status_list_backlog
@@ -152,7 +152,7 @@ def update_config(new_access_token=None, new_expiry_timestamp=None,
         config['backlog'].clear()
         for item in status_list_backlog:
             config.set('backlog', item)
-    if new_wishlist:
+    if new_wishlist is not None:
         if 'wishlist' not in config:
             config.add_section('wishlist')
         global status_list_wishlist
@@ -160,7 +160,7 @@ def update_config(new_access_token=None, new_expiry_timestamp=None,
         config['wishlist'].clear()
         for item in status_list_wishlist:
             config.set('wishlist', item)
-    if new_played_pos:
+    if new_played_pos is not None:
         if 'played positive' not in config:
             config.add_section('played positive')
         global status_list_played_pos
@@ -168,7 +168,7 @@ def update_config(new_access_token=None, new_expiry_timestamp=None,
         config['played positive'].clear()
         for item in status_list_played_pos:
             config.set('played positive', item)
-    if new_played_neg:
+    if new_played_neg is not None:
         if 'played negative' not in config:
             config.add_section('played negative')
         global status_list_played_neg
@@ -179,43 +179,47 @@ def update_config(new_access_token=None, new_expiry_timestamp=None,
 
     if 'ui' not in config:
         config.add_section('ui')
-    if new_row_height:
+    if new_row_height is not None:
         global row_height
-        config['ui']['row_height'] = row_height = new_row_height
-    if new_dark_mode:
+        row_height = int(new_row_height)
+        config['ui']['row_height'] = str(row_height)
+    if new_dark_mode is not None:
         global dark_mode
-        config['ui']['dark_mode'] = dark_mode = new_dark_mode
-    if new_cards_width:
+        dark_mode = bool(new_dark_mode)
+        config['ui']['dark_mode'] = str(dark_mode)
+    if new_cards_width is not None:
         global cards_width
-        config['ui']['cards_width'] = cards_width = new_cards_width
-    if new_color_coding:
+        cards_width = int(new_cards_width)
+        config['ui']['cards_width'] = str(cards_width)
+    if new_color_coding is not None:
         global color_coding
-        config['ui']['color_coding'] = color_coding = new_color_coding
+        color_coding = bool(new_color_coding)
+        config['ui']['color_coding'] = str(color_coding)
 
     if 'tabs' not in config:
         config.add_section('tabs')
-    if new_type_playing:
+    if new_type_playing is not None:
         global type_playing
         config['tabs']['type_playing'] = type_playing = new_type_playing
-    if new_type_played:
+    if new_type_played is not None:
         global type_played
         config['tabs']['type_played'] = type_played = new_type_played
-    if new_type_backlog:
+    if new_type_backlog is not None:
         global type_backlog
         config['tabs']['type_backlog'] = type_backlog = new_type_backlog
-    if new_type_wishlist:
+    if new_type_wishlist is not None:
         global type_wishlist
         config['tabs']['type_wishlist'] = type_wishlist = new_type_wishlist
-    if new_filter_playing:
+    if new_filter_playing is not None:
         global filter_playing
         config['tabs']['filter_playing'] = filter_playing = new_filter_playing
-    if new_filter_played:
+    if new_filter_played is not None:
         global filter_played
         config['tabs']['filter_played'] = filter_played = new_filter_played
-    if new_filter_backlog:
+    if new_filter_backlog is not None:
         global filter_backlog
         config['tabs']['filter_backlog'] = filter_backlog = new_filter_backlog
-    if new_filter_wishlist:
+    if new_filter_wishlist is not None:
         global filter_wishlist
         config['tabs']['filter_wishlist'] = filter_wishlist = new_filter_wishlist
 
