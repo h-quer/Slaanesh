@@ -42,7 +42,7 @@ You then need to save your client id and client secret in the Slaanesh config fi
 Be aware: Client id and secret are (for now) stored in plain text. Doing so for your regular Twitch account (in case you already have one) is obviously a bad idea. In that case, best create a fresh one for dedicated use only as Slaanesh API slave.
 
 ### Docker setup
-Create all necessary directories, adjust config file (IGDB token data!) and copy it to the config directory.
+Create all necessary directories, adjust config file (IGDB token data! See sample config.ini in this repository) and copy it to the config directory.
 Also adjust the docker-compose.yml to match your setup.
 
 ```yaml
@@ -53,19 +53,17 @@ services:
   slaanesh:
     image: ghcr.io/h-quer/slaanesh:latest
     container_name: slaanesh
-    user: 1000:1000
+    user: 1000:1000                          # or any other UID/GID that fit your setup
     restart: unless-stopped
     volumes:
-      - your_config_dir:/files/config
-      - your_import_dir:/files/import
-      - your_export_dir:/files/export
-      - your_covers_dir:/files/covers
-      - your_database_dir:/files/database
+      - your_config_dir:/files/config        # adjust path
+      - your_import_dir:/files/import        # adjust path
+      - your_export_dir:/files/export        # adjust path
+      - your_covers_dir:/files/covers        # adjust path
+      - your_database_dir:/files/database    # adjust path
     ports:
-      - 8428:8080
+      - 8428:8080                            # remove if using reverse proxy and accessing via container name
 ```
-Of course, change the left side of the volumes and port as needed. Same goes for UID/GID or simply remove to run as root. You can also of course remove the port part completely if using a reverse proxy and accessing the container via its name.
-
 Once it's set, simply pull and start the image:
 ```
 docker compose up -d
