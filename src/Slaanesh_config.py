@@ -36,7 +36,7 @@ dark_mode = None
 cards_width = 22
 color_coding = True
 
-display_types = ('cards', 'aggrid', 'table')
+display_types = ['cards', 'aggrid', 'table']
 type_playing = 'cards'
 type_played = 'aggrid'
 type_backlog = 'aggrid'
