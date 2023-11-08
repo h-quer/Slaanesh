@@ -22,7 +22,7 @@ With that in mind, this still absolutely is a beta release. Not a "I've been usi
   <img src="/images/backlog.png" alt="backlog" width="70%"/>
   <img src="/images/game_editor.png" alt="game editor" width="70%"/>
   <img src="/images/add_game.png" alt="add game dialog" width="70%"/>
-  <img src="/images/overivew.png" alt="stats page" width="70%"/>
+  <img src="/images/overview.png" alt="stats page" width="70%"/>
 </div>
 
 ## Setup and installation
