@@ -40,10 +40,10 @@ display_types = ('cards', 'aggrid', 'table')
 type_playing = 'cards'
 type_played = 'aggrid'
 type_backlog = 'aggrid'
-type_wishlist = 'table'
+type_wishlist = 'aggrid'
 filter_playing = False
 filter_played = True
-filter_backlog = False
+filter_backlog = True
 filter_wishlist = True
 
 config = configparser.ConfigParser(allow_no_value=True)
