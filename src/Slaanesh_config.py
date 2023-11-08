@@ -16,7 +16,9 @@ server_file_icon = r'/assets/Slaanesh.png'
 server_path_covers = r'/covers/'
 
 status_list_playing = ["playing", "on hold"]
-status_list_played = ["completed", "discarded", "mastered"]
+status_list_played_pos = ["completed", "mastered"]
+status_list_played_neg = ["discarded", ]
+status_list_played = status_list_played_pos + status_list_played_neg
 status_list_backlog = ["backlog", "waiting"]
 status_list_wishlist = ["wishlist",]
 status_list_unplayed = status_list_backlog + status_list_wishlist + status_list_playing
@@ -41,6 +43,8 @@ config.optionxform = str
 
 def load_config():
 	global file_config
+	global status_list_played, status_list_played_pos, status_list_played_neg
+	global status_list_unplayed, status_list_backlog, status_list_wishlist, status_list_playing
 	config.read(file_config)
 	if 'igdb' in config:
 		global client_id, client_secret, auth_token, token_timestamp, data_refresh_period, data_refresh_limit
@@ -70,11 +74,16 @@ def load_config():
 		status_list_playing.clear()
 		for key in config['playing']:
 			status_list_playing.append(key)
-	if 'played' in config:
-		global status_list_played
-		status_list_played.clear()
-		for key in config['played']:
-			status_list_played.append(key)
+	if 'played positive' in config:
+		global status_list_played_pos
+		status_list_played_pos.clear()
+		for key in config['played positive']:
+			status_list_played_pos.append(key)
+	if 'played negative' in config:
+		global status_list_played_neg
+		status_list_played_neg.clear()
+		for key in config['played negative']:
+			status_list_played_neg.append(key)
 	if 'backlog' in config:
 		global status_list_backlog
 		status_list_backlog.clear()
@@ -85,6 +94,8 @@ def load_config():
 		status_list_wishlist.clear()
 		for key in config['wishlist']:
 			status_list_wishlist.append(key)
+	status_list_played = status_list_played_pos + status_list_played_neg
+	status_list_unplayed = status_list_backlog + status_list_wishlist + status_list_playing
 
 
 def update_config(access_token, expiry_timestamp):
