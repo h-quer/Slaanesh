@@ -33,7 +33,7 @@ data_refresh_limit = 1
 
 row_height = 96
 dark_mode = None
-cards_width = 22
+cards_width = 24
 color_coding = True
 
 display_types = ['cards', 'aggrid', 'table']
@@ -189,6 +189,7 @@ def update_config(new_access_token=None, new_expiry_timestamp=None,
             dark_mode = new_dark_mode
             config['ui']['dark_mode'] = str(dark_mode)
         else:
+            dark_mode = None
             config.remove_option('ui', 'dark_mode')
     if new_cards_width is not None:
         global cards_width
@@ -215,16 +216,20 @@ def update_config(new_access_token=None, new_expiry_timestamp=None,
         config['tabs']['type_wishlist'] = type_wishlist = new_type_wishlist
     if new_filter_playing is not None:
         global filter_playing
-        config['tabs']['filter_playing'] = filter_playing = new_filter_playing
+        filter_playing = new_filter_playing
+        config['tabs']['filter_playing'] = str(filter_playing)
     if new_filter_played is not None:
         global filter_played
-        config['tabs']['filter_played'] = filter_played = new_filter_played
+        filter_played = new_filter_played
+        config['tabs']['filter_played'] = str(filter_played)
     if new_filter_backlog is not None:
         global filter_backlog
-        config['tabs']['filter_backlog'] = filter_backlog = new_filter_backlog
+        filter_backlog = new_filter_backlog
+        config['tabs']['filter_backlog'] = str(filter_backlog)
     if new_filter_wishlist is not None:
         global filter_wishlist
-        config['tabs']['filter_wishlist'] = filter_wishlist = new_filter_wishlist
+        filter_wishlist = new_filter_wishlist
+        config['tabs']['filter_wishlist'] = str(filter_wishlist)
 
     with open(file_config, 'w') as configfile:
         config.write(configfile)
