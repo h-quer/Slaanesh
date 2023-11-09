@@ -185,8 +185,11 @@ def update_config(new_access_token=None, new_expiry_timestamp=None,
         config['ui']['row_height'] = str(row_height)
     if new_dark_mode is not None:
         global dark_mode
-        dark_mode = bool(new_dark_mode)
-        config['ui']['dark_mode'] = str(dark_mode)
+        if type(new_dark_mode) is bool:
+            dark_mode = new_dark_mode
+            config['ui']['dark_mode'] = str(dark_mode)
+        else:
+            config.remove_option('ui', 'dark_mode')
     if new_cards_width is not None:
         global cards_width
         cards_width = int(new_cards_width)
