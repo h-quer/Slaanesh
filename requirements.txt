@@ -1,5 +1,6 @@
-pandas==2.1.1
-nicegui==1.3.17
-igdb-api-v4==0.2.0
-aiohttp==3.9.0b0
-pyarrow==13.0.0
+pandas==2.1.2
+numpy==1.26.1
+nicegui==1.4.2
+igdb-api-v4==0.3.2
+aiohttp==3.8.6
+pyarrow==14.0.1

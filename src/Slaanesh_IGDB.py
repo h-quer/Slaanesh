@@ -16,17 +16,16 @@ update_id_queue = queue.Queue()
 request_limit = 105
 
 
-def init_api() -> bool:
+def init_api():
     global igdb
     igdb = IGDBWrapper(config.client_id, config.auth_token)
     check_igdb_token()
     threading.Thread(target=igdb_update_daemon, daemon=True).start()
-    return True
 
 
 def igdb_update_daemon():
     while True:
-        time.sleep(10)
+        time.sleep(5)
         id_list = list()
         i = 0
         while (i < request_limit - 5) and (not update_id_queue.empty()):
@@ -52,14 +51,13 @@ def igdb_update_daemon():
             data.update_igdb_data(new_data)
 
 
-def check_igdb_token() -> bool:
+def check_igdb_token():
     expiry_datetime = dt.datetime.strptime(config.token_timestamp, "%Y-%m-%d %H:%M:%S")
     if dt.datetime.now() > expiry_datetime:
         refresh_igdb_token()
-    return True
 
 
-def refresh_igdb_token() -> bool:
+def refresh_igdb_token():
     now = dt.datetime.now()
     url = 'https://id.twitch.tv/oauth2/token'
     params = {'client_id': config.client_id,
@@ -70,8 +68,7 @@ def refresh_igdb_token() -> bool:
     dataframe_response = pd.json_normalize(json_response)
     expiry_timestamp = now + dt.timedelta(seconds=int(dataframe_response['expires_in'][0])) - dt.timedelta(days=2)
     expiry_string = dt.datetime.strftime(expiry_timestamp, "%Y-%m-%d %H:%M:%S")
-    config.update_config(dataframe_response['access_token'][0], expiry_string)
-    return True
+    config.update_config(new_access_token=dataframe_response['access_token'][0], new_expiry_timestamp=expiry_string)
 
 
 def collect_game_info(query_list: tuple) -> pd.DataFrame:
