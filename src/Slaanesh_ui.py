@@ -60,9 +60,9 @@ def dialog_settings():
             confirm = await confirmation
         else:
             confirm = True
-        if button:
-            button.set_visibility(False)
         if confirm:
+            if button:
+                button.set_visibility(False)
             try:
                 config.update_config(new_platform_list=platforms, new_backlog=backlog, new_playing=playing,
                                      new_wishlist=wishlist, new_played_neg=played_neg, new_played_pos=played_pos,
@@ -707,8 +707,8 @@ def display_aggrid(aggrid_data: pd.DataFrame, has_playthroughs=False, show_relea
             {'headerName': 'Name', 'field': 'Name', 'cellDataType': 'text', 'cellClass': 'justify-start items-center text-base font-medium', 'flex': 6}]
         if config.color_coding:
             columns.append({'headerName': 'Status', 'field': 'Status', 'cellDataType': 'text', 'flex': 2,
-                            'cellClassRules': {'bg-red-50': f'{config.status_list_played_pos}.includes(x)',
-                                               'bg-green-50': f'{config.status_list_played_neg}.includes(x)'}})
+                            'cellClassRules': {'bg-red-50': f'{config.status_list_played_neg}.includes(x)',
+                                               'bg-green-50': f'{config.status_list_played_pos}.includes(x)'}})
         else:
             columns.append({'headerName': 'Status', 'field': 'Status', 'cellDataType': 'text', 'flex': 2})
         if has_playthroughs:
