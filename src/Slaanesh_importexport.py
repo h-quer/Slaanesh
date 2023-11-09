@@ -8,7 +8,6 @@ quotechar = '"'
 
 
 def import_csv():
-    # todo: add failsafe and notification if trying to import games already in db (currently results in inconsistent db)
     global separator
     gl_dtypes = {'IGDB_image': str,
                  'IGDB_ID': 'int64',
@@ -30,8 +29,9 @@ def import_csv():
                          sep=separator, escapechar=escapechar, quotechar=quotechar, dtype=gl_dtypes, parse_dates=gl_parser)
     new_pt = pd.read_csv(config.path_import + 'playthroughs.csv',
                          sep=separator, escapechar=escapechar, quotechar=quotechar, dtype=pt_dtypes, parse_dates=pt_parser)
-    # data.gl = new_gl.reset_index(drop=True)
-    # data.pt = new_pt.reset_index(drop=True)
+    duplicate_check = new_gl.merge(data.gl, how='inner', on='IGDB_ID')
+    if not duplicate_check.empty:
+        raise Exception(f'{len(duplicate_check)} game(s) to import already in database')
     data.gl = pd.concat([data.gl, new_gl], ignore_index=True)
     data.pt = pd.concat([data.pt, new_pt], ignore_index=True)
     data.write_dataframes()
