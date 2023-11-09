@@ -75,12 +75,10 @@ Folders to mount are:
 ## Scope and roadmap
 ### Roadmap
 Features I am currently slowly but actively working on (pull requests still very welcome for support on these!):
-* Proper dark mode support (currently works for everything but the tables)
+* Proper dark mode support (overview page and aggrid style tables not ideal yet)
 * Make it render properly on mobile
 * Option to add a custom icon and name (the big central part of the UI header)
-* Expand settings dialog to enable modifying the config file from within the UI
-* Once Twitch client ID and secret can be added via the UI, save them not in plain text in the config file but encrypted somewhere else
-* File picker and file downloads for csv import/export
+* Enable adding Twitch client ID and secret via the UI, save them not in plain text in the config file but encrypted somewhere else
 * General UI improvements, especially considering responsiveness - there is probably a lot that can be done with asyncio which I have barely used so far
 * Build a native mode version for local (not self-hosted) usage
 
