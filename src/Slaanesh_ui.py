@@ -19,7 +19,7 @@ with ui.dialog() as confirmation, ui.card():
 
 def refresh_ui():
     global dark
-    dark.value = config.dark_mode
+    dark.set_value(config.dark_mode)
     panel_overview.refresh()
     panel_playing.refresh()
     panel_played.refresh()
@@ -28,10 +28,12 @@ def refresh_ui():
 
 
 def display_ui():
+    global dark
+    dark.set_value(config.dark_mode)
     with ui.column().classes('w-full h-[90vh] flex-nowrap'):
         ui_header()
         tabs_lists()
-    ui.run(title='Slaanesh', favicon=config.file_icon, reload=False, dark=config.dark_mode)
+    ui.run(title='Slaanesh', favicon=config.file_icon, reload=False)
 
 
 def ui_header():
@@ -304,8 +306,8 @@ def panel_playing():
     res.sort_values(by=['Status', 'Platform', 'Game_comment'], inplace=True)
     match config.type_playing:
         case 'cards': x = display_cards
-        case 'table': x = display_table
-        case 'aggrid': x = display_aggrid
+        case 'alt_table': x = display_table
+        case 'table': x = display_aggrid
         case _: x = display_aggrid
     x(res, has_playthroughs=False, show_release_status=False, show_filter=config.filter_playing)
 
@@ -318,8 +320,8 @@ def panel_played():
     res.sort_values(by='Date', ascending=False, inplace=True)
     match config.type_played:
         case 'cards': x = display_cards
-        case 'table': x = display_table
-        case 'aggrid': x = display_aggrid
+        case 'alt_table': x = display_table
+        case 'table': x = display_aggrid
         case _: x = display_aggrid
     x(res, has_playthroughs=True, show_release_status=False, show_filter=config.filter_played)
 
@@ -332,8 +334,8 @@ def panel_backlog():
     res.sort_values(by=['Status', 'Platform', 'Game_comment'], inplace=True)
     match config.type_backlog:
         case 'cards': x = display_cards
-        case 'table': x = display_table
-        case 'aggrid': x = display_aggrid
+        case 'alt_table': x = display_table
+        case 'table': x = display_aggrid
         case _: x = display_aggrid
     x(res, has_playthroughs=False, show_release_status=False, show_filter=config.filter_backlog)
 
@@ -346,8 +348,8 @@ def panel_wishlist():
     res.sort_values(by=['Status', 'Platform', 'Release_date', 'Game_comment'], key=lambda col: col.replace(0, np.nan), na_position='last', inplace=True)
     match config.type_wishlist:
         case 'cards': x = display_cards
-        case 'table': x = display_table
-        case 'aggrid': x = display_aggrid
+        case 'alt_table': x = display_table
+        case 'table': x = display_aggrid
         case _: x = display_aggrid
     x(res, has_playthroughs=False, show_release_status=True, show_filter=config.filter_wishlist)
 
@@ -661,8 +663,8 @@ def display_table(table_data: pd.DataFrame, has_playthroughs=False, show_release
                     </q-td>
                 ''')
             table.add_slot('body-cell-Image', f'''
-                <q-td :props="props" style="width: {config.row_height}px;">
-                    <q-img :src="props.row.IGDB_image" style="height: {config.row_height}px;">
+                <q-td :props="props">
+                    <q-img :src="props.row.IGDB_image" style="width: {config.row_height*0.75}px;">
                 </q-td>
             ''')
 
@@ -674,10 +676,7 @@ def display_aggrid(aggrid_data: pd.DataFrame, has_playthroughs=False, show_relea
         <style>
             .ag-header-cell {
                 font-weight: 600;
-                font-size: 1.25rem;
-                display: flex;
-                align-items: center;
-                justify-content: center;
+                font-size: 1.125rem;
             }
         </style>
         """)
@@ -687,32 +686,23 @@ def display_aggrid(aggrid_data: pd.DataFrame, has_playthroughs=False, show_relea
         today = dt.date.today()
         aggrid_data['Release_status'] = aggrid_data.apply(lambda x: get_release_status(x['Release_date'], x['IGDB_status'], today), axis=1)
     if has_playthroughs:
+        aggrid_data['StrDate'] = aggrid_data['Date'].apply(lambda x: x.strftime('%Y-%m-%d'))
         aggrid_data['Comment'] = aggrid_data['Playthrough_comment'].replace({None: " "}) + " " + aggrid_data['Game_comment'].replace({None: " "})
-        aggrid_data.drop(['Game_comment', 'Playthrough_comment'], axis=1, inplace=True)
+        aggrid_data.drop(['Game_comment', 'Playthrough_comment', 'Date'], axis=1, inplace=True)
     aggrid_data.drop(['IGDB_queried', 'Release_date', 'Steam_ID', 'IGDB_status', 'IGDB_url'], axis=1, inplace=True)
     with ui.row().classes('justify-center w-full h-full'):
-        table = ui.aggrid.from_pandas(aggrid_data).classes('w-11/12 h-full')
-        table.options['rowHeight'] = config.row_height
-        table.options['defaultColDef'] = {'floatingFilter': show_filter,
-                                          'filter': 'agTextColumnFilter',
-                                          'minWidth': 128,
-                                          'sortable': True,
-                                          'resizable': True,
-                                          'cellStyle': {'display': 'flex'},
-                                          'cellClass': 'justify-center items-center text-base font-normal'
-                                          }
         columns = [
             {'headerName': '', 'field': 'IGDB_image', 'cellDataType': 'object', 'maxWidth': 128, 'cellClass': 'justify-center', 'filter': False},
             {'headerName': 'ID', 'field': 'IGDB_id', 'hide': True},
             {'headerName': 'Name', 'field': 'Name', 'cellDataType': 'text', 'cellClass': 'justify-start items-center text-base font-medium', 'flex': 6}]
         if config.color_coding:
             columns.append({'headerName': 'Status', 'field': 'Status', 'cellDataType': 'text', 'flex': 2,
-                            'cellClassRules': {'bg-red-50': f'{config.status_list_played_neg}.includes(x)',
-                                               'bg-green-50': f'{config.status_list_played_pos}.includes(x)'}})
+                            'cellClassRules': {'bg-red-950' if dark.value else 'bg-red-50': f'{config.status_list_played_neg}.includes(x)',
+                                               'bg-green-950' if dark.value else 'bg-green-50': f'{config.status_list_played_pos}.includes(x)'}})
         else:
             columns.append({'headerName': 'Status', 'field': 'Status', 'cellDataType': 'text', 'flex': 2})
         if has_playthroughs:
-            columns.append({'headerName': 'Date', 'field': 'Date', 'cellDataType': 'dateString', 'flex': 2})
+            columns.append({'headerName': 'Date', 'field': 'StrDate', 'cellDataType': 'dateString', 'flex': 2})
         if show_release_status:
             columns.append({'headerName': 'Release Status', 'field': 'Release_status', 'cellDataType': 'text', 'flex': 2})
         columns.append({'headerName': 'Platform', 'field': 'Platform', 'cellDataType': 'text', 'flex': 2})
@@ -722,8 +712,18 @@ def display_aggrid(aggrid_data: pd.DataFrame, has_playthroughs=False, show_relea
         else:
             columns.append({'headerName': 'Comment', 'field': 'Game_comment', 'cellDataType': 'text', 'flex': 5,
                             'cellClass': 'justify-start items-center text-base font-normal'})
-        table.options['columnDefs'] = columns
-        table.props(':html_columns="[0]"')
+        default_col_def = {'floatingFilter': show_filter,
+                           'filter': 'agTextColumnFilter',
+                           'minWidth': 128,
+                           'sortable': True,
+                           'resizable': True,
+                           'cellStyle': {'display': 'flex'},
+                           'cellClass': 'justify-center items-center text-base font-normal'}
+        row_data = aggrid_data.to_dict('records')
+        table = ui.aggrid({'columnDefs': columns, 'rowData': row_data, 'rowHeight': config.row_height, 'defaultColDef': default_col_def},
+                          theme=("alpine-dark" if dark.value else "alpine"),
+                          html_columns=[0],
+                          auto_size_columns=False).classes('w-11/12 h-full')
         table.on('cellClicked', lambda e: dialog_game_editor(e.args['data']['IGDB_ID']))
 
 

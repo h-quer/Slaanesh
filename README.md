@@ -12,7 +12,7 @@ Slaanesh is a game tracker, allowing for keeping track of games played as well a
 ## It's a beta release, is it safe to use?
 Yes, absolutely!
 
-This is why Slaanesh has a simple csv export functionality. Even if Slaanesh somehow corrupts its database, as long as you at least occasionally press the csv export button, all your data will be safe in a very easy to read and easily accessible text format. Just make sure that both the database and export directory are part of the 3-2-1 backup system you are using for your server already anyway. If you don't run a 3-2-1 backup system on your server, then you have bigger things to worry about than Slaanesh ;)
+This is why Slaanesh offers a simple export functionality. Even if Slaanesh somehow corrupts its database, as long as you at least occasionally press the csv export button, all your data will be safe in a very easy to read and easily accessible text format. Just make sure that both the database and export directory are part of the 3-2-1 backup system you are using for your server already anyway. If you don't run a 3-2-1 backup system on your server, then you have bigger things to worry about than Slaanesh ;)
 
 With that in mind, this still absolutely is a beta release. Not a "I've been using it for months and just calling it beta" release, but a true beta. Maybe alpha. Expect bugs - and ideally report or even help fix them, please.
 
@@ -75,7 +75,7 @@ Folders to mount are:
 ## Scope and roadmap
 ### Roadmap
 Features I am currently slowly but actively working on (pull requests still very welcome for support on these!):
-* Proper dark mode support (overview page and aggrid style tables not ideal yet)
+* Improve dark mode support (overview page and aggrid style tables not ideal yet)
 * Make it render properly on mobile
 * Option to add a custom icon and name (the big central part of the UI header)
 * Enable adding Twitch client ID and secret via the UI, save them not in plain text in the config file but encrypted somewhere else
