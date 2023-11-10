@@ -75,7 +75,7 @@ Folders to mount are:
 ## Scope and roadmap
 ### Roadmap
 Features I am currently slowly but actively working on (pull requests still very welcome for support on these!):
-* Proper dark mode support (overview page and aggrid style tables not ideal yet)
+* Improve dark mode support (overview page and aggrid style tables not ideal yet)
 * Make it render properly on mobile
 * Option to add a custom icon and name (the big central part of the UI header)
 * Enable adding Twitch client ID and secret via the UI, save them not in plain text in the config file but encrypted somewhere else
