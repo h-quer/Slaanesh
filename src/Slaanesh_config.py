@@ -36,11 +36,11 @@ dark_mode = None
 cards_width = 24
 color_coding = True
 
-display_types = ['cards', 'aggrid', 'table']
+display_types = ['cards', 'table', 'alt_table']
 type_playing = 'cards'
-type_played = 'aggrid'
-type_backlog = 'aggrid'
-type_wishlist = 'aggrid'
+type_played = 'table'
+type_backlog = 'table'
+type_wishlist = 'table'
 filter_playing = False
 filter_played = True
 filter_backlog = True
