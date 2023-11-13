@@ -78,11 +78,10 @@ Folders to mount are:
 ### Roadmap
 Features I am currently slowly but actively working on (pull requests still very welcome for support on these!):
 * Improve dark mode support (overview page and aggrid style tables not ideal yet)
-* Make it render properly on mobile
-* Option to add a custom icon and name (the big central part of the UI header)
-* Enable adding Twitch client ID and secret via the UI, save them not in plain text in the config file but encrypted somewhere else
 * General UI improvements, especially considering responsiveness - there is probably a lot that can be done with asyncio which I have barely used so far
 * Build a native mode version for local (not self-hosted) usage
+* Make it render properly on mobile
+* Enable adding Twitch client ID and secret via the UI, save them not in plain text in the config file but encrypted somewhere else
 
 ### Not in scope
 Slaanesh does not and will not include:
