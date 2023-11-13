@@ -33,7 +33,7 @@ def display_ui():
     with ui.column().classes('w-full h-[90vh] flex-nowrap'):
         ui_header()
         tabs_lists()
-    ui.run(title='Slaanesh', favicon=config.file_icon, reload=False)
+    ui.run(title=config.gt_name, favicon=config.file_icon, reload=False)
 
 
 def ui_header():
@@ -43,7 +43,7 @@ def ui_header():
             ui.button('Add game with playthrough', on_click=lambda: dialog_add_played_game())
         with ui.row().classes('justify-center items-center'):
             ui.image(config.file_icon).classes('w-12')
-            ui.label('Slaanesh').classes('text-4xl')
+            ui.label(config.gt_name).classes('text-4xl')
         with ui.row().classes('justify-center items-center'):
             ui.button(icon='refresh', on_click=lambda: refresh_ui()).props('round')
             ui.button(icon='build', on_click=lambda: dialog_tools()).props('round')
