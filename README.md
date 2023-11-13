@@ -17,13 +17,15 @@ This is why Slaanesh offers a simple export functionality. Even if Slaanesh some
 With that in mind, this still absolutely is a beta release. Not a "I've been using it for months and just calling it beta" release, but a true beta. Maybe alpha. Expect bugs - and ideally report or even help fix them, please.
 
 ## Screenshots
-<div class="column">
-  <img src="/images/playing.png" alt="playing" width="70%"/>
-  <img src="/images/backlog.png" alt="backlog" width="70%"/>
-  <img src="/images/game_editor.png" alt="game editor" width="70%"/>
-  <img src="/images/add_game.png" alt="add game dialog" width="70%"/>
-  <img src="/images/overview.png" alt="stats page" width="70%"/>
-</div>
+<p align="center">
+  <img src="/images/playing.png" alt="playing" width="48%"/>
+  <img src="/images/backlog.png" alt="backlog" width="48%"/>
+  <img src="/images/dark_mode.png" alt="stats page" width="48%"/>
+  <img src="/images/game_editor.png" alt="game editor" width="48%"/>
+  <img src="/images/add_game.png" alt="add game dialog" width="48%"/>
+  <img src="/images/settings.png" alt="stats page" width="48%"/>
+  <img src="/images/overview.png" alt="stats page" width="48%"/>
+</p>
 
 ## Setup and installation
 ### IGDB API token
