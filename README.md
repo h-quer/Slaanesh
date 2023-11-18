@@ -77,7 +77,6 @@ Folders to mount are:
 ## Scope and roadmap
 ### Roadmap
 Features I am currently slowly but actively working on (pull requests still very welcome for support on these!):
-* Improve dark mode support (overview page and aggrid style tables not ideal yet)
 * General UI improvements, especially considering responsiveness - there is probably a lot that can be done with asyncio which I have barely used so far
 * Build a native mode version for local (not self-hosted) usage
 * Make it render properly on mobile
