@@ -820,6 +820,7 @@ def action_refresh_acces_token():
 
 
 def action_update_igdb_data(igdb_id: int):
+    data.rem_cover(igdb_id)
     igdb.update_id_queue.put(igdb_id)
     ui.notify('IGDB data update queued')
 
