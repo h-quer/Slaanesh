@@ -30,12 +30,7 @@ def refresh_ui():
 
 async def handle_connection():
     global browser_dm
-    browser_dm = await ui.run_javascript('''
-        if (Quasar.Dark.mode == "auto")
-            return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-        else
-            return Quasar.Dark.mode;
-    ''')
+    browser_dm = await ui.run_javascript('''return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;''')
     refresh_ui()
 
 
@@ -377,22 +372,22 @@ def panel_overview():
                 ui.label('Stats by category').classes('text-xl font-bold')
             with ui.row().classes('justify-center w-full'):
                 ui.echart({
-                    'yAxis': {'type': 'value'},
+                    'yAxis': {'type': 'value', 'splitLine': {'lineStyle': {'color': '#333' if dark_table() else '#eee'}}},
                     'xAxis': {'type': 'category', 'data': ['Games', 'Playthroughs']},
                     'tooltip': {'trigger': 'item'},
                     'series': {'type': 'bar', 'data': [len(data.gl.index.to_list()), len(data.pt.index.to_list())],
-                               'label': {'normal': {'show': True, 'position': 'top'}}},
+                               'label': {'normal': {'show': True, 'position': 'top', 'textStyle': {'color': 'white' if dark_table() else 'black'}}}},
                 })
             with ui.row().classes('justify-center w-full'):
                 ui.echart({
-                    'yAxis': {'type': 'log'},
+                    'yAxis': {'type': 'log', 'splitLine': {'lineStyle': {'color': '#333' if dark_table() else '#eee'}}},
                     'xAxis': {'type': 'category', 'data': ['Playing', 'Played', 'Backlog', 'Wishlist']},
                     'tooltip': {'trigger': 'item'},
                     'series': {'type': 'bar', 'data': [sum(data.gl['Status'].isin(config.status_list_playing)),
                                                        sum(data.gl['Status'].isin(config.status_list_played)),
                                                        sum(data.gl['Status'].isin(config.status_list_backlog)),
                                                        sum(data.gl['Status'].isin(config.status_list_wishlist))],
-                               'label': {'normal': {'show': True, 'position': 'top'}}},
+                               'label': {'normal': {'show': True, 'position': 'top', 'textStyle': {'color': 'white' if dark_table() else 'black'}}}},
                 })
 
         with ui.column().classes('w-full'):
@@ -406,7 +401,8 @@ def panel_overview():
                     ui.label('Completion').classes('text-xl font-bold')
                 with ui.row().classes('w-full'):
                     ui.echart({'tooltip': {'trigger': 'item'},
-                               'series': {'type': 'pie', 'data': graph_data}})
+                               'series': {'type': 'pie', 'data': graph_data,
+                                          'label': {'show': True, 'textStyle': {'color': 'white' if dark_table() else 'black'}}}})
 
             # Platform stats
             with ui.card().classes('w-full'):
@@ -420,11 +416,11 @@ def panel_overview():
                     ui.label('Platform stats').classes('text-xl font-bold')
                 with ui.row().classes('w-full'):
                     ui.echart({
-                        'yAxis': {'type': 'log'},
+                        'yAxis': {'type': 'log', 'splitLine': {'lineStyle': {'color': '#333' if dark_table() else '#eee'}}},
                         'xAxis': {'type': 'category', 'data': platform_names},
                         'tooltip': {'trigger': 'item'},
                         'series': {'type': 'bar', 'data': graph_data,
-                                   'label': {'normal': {'show': True, 'position': 'top'}}},
+                                   'label': {'normal': {'show': True, 'position': 'top', 'textStyle': {'color': 'white' if dark_table() else 'black'}}}},
                     })
 
         # Yearly stats
@@ -445,12 +441,14 @@ def panel_overview():
                         yearly_data.append(count)
                     b = res['Date'] < dt.datetime(dt.datetime.now().year-6, 1, 1)
                     yearly_data.append(sum(res.loc[b, 'Status'] == str(status)))
-                    graph_data.append({'type': 'bar', 'name': status, 'data': yearly_data, 'label': {'normal': {'show': True, 'position': 'right'}}})
+                    graph_data.append({'type': 'bar', 'name': status, 'data': yearly_data,
+                                       'label': {'normal': {'show': True, 'position': 'right',
+                                                            'textStyle': {'color': 'white' if dark_table() else 'black'}}}})
 
                 ui.echart({
-                    'xAxis': {'type': 'value'},
+                    'xAxis': {'type': 'value', 'splitLine': {'lineStyle': {'color': '#333' if dark_table() else '#eee'}}},
                     'yAxis': {'type': 'category', 'data': list_years, 'inverse': True},
-                    'legend': {'color': '#000'},
+                    'legend': {'show': True, 'textStyle': {'color': 'white' if dark_table() else 'black'}},
                     'tooltip': {'trigger': 'item'},
                     'series': graph_data,
                 }).classes('w-full h-[60vh]')
@@ -682,13 +680,14 @@ def display_table(table_data: pd.DataFrame, has_playthroughs=False, show_release
             ''')
 
 
-def display_aggrid(aggrid_data: pd.DataFrame, has_playthroughs=False, show_release_status=False, show_filter=True):
-    def dark_table():
-        if config.dark_mode is None:
-            return browser_dm
-        else:
-            return config.dark_mode
+def dark_table():
+    if config.dark_mode is None:
+        return browser_dm
+    else:
+        return config.dark_mode
 
+
+def display_aggrid(aggrid_data: pd.DataFrame, has_playthroughs=False, show_release_status=False, show_filter=True):
     # todo: header styling, doesn't align/center headers, though, fix for that still open
     #       line height, flex and align seem to be ignored?
     ui.add_head_html("""
