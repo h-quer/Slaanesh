@@ -1,4 +1,4 @@
-from nicegui import ui
+from nicegui import app, ui
 import datetime as dt
 import pandas as pd
 import numpy as np
@@ -8,6 +8,7 @@ import Slaanesh_importexport as imex
 import Slaanesh_IGDB as igdb
 
 dark = ui.dark_mode()
+browser_dm = None
 
 # general confirmation dialog
 with ui.dialog() as confirmation, ui.card():
@@ -27,12 +28,24 @@ def refresh_ui():
     panel_wishlist.refresh()
 
 
+async def handle_connection():
+    global browser_dm
+    browser_dm = await ui.run_javascript('''
+        if (Quasar.Dark.mode == "auto")
+            return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        else
+            return Quasar.Dark.mode;
+    ''')
+    refresh_ui()
+
+
 def display_ui():
     global dark
     dark.set_value(config.dark_mode)
     with ui.column().classes('w-full h-[90vh] flex-nowrap'):
         ui_header()
         tabs_lists()
+    app.on_connect(handle_connection)
     ui.run(title=config.gt_name, favicon=config.file_icon, reload=False)
 
 
@@ -437,7 +450,7 @@ def panel_overview():
                 ui.echart({
                     'xAxis': {'type': 'value'},
                     'yAxis': {'type': 'category', 'data': list_years, 'inverse': True},
-                    'legend': {},
+                    'legend': {'color': '#000'},
                     'tooltip': {'trigger': 'item'},
                     'series': graph_data,
                 }).classes('w-full h-[60vh]')
@@ -670,6 +683,12 @@ def display_table(table_data: pd.DataFrame, has_playthroughs=False, show_release
 
 
 def display_aggrid(aggrid_data: pd.DataFrame, has_playthroughs=False, show_release_status=False, show_filter=True):
+    def dark_table():
+        if config.dark_mode is None:
+            return browser_dm
+        else:
+            return config.dark_mode
+
     # todo: header styling, doesn't align/center headers, though, fix for that still open
     #       line height, flex and align seem to be ignored?
     ui.add_head_html("""
@@ -697,8 +716,8 @@ def display_aggrid(aggrid_data: pd.DataFrame, has_playthroughs=False, show_relea
             {'headerName': 'Name', 'field': 'Name', 'cellDataType': 'text', 'cellClass': 'justify-start items-center text-base font-medium', 'flex': 6}]
         if config.color_coding:
             columns.append({'headerName': 'Status', 'field': 'Status', 'cellDataType': 'text', 'flex': 2,
-                            'cellClassRules': {'bg-red-950' if dark.value else 'bg-red-50': f'{config.status_list_played_neg}.includes(x)',
-                                               'bg-green-950' if dark.value else 'bg-green-50': f'{config.status_list_played_pos}.includes(x)'}})
+                            'cellClassRules': {'bg-red-950' if dark_table() else 'bg-red-50': f'{config.status_list_played_neg}.includes(x)',
+                                               'bg-green-950' if dark_table() else 'bg-green-50': f'{config.status_list_played_pos}.includes(x)'}})
         else:
             columns.append({'headerName': 'Status', 'field': 'Status', 'cellDataType': 'text', 'flex': 2})
         if has_playthroughs:
@@ -721,7 +740,7 @@ def display_aggrid(aggrid_data: pd.DataFrame, has_playthroughs=False, show_relea
                            'cellClass': 'justify-center items-center text-base font-normal'}
         row_data = aggrid_data.to_dict('records')
         table = ui.aggrid({'columnDefs': columns, 'rowData': row_data, 'rowHeight': config.row_height, 'defaultColDef': default_col_def},
-                          theme=("alpine-dark" if dark.value else "alpine"),
+                          theme=("alpine-dark" if dark_table() else "alpine"),
                           html_columns=[0],
                           auto_size_columns=False).classes('w-11/12 h-full')
         table.on('cellClicked', lambda e: dialog_game_editor(e.args['data']['IGDB_ID']))
@@ -826,12 +845,6 @@ def action_add_unplayed_game(name: str, igdb_id: int, platform: str, status: str
 
 def action_add_played_game(name: str, igdb_id: int, platform: str, date: dt.datetime, status: str,
                            game_comment: str, playthrough_comment: str, dialog=None):
-    if igdb_id == "":
-        try:
-            igdb_id = igdb.get_id_to_name(name)
-        except Exception as e:
-            ui.notify('No ID supplied and name could not be resolved: ' + str(e))
-            return
     try:
         action_add_unplayed_game(name=name, igdb_id=igdb_id, platform=platform, status=status, comment=game_comment)
     except Exception as e:
