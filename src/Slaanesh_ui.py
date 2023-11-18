@@ -1,4 +1,4 @@
-from nicegui import ui
+from nicegui import app, ui
 import datetime as dt
 import pandas as pd
 import numpy as np
@@ -8,6 +8,7 @@ import Slaanesh_importexport as imex
 import Slaanesh_IGDB as igdb
 
 dark = ui.dark_mode()
+browser_dm = None
 
 # general confirmation dialog
 with ui.dialog() as confirmation, ui.card():
@@ -27,13 +28,20 @@ def refresh_ui():
     panel_wishlist.refresh()
 
 
+async def handle_connection():
+    global browser_dm
+    browser_dm = await ui.run_javascript('''return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;''')
+    refresh_ui()
+
+
 def display_ui():
     global dark
     dark.set_value(config.dark_mode)
     with ui.column().classes('w-full h-[90vh] flex-nowrap'):
         ui_header()
         tabs_lists()
-    ui.run(title='Slaanesh', favicon=config.file_icon, reload=False)
+    app.on_connect(handle_connection)
+    ui.run(title=config.gt_name, favicon=config.file_icon, reload=False)
 
 
 def ui_header():
@@ -43,7 +51,7 @@ def ui_header():
             ui.button('Add game with playthrough', on_click=lambda: dialog_add_played_game())
         with ui.row().classes('justify-center items-center'):
             ui.image(config.file_icon).classes('w-12')
-            ui.label('Slaanesh').classes('text-4xl')
+            ui.label(config.gt_name).classes('text-4xl')
         with ui.row().classes('justify-center items-center'):
             ui.button(icon='refresh', on_click=lambda: refresh_ui()).props('round')
             ui.button(icon='build', on_click=lambda: dialog_tools()).props('round')
@@ -364,22 +372,22 @@ def panel_overview():
                 ui.label('Stats by category').classes('text-xl font-bold')
             with ui.row().classes('justify-center w-full'):
                 ui.echart({
-                    'yAxis': {'type': 'value'},
+                    'yAxis': {'type': 'value', 'splitLine': {'lineStyle': {'color': '#333' if dark_table() else '#eee'}}},
                     'xAxis': {'type': 'category', 'data': ['Games', 'Playthroughs']},
                     'tooltip': {'trigger': 'item'},
                     'series': {'type': 'bar', 'data': [len(data.gl.index.to_list()), len(data.pt.index.to_list())],
-                               'label': {'normal': {'show': True, 'position': 'top'}}},
+                               'label': {'normal': {'show': True, 'position': 'top', 'textStyle': {'color': 'white' if dark_table() else 'black'}}}},
                 })
             with ui.row().classes('justify-center w-full'):
                 ui.echart({
-                    'yAxis': {'type': 'log'},
+                    'yAxis': {'type': 'log', 'splitLine': {'lineStyle': {'color': '#333' if dark_table() else '#eee'}}},
                     'xAxis': {'type': 'category', 'data': ['Playing', 'Played', 'Backlog', 'Wishlist']},
                     'tooltip': {'trigger': 'item'},
                     'series': {'type': 'bar', 'data': [sum(data.gl['Status'].isin(config.status_list_playing)),
                                                        sum(data.gl['Status'].isin(config.status_list_played)),
                                                        sum(data.gl['Status'].isin(config.status_list_backlog)),
                                                        sum(data.gl['Status'].isin(config.status_list_wishlist))],
-                               'label': {'normal': {'show': True, 'position': 'top'}}},
+                               'label': {'normal': {'show': True, 'position': 'top', 'textStyle': {'color': 'white' if dark_table() else 'black'}}}},
                 })
 
         with ui.column().classes('w-full'):
@@ -393,7 +401,8 @@ def panel_overview():
                     ui.label('Completion').classes('text-xl font-bold')
                 with ui.row().classes('w-full'):
                     ui.echart({'tooltip': {'trigger': 'item'},
-                               'series': {'type': 'pie', 'data': graph_data}})
+                               'series': {'type': 'pie', 'data': graph_data,
+                                          'label': {'show': True, 'textStyle': {'color': 'white' if dark_table() else 'black'}}}})
 
             # Platform stats
             with ui.card().classes('w-full'):
@@ -407,11 +416,11 @@ def panel_overview():
                     ui.label('Platform stats').classes('text-xl font-bold')
                 with ui.row().classes('w-full'):
                     ui.echart({
-                        'yAxis': {'type': 'log'},
+                        'yAxis': {'type': 'log', 'splitLine': {'lineStyle': {'color': '#333' if dark_table() else '#eee'}}},
                         'xAxis': {'type': 'category', 'data': platform_names},
                         'tooltip': {'trigger': 'item'},
                         'series': {'type': 'bar', 'data': graph_data,
-                                   'label': {'normal': {'show': True, 'position': 'top'}}},
+                                   'label': {'normal': {'show': True, 'position': 'top', 'textStyle': {'color': 'white' if dark_table() else 'black'}}}},
                     })
 
         # Yearly stats
@@ -432,12 +441,14 @@ def panel_overview():
                         yearly_data.append(count)
                     b = res['Date'] < dt.datetime(dt.datetime.now().year-6, 1, 1)
                     yearly_data.append(sum(res.loc[b, 'Status'] == str(status)))
-                    graph_data.append({'type': 'bar', 'name': status, 'data': yearly_data, 'label': {'normal': {'show': True, 'position': 'right'}}})
+                    graph_data.append({'type': 'bar', 'name': status, 'data': yearly_data,
+                                       'label': {'normal': {'show': True, 'position': 'right',
+                                                            'textStyle': {'color': 'white' if dark_table() else 'black'}}}})
 
                 ui.echart({
-                    'xAxis': {'type': 'value'},
+                    'xAxis': {'type': 'value', 'splitLine': {'lineStyle': {'color': '#333' if dark_table() else '#eee'}}},
                     'yAxis': {'type': 'category', 'data': list_years, 'inverse': True},
-                    'legend': {},
+                    'legend': {'show': True, 'textStyle': {'color': 'white' if dark_table() else 'black'}},
                     'tooltip': {'trigger': 'item'},
                     'series': graph_data,
                 }).classes('w-full h-[60vh]')
@@ -669,6 +680,13 @@ def display_table(table_data: pd.DataFrame, has_playthroughs=False, show_release
             ''')
 
 
+def dark_table():
+    if config.dark_mode is None:
+        return browser_dm
+    else:
+        return config.dark_mode
+
+
 def display_aggrid(aggrid_data: pd.DataFrame, has_playthroughs=False, show_release_status=False, show_filter=True):
     # todo: header styling, doesn't align/center headers, though, fix for that still open
     #       line height, flex and align seem to be ignored?
@@ -697,8 +715,8 @@ def display_aggrid(aggrid_data: pd.DataFrame, has_playthroughs=False, show_relea
             {'headerName': 'Name', 'field': 'Name', 'cellDataType': 'text', 'cellClass': 'justify-start items-center text-base font-medium', 'flex': 6}]
         if config.color_coding:
             columns.append({'headerName': 'Status', 'field': 'Status', 'cellDataType': 'text', 'flex': 2,
-                            'cellClassRules': {'bg-red-950' if dark.value else 'bg-red-50': f'{config.status_list_played_neg}.includes(x)',
-                                               'bg-green-950' if dark.value else 'bg-green-50': f'{config.status_list_played_pos}.includes(x)'}})
+                            'cellClassRules': {'bg-red-950' if dark_table() else 'bg-red-50': f'{config.status_list_played_neg}.includes(x)',
+                                               'bg-green-950' if dark_table() else 'bg-green-50': f'{config.status_list_played_pos}.includes(x)'}})
         else:
             columns.append({'headerName': 'Status', 'field': 'Status', 'cellDataType': 'text', 'flex': 2})
         if has_playthroughs:
@@ -721,7 +739,7 @@ def display_aggrid(aggrid_data: pd.DataFrame, has_playthroughs=False, show_relea
                            'cellClass': 'justify-center items-center text-base font-normal'}
         row_data = aggrid_data.to_dict('records')
         table = ui.aggrid({'columnDefs': columns, 'rowData': row_data, 'rowHeight': config.row_height, 'defaultColDef': default_col_def},
-                          theme=("alpine-dark" if dark.value else "alpine"),
+                          theme=("alpine-dark" if dark_table() else "alpine"),
                           html_columns=[0],
                           auto_size_columns=False).classes('w-11/12 h-full')
         table.on('cellClicked', lambda e: dialog_game_editor(e.args['data']['IGDB_ID']))
@@ -802,6 +820,7 @@ def action_refresh_acces_token():
 
 
 def action_update_igdb_data(igdb_id: int):
+    data.rem_cover(igdb_id)
     igdb.update_id_queue.put(igdb_id)
     ui.notify('IGDB data update queued')
 
@@ -826,12 +845,6 @@ def action_add_unplayed_game(name: str, igdb_id: int, platform: str, status: str
 
 def action_add_played_game(name: str, igdb_id: int, platform: str, date: dt.datetime, status: str,
                            game_comment: str, playthrough_comment: str, dialog=None):
-    if igdb_id == "":
-        try:
-            igdb_id = igdb.get_id_to_name(name)
-        except Exception as e:
-            ui.notify('No ID supplied and name could not be resolved: ' + str(e))
-            return
     try:
         action_add_unplayed_game(name=name, igdb_id=igdb_id, platform=platform, status=status, comment=game_comment)
     except Exception as e:

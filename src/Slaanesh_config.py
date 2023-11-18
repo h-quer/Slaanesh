@@ -1,6 +1,6 @@
 import configparser
 
-version = "0.3-beta"
+version = "0.5-beta"
 
 # local files
 game_list = r'/files/database/gamelist.feather'
@@ -31,6 +31,7 @@ token_timestamp = ""
 data_refresh_period = 90
 data_refresh_limit = 1
 
+gt_name = "Slaanesh"
 row_height = 96
 dark_mode = None
 cards_width = 24
@@ -67,7 +68,8 @@ def load_config():
         print('IGDB parameters not set')
         return
     if 'ui' in config:
-        global row_height, dark_mode, cards_width, color_coding
+        global row_height, dark_mode, cards_width, color_coding, gt_name
+        gt_name = config.get('ui', 'name', fallback=gt_name)
         row_height = config.getint('ui', 'row_height', fallback=row_height)
         dark_mode = config.getboolean('ui', 'dark_mode', fallback=dark_mode)
         cards_width = config.getint('ui', 'cards_width', fallback=cards_width)

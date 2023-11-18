@@ -103,16 +103,20 @@ def edit_game(index, platform=None, status=None, comment=None):
     write_dataframes()
 
 
+def rem_cover(igdb_id: int):
+    import os
+    try:
+        os.remove(config.path_covers + str(igdb_id) + '.png')
+    except Exception as e:
+        print('Removal of cover failed: ' + str(e))
+
+
 def rem_game(index_gl, index_pt=None):
     global gl, pt
     if (index_pt is not None) and (not index_pt.empty):
         pt.drop(index_pt, axis=0, inplace=True)
         pt.reset_index(drop=True, inplace=True)
-    try:
-        import os
-        os.remove(config.path_covers + str(gl.loc[index_gl, 'IGDB_ID']) + '.png')
-    except Exception as e:
-        print('Removal of cover failed: ' + str(e))
+    rem_cover(gl.loc[index_gl, 'IGDB_ID'])
     gl.drop(index_gl, axis=0, inplace=True)
     gl.reset_index(drop=True, inplace=True)
     write_dataframes()
