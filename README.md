@@ -9,7 +9,7 @@
 ## What is Slaanesh about?
 Slaanesh is a game tracker, allowing for keeping track of games played as well as maintaining a wishlist and backlog.
 
-## It's a beta release, is it safe to use?
+## It's a beta release, will it keep my data safe?
 Yes, absolutely!
 
 This is why Slaanesh offers a simple export functionality. Even if Slaanesh somehow corrupts its database, as long as you at least occasionally press the csv export button, all your data will be safe in a very easy to read and easily accessible text format. Just make sure that both the database and export directory are part of the 3-2-1 backup system you are using for your server already anyway. If you don't run a 3-2-1 backup system on your server, then you have bigger things to worry about than Slaanesh ;)
@@ -77,7 +77,6 @@ Folders to mount are:
 ## Scope and roadmap
 ### Roadmap
 Features I am currently slowly but actively working on (pull requests still very welcome for support on these!):
-* Improve dark mode support (overview page and aggrid style tables not ideal yet)
 * General UI improvements, especially considering responsiveness - there is probably a lot that can be done with asyncio which I have barely used so far
 * Build a native mode version for local (not self-hosted) usage
 * Make it render properly on mobile

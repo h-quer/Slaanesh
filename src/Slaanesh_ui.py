@@ -47,8 +47,7 @@ def display_ui():
 def ui_header():
     with ui.grid(columns=3).classes('w-full'):
         with ui.row().classes('justify-center items-center'):
-            ui.button('Add game', on_click=lambda: dialog_add_unplayed_game())
-            ui.button('Add game with playthrough', on_click=lambda: dialog_add_played_game())
+            ui.button(text='Add game', icon='add_circle', on_click=lambda: dialog_add_game())
         with ui.row().classes('justify-center items-center'):
             ui.image(config.file_icon).classes('w-12')
             ui.label(config.gt_name).classes('text-4xl')
@@ -825,80 +824,63 @@ def action_update_igdb_data(igdb_id: int):
     ui.notify('IGDB data update queued')
 
 
-def action_add_unplayed_game(name: str, igdb_id: int, platform: str, status: str, comment: str, dialog=None):
-    if igdb_id == "":
+def action_add_game(add_by_id: bool, igdb_id: int, name: str, status_g: str, platform: str, game_comment: str,
+                    add_pt: bool, status_pt: str, date: dt.datetime, playthrough_comment: str, dialog):
+    if not add_by_id:
         try:
             igdb_id = igdb.get_id_to_name(name)
         except Exception as e:
-            ui.notify('No ID supplied and name could not be resolved: ' + str(e))
+            ui.notify('Name could not be resolved: ' + str(e))
             return
     try:
-        data.add_game(name, igdb_id, platform, status, comment)
-        refresh_ui()
+        data.add_game(name=name, igdb_id=igdb_id, platform=platform, status=(status_pt if add_pt else status_g), comment=game_comment)
         ui.notify('Game added succesfully')
-        if dialog is not None:
-            dialog.delete()
-    except Exception as e:
-        ui.notify('Add game not succesful: ' + str(e))
-        return
-
-
-def action_add_played_game(name: str, igdb_id: int, platform: str, date: dt.datetime, status: str,
-                           game_comment: str, playthrough_comment: str, dialog=None):
-    try:
-        action_add_unplayed_game(name=name, igdb_id=igdb_id, platform=platform, status=status, comment=game_comment)
     except Exception as e:
         ui.notify('Adding game not successful: ' + str(e))
         return
-    try:
-        data.add_pt(igdb_id=igdb_id, date=date, comment=playthrough_comment)
-        refresh_ui()
-        ui.notify('Playthrough added succesfully')
-        if dialog is not None:
-            dialog.delete()
-    except Exception as e:
-        ui.notify('Add playthrough not succesful: ' + str(e))
+    if add_pt:
         try:
-            gl_index = data.gl.index[data.gl['IGDB_ID'] == igdb_id][0]
-            data.rem_game(index_gl=gl_index)
+            data.add_pt(igdb_id=igdb_id, date=date, comment=playthrough_comment)
+            ui.notify('Playthrough added succesfully')
         except Exception as e:
-            ui.notify('Game removal after unsuccessful attempt to add playthrough failed' + str(e))
+            ui.notify('Add playthrough not succesful: ' + str(e))
+            try:
+                gl_index = data.gl.index[data.gl['IGDB_ID'] == igdb_id][0]
+                data.rem_game(index_gl=gl_index)
+            except Exception as e:
+                ui.notify('Game removal after unsuccessful attempt to add playthrough failed' + str(e))
+    refresh_ui()
+    if dialog is not None:
+        dialog.delete()
 
 
-def dialog_add_played_game():
-    with ui.dialog(value=True) as dialog, ui.card():
-        with ui.grid(columns=2):
-            igdb_id = ui.input(label="IGDB ID")
-            name = ui.input(label="Name")
-            status = ui.select(config.status_list_played, label="Status", with_input=True, value=config.status_list_played[0])
-            platform = ui.select(config.platform_list, label="Platform", with_input=True, value=config.platform_list[0])
-        with ui.row():
-            with ui.input('Date') as date:
+def dialog_add_game():
+    with ui.dialog(value=True) as dialog_ag, ui.card():
+        with ui.row().classes('items-center flex-nowrap'):
+            add_by_id = ui.switch('Add by', value=True)
+            igdb_id = ui.input(label="IGDB ID").bind_visibility_from(add_by_id, 'value')
+            name = ui.input(label="Name").bind_visibility_from(add_by_id, 'value', backward=lambda x: not x)
+        with ui.row().classes('items-center flex-nowrap'):
+            status_g = ui.select(config.status_list_unplayed, label="Status", with_input=True, value=config.status_list_unplayed[0]).classes('w-1/4')
+            platform = ui.select(config.platform_list, label="Platform", with_input=True, value=config.platform_list[0]).classes('w-1/4')
+            game_comment = ui.input(label='Game comment').classes('w-5/12')
+        with ui.row().classes('items-center flex-nowrap'):
+            add_pt = ui.checkbox('Also add playthrough', value=False)
+            status_g.bind_visibility_from(add_pt, 'value', backward=lambda x: not x)
+        with ui.row().classes('items-center flex-nowrap').bind_visibility_from(add_pt, 'value'):
+            status_pt = ui.select(config.status_list_played, label="Status", with_input=True, value=config.status_list_played[0])
+            status_pt.bind_visibility_from(add_pt, 'value').classes('w-1/4')
+            with ui.input('Date', value=dt.date.today().strftime("%Y-%m-%d")).classes('w-1/4') as date:
                 with date.add_slot('append'):
                     ui.icon('edit_calendar').on('click', lambda: menu.open()).classes('cursor-pointer')
                 with ui.menu() as menu:
-                    ui.date().bind_value(date)
-            game_comment = ui.input(label='Game comment')
-            playthrough_comment = ui.input(label="Playthrough comment")
+                    ui.date().bind_value(date).bind_visibility_from(add_pt)
+            playthrough_comment = ui.input(label="Playthrough comment").classes('w-5/12')
         with ui.row():
-            ui.button('Add', on_click=lambda: action_add_played_game(
-                name.value, igdb_id.value, platform.value, dt.datetime.strptime(date.value, "%Y-%m-%d"), status.value,
-                game_comment.value, playthrough_comment.value, dialog))
-            ui.button('Cancel', on_click=lambda: dialog.delete())
-
-
-def dialog_add_unplayed_game():
-    with ui.dialog(value=True) as dialog, ui.card():
-        with ui.grid(columns=2):
-            igdb_id = ui.input(label='IGDB ID')
-            name = ui.input(label='Name')
-            status = ui.select(config.status_list_unplayed, label='Status', with_input=True, value=config.status_list_backlog[0])
-            platform = ui.select(config.platform_list, label='Platform', with_input=True, value=config.platform_list[0])
-            comment = ui.input(label='Comment')
-        with ui.row():
-            ui.button('Add', on_click=lambda: action_add_unplayed_game(
-                name.value, igdb_id.value, platform.value, status.value, comment.value, dialog))
-            ui.button('Cancel', on_click=lambda: dialog.delete())
+            ui.button('Add', on_click=lambda: action_add_game(
+                add_by_id.value, igdb_id.value, name.value, status_g.value, platform.value, game_comment.value, add_pt.value, status_pt.value,
+                dt.datetime.strptime(date.value, "%Y-%m-%d"), playthrough_comment.value, dialog_ag))
+            ui.button('Cancel', on_click=lambda: dialog_ag.delete())
 
 
 def action_check_database_consistency():
