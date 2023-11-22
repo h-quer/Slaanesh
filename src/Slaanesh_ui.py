@@ -847,7 +847,7 @@ def dialog_add_game():
                     ui.date().bind_value(date).bind_visibility_from(add_pt)
             playthrough_comment = ui.input(label="Playthrough comment").classes('w-5/12')
         with ui.row():
-            ui.button('Add', on_click=lambda dag=dialog_ag: action_add_game(
+            ui.button('Add', on_click=lambda: action_add_game(
                 add_by_id.value, igdb_id.value, name.value, status_g.value, platform.value, game_comment.value, add_pt.value, status_pt.value,
                 dt.datetime.strptime(date.value, "%Y-%m-%d"), playthrough_comment.value, dag))
             ui.button('Cancel', on_click=lambda: dialog_ag.delete())
@@ -879,6 +879,7 @@ def action_add_game(add_by_id: bool, igdb_id: int, name: str, status_g: str, pla
             except Exception as e:
                 ui.notify('Game removal after unsuccessful attempt to add playthrough failed' + str(e))
     if dialog_ag is not None:
+        dialog_ag.close()
         dialog_ag.delete()
     refresh_ui()
 
