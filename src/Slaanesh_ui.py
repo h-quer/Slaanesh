@@ -847,14 +847,14 @@ def dialog_add_game():
                     ui.date().bind_value(date).bind_visibility_from(add_pt)
             playthrough_comment = ui.input(label="Playthrough comment").classes('w-5/12')
         with ui.row():
-            ui.button('Add', on_click=lambda: action_add_game(
+            ui.button('Add', on_click=lambda dag=dialog_ag: action_add_game(
                 add_by_id.value, igdb_id.value, name.value, status_g.value, platform.value, game_comment.value, add_pt.value, status_pt.value,
-                dt.datetime.strptime(date.value, "%Y-%m-%d"), playthrough_comment.value, dialog_ag))
+                dt.datetime.strptime(date.value, "%Y-%m-%d"), playthrough_comment.value, dag))
             ui.button('Cancel', on_click=lambda: dialog_ag.delete())
 
 
 def action_add_game(add_by_id: bool, igdb_id: int, name: str, status_g: str, platform: str, game_comment: str,
-                    add_pt: bool, status_pt: str, date: dt.datetime, playthrough_comment: str, dialog):
+                    add_pt: bool, status_pt: str, date: dt.datetime, playthrough_comment: str, dialog_ag=None):
     if not add_by_id:
         try:
             igdb_id = igdb.get_id_to_name(name)
@@ -878,12 +878,9 @@ def action_add_game(add_by_id: bool, igdb_id: int, name: str, status_g: str, pla
                 data.rem_game(index_gl=gl_index)
             except Exception as e:
                 ui.notify('Game removal after unsuccessful attempt to add playthrough failed' + str(e))
-    try:
-        dialog.delete()
-    except Exception as e:
-        ui.notify('Removal of dialog failed: ' + str(e))
+    if dialog_ag is not None:
+        dialog_ag.delete()
     refresh_ui()
-
 
 
 def action_check_database_consistency():
