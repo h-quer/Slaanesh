@@ -47,10 +47,10 @@ def display_ui():
 def ui_header():
     with ui.grid(columns=3).classes('w-full'):
         with ui.row().classes('justify-center items-center'):
-            ui.button(text='Add game', icon='add_circle', on_click=lambda: dialog_add_game())
-        with ui.row().classes('justify-center items-center'):
             ui.image(config.file_icon).classes('w-12')
             ui.label(config.gt_name).classes('text-4xl')
+        with ui.row().classes('justify-center items-center'):
+            ui.button(text='Add game', icon='add_circle', on_click=lambda: dialog_add_game())
         with ui.row().classes('justify-center items-center'):
             ui.button(icon='refresh', on_click=lambda: refresh_ui()).props('round')
             ui.button(icon='build', on_click=lambda: dialog_tools()).props('round')
@@ -824,36 +824,6 @@ def action_update_igdb_data(igdb_id: int):
     ui.notify('IGDB data update queued')
 
 
-def action_add_game(add_by_id: bool, igdb_id: int, name: str, status_g: str, platform: str, game_comment: str,
-                    add_pt: bool, status_pt: str, date: dt.datetime, playthrough_comment: str, dialog):
-    if not add_by_id:
-        try:
-            igdb_id = igdb.get_id_to_name(name)
-        except Exception as e:
-            ui.notify('Name could not be resolved: ' + str(e))
-            return
-    try:
-        data.add_game(name=name, igdb_id=igdb_id, platform=platform, status=(status_pt if add_pt else status_g), comment=game_comment)
-        ui.notify('Game added succesfully')
-    except Exception as e:
-        ui.notify('Adding game not successful: ' + str(e))
-        return
-    if add_pt:
-        try:
-            data.add_pt(igdb_id=igdb_id, date=date, comment=playthrough_comment)
-            ui.notify('Playthrough added succesfully')
-        except Exception as e:
-            ui.notify('Add playthrough not succesful: ' + str(e))
-            try:
-                gl_index = data.gl.index[data.gl['IGDB_ID'] == igdb_id][0]
-                data.rem_game(index_gl=gl_index)
-            except Exception as e:
-                ui.notify('Game removal after unsuccessful attempt to add playthrough failed' + str(e))
-    refresh_ui()
-    if dialog is not None:
-        dialog.delete()
-
-
 def dialog_add_game():
     with ui.dialog(value=True) as dialog_ag, ui.card():
         with ui.row().classes('items-center flex-nowrap'):
@@ -881,6 +851,39 @@ def dialog_add_game():
                 add_by_id.value, igdb_id.value, name.value, status_g.value, platform.value, game_comment.value, add_pt.value, status_pt.value,
                 dt.datetime.strptime(date.value, "%Y-%m-%d"), playthrough_comment.value, dialog_ag))
             ui.button('Cancel', on_click=lambda: dialog_ag.delete())
+
+
+def action_add_game(add_by_id: bool, igdb_id: int, name: str, status_g: str, platform: str, game_comment: str,
+                    add_pt: bool, status_pt: str, date: dt.datetime, playthrough_comment: str, dialog):
+    if not add_by_id:
+        try:
+            igdb_id = igdb.get_id_to_name(name)
+        except Exception as e:
+            ui.notify('Name could not be resolved: ' + str(e))
+            return
+    try:
+        data.add_game(name=name, igdb_id=igdb_id, platform=platform, status=(status_pt if add_pt else status_g), comment=game_comment)
+        ui.notify('Game added succesfully')
+    except Exception as e:
+        ui.notify('Adding game not successful: ' + str(e))
+        return
+    if add_pt:
+        try:
+            data.add_pt(igdb_id=igdb_id, date=date, comment=playthrough_comment)
+            ui.notify('Playthrough added succesfully')
+        except Exception as e:
+            ui.notify('Add playthrough not succesful: ' + str(e))
+            try:
+                gl_index = data.gl.index[data.gl['IGDB_ID'] == igdb_id][0]
+                data.rem_game(index_gl=gl_index)
+            except Exception as e:
+                ui.notify('Game removal after unsuccessful attempt to add playthrough failed' + str(e))
+    try:
+        dialog.delete()
+    except Exception as e:
+        ui.notify('Removal of dialog failed: ' + str(e))
+    refresh_ui()
+
 
 
 def action_check_database_consistency():

@@ -19,7 +19,6 @@ def load_dataframes():
         print(str(e))
 
 
-# execute allows for temporarily turning off automatic writes, manually writing possible via UI
 def write_dataframes():
     global gl, pt
     gl.to_feather(config.game_list)
