@@ -18,13 +18,16 @@ With that in mind, this still absolutely is a beta release. Not a "I've been usi
 
 ## Screenshots
 <p align="center">
-  <img src="/images/playing.png" alt="playing" width="48%"/>
-  <img src="/images/backlog.png" alt="backlog" width="48%"/>
-  <img src="/images/dark_mode.png" alt="stats page" width="48%"/>
-  <img src="/images/game_editor.png" alt="game editor" width="48%"/>
-  <img src="/images/add_game.png" alt="add game dialog" width="48%"/>
-  <img src="/images/settings.png" alt="stats page" width="48%"/>
-  <img src="/images/overview.png" alt="stats page" width="48%"/>
+  <img src="/images/light_playing.png" alt="playing" width="48%"/>
+  <img src="/images/dark_playing.png" alt="playing" width="48%"/>
+  <img src="/images/dark_game_editor.png" alt="game editor" width="48%"/>
+  <img src="/images/light_game_editor.png" alt="game editor" width="48%"/>
+  <img src="/images/light_played.png" alt="played" width="48%"/>
+  <img src="/images/dark_played.png" alt="played" width="48%"/>
+  <img src="/images/dark_add_game.png" alt="add game" width="48%"/>
+  <img src="/images/light_settings.png" alt="settings" width="48%"/>
+  <img src="/images/light_overview.png" alt="overview" width="48%"/>
+  <img src="/images/dark_overview.png" alt="overview" width="48%"/>
 </p>
 
 ## Setup and installation
