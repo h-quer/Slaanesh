@@ -497,8 +497,8 @@ def dialog_game_editor(igdb_id: int):
 
                         with ui.dialog(value=True) as d_editor_g, ui.card():
                             d_status = ui.select(config.status_list_played if has_pt else config.status_list_unplayed,
-                                                 label='Status', with_input=True, value=game_info['Status'][game_index])
-                            d_platform = ui.select(config.platform_list, label='Platform', with_input=True, value=game_info['Platform'][game_index])
+                                                 label='Status', value=game_info['Status'][game_index])
+                            d_platform = ui.select(config.platform_list, label='Platform', value=game_info['Platform'][game_index])
                             d_comment = ui.input(label='Game comment', value=game_info['Game_comment'][game_index])
                             with ui.row():
                                 ui.button('Commit', on_click=lambda: action(d_status.value, d_platform.value, d_comment.value, d_editor_g))
@@ -545,7 +545,7 @@ def dialog_game_editor(igdb_id: int):
                     except Exception as e:
                         ui.notify('Add playthrough not successful: ' + str(e))
 
-                pt_status = ui.select(config.status_list_played, label='Status', with_input=True,
+                pt_status = ui.select(config.status_list_played, label='Status',
                                       value=game_info['Status'][game_index] if has_pt else config.status_list_played[0]).classes('w-1/4 flex-1')
                 with ui.input('Date', value=dt.date.today().strftime("%Y-%m-%d")).classes('w-1/4 flex-1') as pt_date:
                     with pt_date.add_slot('append'):
@@ -831,14 +831,14 @@ async def action_add_game():
             d_igdb_id = ui.input(label="IGDB ID").bind_visibility_from(d_add_by_id, 'value')
             d_name = ui.input(label="Name").bind_visibility_from(d_add_by_id, 'value', backward=lambda x: not x)
         with ui.row().classes('items-center flex-nowrap'):
-            d_status_g = ui.select(config.status_list_unplayed, label="Status", with_input=True, value=config.status_list_unplayed[0]).classes('w-1/4')
-            d_platform = ui.select(config.platform_list, label="Platform", with_input=True, value=config.platform_list[0]).classes('w-1/4')
+            d_status_g = ui.select(config.status_list_unplayed, label="Status", value=config.status_list_unplayed[0]).classes('w-1/4')
+            d_platform = ui.select(config.platform_list, label="Platform", value=config.platform_list[0]).classes('w-1/4')
             d_game_comment = ui.input(label='Game comment').classes('w-5/12')
         with ui.row().classes('items-center flex-nowrap'):
             d_add_pt = ui.checkbox('Also add playthrough', value=False)
             d_status_g.bind_visibility_from(d_add_pt, 'value', backward=lambda x: not x)
         with ui.row().classes('items-center flex-nowrap').bind_visibility_from(d_add_pt, 'value'):
-            d_status_pt = ui.select(config.status_list_played, label="Status", with_input=True, value=config.status_list_played[0])
+            d_status_pt = ui.select(config.status_list_played, label="Status", value=config.status_list_played[0])
             d_status_pt.bind_visibility_from(d_add_pt, 'value').classes('w-1/4')
             with ui.input('Date', value=dt.date.today().strftime("%Y-%m-%d")).classes('w-1/4') as d_date:
                 with d_date.add_slot('append'):
