@@ -19,6 +19,7 @@ def load_dataframes():
         print(str(e))
 
 
+# execute allows for temporarily turning off automatic writes, manually writing possible via UI
 def write_dataframes():
     global gl, pt
     gl.to_feather(config.game_list)
@@ -88,6 +89,7 @@ def add_game(name: str, igdb_id: int, platform: str, status: str, comment: str):
     gl.loc[len(gl.index)] = ["", int(igdb_id), name, platform, status,
                              dt.datetime(1900, 1, 1, 1, 1, 1, 1), int(0), int(0), int(0), "", comment]
     igdb.update_id_queue.put(int(igdb_id))
+    igdb.start_update_daemon()
     write_dataframes()
 
 
