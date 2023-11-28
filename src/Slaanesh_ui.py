@@ -803,6 +803,7 @@ def action_update_api_data():
     tmp = data.gl['IGDB_ID'].tolist()
     for x in tmp:
         igdb.update_id_queue.put(x)
+    igdb.start_update_daemon()
     ui.notify('API data update queued')
 
 
@@ -810,6 +811,7 @@ def action_update_release_dates():
     relevance = (data.gl['Release_date'] == 0) | (data.gl['Status'].isin(config.status_list_wishlist))
     for x in data.gl[relevance]['IGDB_ID'].tolist():
         igdb.update_id_queue.put(x)
+    igdb.start_update_daemon()
     ui.notify('Update for wishlist and all unknown release dates queued')
 
 
@@ -821,6 +823,7 @@ def action_refresh_acces_token():
 def action_update_igdb_data(igdb_id: int):
     data.rem_cover(igdb_id)
     igdb.update_id_queue.put(igdb_id)
+    igdb.start_update_daemon()
     ui.notify('IGDB data update queued')
 
 
