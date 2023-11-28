@@ -20,12 +20,15 @@ def init_api():
     global igdb
     igdb = IGDBWrapper(config.client_id, config.auth_token)
     check_igdb_token()
+
+
+def start_update_daemon():
     threading.Thread(target=igdb_update_daemon, daemon=True).start()
 
 
 def igdb_update_daemon():
-    while True:
-        time.sleep(5)
+    while not update_id_queue.empty():
+        time.sleep(0.5)
         id_list = list()
         i = 0
         while (i < request_limit - 5) and (not update_id_queue.empty()):
@@ -133,6 +136,7 @@ def process_api_data(api_data) -> pd.DataFrame:
 def get_id_to_name(name: str) -> int:
     # time.sleep(0.5)
     # todo: add to background queue, then also add sleep to prevent API timeouts
+    #       alternatively, use asyncio
     byte_array = igdb.api_request(
         'games',
         f"""fields name, id; limit 1; where name = "{name}";"""
