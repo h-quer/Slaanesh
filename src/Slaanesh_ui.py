@@ -37,7 +37,7 @@ async def handle_connection():
 def display_ui():
     global dark
     dark.set_value(config.dark_mode)
-    with ui.column().classes('w-full h-[90vh] flex-nowrap'):
+    with ui.column().classes('w-full h-[95vh] flex-nowrap'):
         ui_header()
         tabs_lists()
     app.on_connect(handle_connection)
@@ -285,24 +285,23 @@ def dialog_about():
 
 
 def tabs_lists():
-    with ui.row().classes('w-full h-full justify-center'):
-        with ui.tabs().classes('w-full') as tabs:
-            tab_ov = ui.tab('Overview').classes('w-1/6')
-            tab_pl = ui.tab('Playing').classes('w-1/6')
-            tab_pt = ui.tab('Played').classes('w-1/6')
-            tab_bl = ui.tab('Backlog').classes('w-1/6')
-            tab_wl = ui.tab('Wishlist').classes('w-1/6')
-        with ui.tab_panels(tabs, value=tab_pt).classes('w-full h-full'):
-            with ui.tab_panel(tab_ov):
-                panel_overview()
-            with ui.tab_panel(tab_pl):
-                panel_playing()
-            with ui.tab_panel(tab_pt):
-                panel_played()
-            with ui.tab_panel(tab_bl):
-                panel_backlog()
-            with ui.tab_panel(tab_wl):
-                panel_wishlist()
+    with ui.tabs().classes('w-5/6 self-center') as tabs:
+        tab_ov = ui.tab('Overview').classes('grow')
+        tab_pl = ui.tab('Playing').classes('grow')
+        tab_pt = ui.tab('Played').classes('grow')
+        tab_bl = ui.tab('Backlog').classes('grow')
+        tab_wl = ui.tab('Wishlist').classes('grow')
+    with ui.tab_panels(tabs, value=tab_pt).classes('w-full h-full'):
+        with ui.tab_panel(tab_ov):
+            panel_overview()
+        with ui.tab_panel(tab_pl):
+            panel_playing()
+        with ui.tab_panel(tab_pt):
+            panel_played()
+        with ui.tab_panel(tab_bl):
+            panel_backlog()
+        with ui.tab_panel(tab_wl):
+            panel_wishlist()
 
 
 @ui.refreshable
@@ -467,7 +466,7 @@ def dialog_game_editor(igdb_id: int):
 
     # game info section
     # with ui.dialog(value=True).props('persistent') as game_editor, ui.card().classes('w-1/3 h-3/4 items-center'):
-    with ui.dialog(value=True).props('persistent'), ui.card().classes('w-1/3 h-3/4 items-center'):
+    with ui.dialog(value=True).props('persistent'), ui.card().classes('w-1/2 min-w-[32rem] h-3/4 items-center'):
         with ui.column().classes('w-full'):
             with ui.row().classes('w-full justify-between'):
                 ui.label('')
@@ -687,8 +686,22 @@ def dark_table():
 
 
 def display_aggrid(aggrid_data: pd.DataFrame, has_playthroughs=False, show_release_status=False, show_filter=True):
-    # todo: header styling, doesn't align/center headers, though, fix for that still open
-    #       line height, flex and align seem to be ignored?
+    dark_res = dark_table()
+
+    def color_badges(val):
+        if val in config.status_list_played_pos:
+            if dark_res:
+                return """<span class="bg-green-900 px-3 py-2 rounded">""" + val + """</span>"""
+            else:
+                return """<span class="bg-green-100 px-3 py-2 rounded">""" + val + """</span>"""
+        if val in config.status_list_played_neg:
+            if dark_res:
+                return """<span class="bg-red-900 px-3 py-2 rounded">""" + val + """</span>"""
+            else:
+                return """<span class="bg-red-100 px-3 py-2 rounded">""" + val + """</span>"""
+        return val
+
+    # todo: doesn't align/center headers - line height, flex and align seem to be ignored?
     ui.add_head_html("""
         <style>
             .ag-header-cell {
@@ -706,18 +719,15 @@ def display_aggrid(aggrid_data: pd.DataFrame, has_playthroughs=False, show_relea
         aggrid_data['StrDate'] = aggrid_data['Date'].apply(lambda x: x.strftime('%Y-%m-%d'))
         aggrid_data['Comment'] = aggrid_data['Playthrough_comment'].replace({None: " "}) + " " + aggrid_data['Game_comment'].replace({None: " "})
         aggrid_data.drop(['Game_comment', 'Playthrough_comment', 'Date'], axis=1, inplace=True)
+    if config.color_coding:
+        aggrid_data['Status'] = aggrid_data.apply(lambda x: color_badges(x['Status']), axis=1)
     aggrid_data.drop(['IGDB_queried', 'Release_date', 'Steam_ID', 'IGDB_status', 'IGDB_url'], axis=1, inplace=True)
     with ui.row().classes('justify-center w-full h-full'):
         columns = [
             {'headerName': '', 'field': 'IGDB_image', 'cellDataType': 'object', 'maxWidth': 128, 'cellClass': 'justify-center', 'filter': False},
             {'headerName': 'ID', 'field': 'IGDB_id', 'hide': True},
-            {'headerName': 'Name', 'field': 'Name', 'cellDataType': 'text', 'cellClass': 'justify-start items-center text-base font-medium', 'flex': 6}]
-        if config.color_coding:
-            columns.append({'headerName': 'Status', 'field': 'Status', 'cellDataType': 'text', 'flex': 2,
-                            'cellClassRules': {'bg-red-950' if dark_table() else 'bg-red-50': f'{config.status_list_played_neg}.includes(x)',
-                                               'bg-green-950' if dark_table() else 'bg-green-50': f'{config.status_list_played_pos}.includes(x)'}})
-        else:
-            columns.append({'headerName': 'Status', 'field': 'Status', 'cellDataType': 'text', 'flex': 2})
+            {'headerName': 'Name', 'field': 'Name', 'cellDataType': 'text', 'cellClass': 'justify-start items-center text-base font-medium', 'flex': 6},
+            {'headerName': 'Status', 'field': 'Status', 'cellDataType': 'text', 'flex': 2}]
         if has_playthroughs:
             columns.append({'headerName': 'Date', 'field': 'StrDate', 'cellDataType': 'dateString', 'flex': 2})
         if show_release_status:
@@ -738,8 +748,8 @@ def display_aggrid(aggrid_data: pd.DataFrame, has_playthroughs=False, show_relea
                            'cellClass': 'justify-center items-center text-base font-normal'}
         row_data = aggrid_data.to_dict('records')
         table = ui.aggrid({'columnDefs': columns, 'rowData': row_data, 'rowHeight': config.row_height, 'defaultColDef': default_col_def},
-                          theme=("alpine-dark" if dark_table() else "alpine"),
-                          html_columns=[0],
+                          theme=("alpine-dark" if dark_res else "alpine"),
+                          html_columns=[0, 3],
                           auto_size_columns=False).classes('w-11/12 h-full')
         table.on('cellClicked', lambda e: dialog_game_editor(e.args['data']['IGDB_ID']))
 
