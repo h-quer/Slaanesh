@@ -668,31 +668,6 @@ def display_cards(table_data: pd.DataFrame, has_playthroughs=False, show_release
         table.bind_filter(table_filter, 'value')
 
 
-def old_display_cards(card_data: pd.DataFrame, has_playthroughs=False, show_release_status=False, show_filter=False):
-    if show_filter:
-        print('filter for cards not yet implemented')
-    with ui.row().classes('w-full h-0 justify-center'):
-        for index, row in card_data.iterrows():
-            with ui.card().classes(f'w-[{config.card_height * 0.75}px]').on('click', lambda x=row['IGDB_ID']: dialog_game_editor(igdb_id=x)):
-                with ui.row().classes('self-center'):
-                    ui.label(row['Name']).classes('text-xl font-bold')
-                with ui.row().classes('w-full'):
-                    with ui.column().classes('w-8/12 h-full'):
-                        ui.image(row['IGDB_image'])
-                    with ui.column().classes('w-3/12 h-full items-center self-center'):
-                        ui.label(row['Status']).classes('text-lg')
-                        if has_playthroughs:
-                            ui.label(row['Date'].strftime("%Y-%m-%d")).classes('text-lg')
-                        if show_release_status:
-                            ui.label(get_release_status(
-                                row['Release_date'], row['IGDB_status'], dt.date.today())).classes('text-lg')
-                        ui.label(row['Platform']).classes('text-lg')
-                        if has_playthroughs:
-                            ui.label(row['Playthrough_comment'] + "\n" + row['Game_comment'])
-                        else:
-                            ui.label(row['Game_comment'])
-
-
 def display_table(aggrid_data: pd.DataFrame, has_playthroughs=False, show_release_status=False, show_filter=True):
     def color_badges(val):
         if val in config.status_list_played_pos:
@@ -750,64 +725,6 @@ def display_table(aggrid_data: pd.DataFrame, has_playthroughs=False, show_releas
                       html_columns=[0, 3],
                       auto_size_columns=False).classes('w-11/12 h-full self-center')
     table.on('cellClicked', lambda e: dialog_game_editor(e.args['data']['IGDB_ID']))
-
-
-def old_display_table(table_data: pd.DataFrame, has_playthroughs=False, show_release_status=False, show_filter=True):
-    if show_release_status:
-        today = dt.date.today()
-        table_data['Release_status'] = table_data.apply(lambda x: get_release_status(x['Release_date'], x['IGDB_status'], today), axis=1)
-    if has_playthroughs:
-        table_data['StrDate'] = table_data['Date'].apply(lambda x: x.strftime('%Y-%m-%d'))
-        table_data['Comment'] = table_data['Playthrough_comment'].replace({None: " "}) + " " + table_data['Game_comment'].replace({None: " "})
-        table_data.drop(['Game_comment', 'Playthrough_comment', 'Date'], axis=1, inplace=True)
-    table_data.drop(['IGDB_queried', 'Release_date', 'Steam_ID', 'IGDB_status', 'IGDB_url'], axis=1, inplace=True)
-
-    columns = [{'name': 'Image', 'label': '', 'field': 'IGDB_image', 'align': 'center'},
-               {'name': 'Name', 'label': 'Name', 'field': 'Name', 'align': 'left',
-                'sortable': True, 'headerStyle': 'font-size: 1.25rem; font-weight: 600', 'style': 'font-size: 1rem;'},
-               {'name': 'Status', 'label': 'Status', 'field': 'Status', 'align': 'center',
-                'sortable': True, 'headerStyle': 'font-size: 1.25rem; font-weight: 600', 'style': 'font-size: 1rem;'}]
-    if has_playthroughs:
-        columns.append({'name': 'Date', 'label': 'Date', 'field': 'StrDate', 'align': 'center',
-                        'sortable': True, 'headerStyle': 'font-size: 1.25rem; font-weight: 600', 'style': 'font-size: 1rem;'})
-    if show_release_status:
-        columns.append({'name': 'Release Status', 'label': 'Release Status', 'field': 'Release_status', 'align': 'center',
-                        'sortable': True, 'headerStyle': 'font-size: 1.25rem; font-weight: 600', 'style': 'font-size: 1rem;'})
-    columns.append({'name': 'Platform', 'label': 'Platform', 'field': 'Platform', 'align': 'center',
-                    'sortable': True, 'headerStyle': 'font-size: 1.25rem; font-weight: 600', 'style': 'font-size: 1rem;'})
-    if has_playthroughs:
-        columns.append({'name': 'Comment', 'label': 'Comment', 'field': 'Comment', 'align': 'left',
-                        'sortable': True, 'headerStyle': 'font-size: 1.25rem; font-weight: 600', 'style': 'font-size: 1rem;'})
-    else:
-        columns.append({'name': 'Game_comment', 'label': 'Comment', 'field': 'Game_comment', 'align': 'left',
-                        'sortable': True, 'headerStyle': 'font-size: 1.25rem; font-weight: 600', 'style': 'font-size: 1rem;'})
-    rows = table_data.to_dict('records')
-    with ui.row().classes('justify-center w-full h-full'):
-        table = ui.table(columns=columns, rows=rows, pagination=40).classes('w-11/12 h-full')
-
-        table.on('rowClick', lambda x: dialog_game_editor(x.args[1]['IGDB_ID']))
-        if show_filter:
-            with table.add_slot('top-right'):
-                table_filter = ui.input(label='Search')
-            table.bind_filter(table_filter, 'value')
-
-        if config.color_coding:
-            table.add_slot('body-cell-Status', f'''
-                <q-td v-if="{config.status_list_played_neg}.includes(props.value)" key="Status" :props="props">
-                    <q-badge color='red-10'><p style='font-size: 1rem;'>{{{{ props.value }}}}</p></q-badge>
-                </q-td>
-                <q-td v-else-if="{config.status_list_played_pos}.includes(props.value)" key="Status" :props="props">
-                    <q-badge color='green-10'><p style='font-size: 1rem;'>{{{{ props.value }}}}</p></q-badge>
-                </q-td>
-                <q-td v-else key="Status" :props="props">
-                    <p style='font-size: 1rem;'>{{{{ props.value }}}}</p>
-                </q-td>
-            ''')
-        table.add_slot('body-cell-Image', f'''
-            <q-td :props="props">
-                <img :src="props.row.IGDB_image" style="width: {config.row_height*0.75}px;">
-            </q-td>
-        ''')
 
 
 def get_release_status(timestamp: int, status: int, today: dt.date) -> str:
