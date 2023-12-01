@@ -40,12 +40,12 @@ card_height = 384
 display_types = ['cards', 'table', 'alt_table']
 type_playing = 'cards'
 type_played = 'table'
-type_backlog = 'table'
+type_backlog = 'cards'
 type_wishlist = 'table'
-filter_playing = False
+filter_playing = True
 filter_played = True
-filter_backlog = True
-filter_wishlist = True
+filter_backlog = False
+filter_wishlist = False
 
 config = configparser.ConfigParser(allow_no_value=True)
 config.optionxform = str
