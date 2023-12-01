@@ -597,6 +597,13 @@ def dialog_game_editor(igdb_id: int):
                             ui.button(icon='remove_circle', on_click=lambda x=pt: remove_pt(x, game_index)).props('round color=red-10 size=sm')
 
 
+def dark_table():
+    if config.dark_mode is None:
+        return browser_dm
+    else:
+        return config.dark_mode
+
+
 def display_cards(table_data: pd.DataFrame, has_playthroughs=False, show_release_status=False, show_filter=True):
     if show_release_status:
         today = dt.date.today()
@@ -633,7 +640,12 @@ def display_cards(table_data: pd.DataFrame, has_playthroughs=False, show_release
                         <p align="center"><img class="max-h-[{config.card_height-80}px]" :src="props.row.IGDB_image"/></p>
                     </div>
                     <div class="text-center place-self-center leading-loose text-base w-4/12 px-4">
-                        <p>{{{{ props.row.Status }}}}</p>
+                        {f'''<span :class="{config.status_list_played_pos}.includes(props.row.Status)
+                            ? 'bg-green-{'900' if dark_table() else '100'} text-green-{'100' if dark_table() else '900'} px-2 py-1 rounded'
+                            : 'bg-red-{'900' if dark_table() else '100'} text-red-{'100' if dark_table() else '900'} px-2 py-1 rounded'">
+                            ''' if config.color_coding else "<p>"}
+                        {{{{ props.row.Status }}}}
+                        {f'''</span>''' if config.color_coding else "</p>"}
                         <p>{{{{ props.row.Platform }}}}</p>
                         {r'''<p>{{ props.row.StrDate }}</p>''' if has_playthroughs else ""}
                         {r'''<p>{{ props.row.Release_status }}</p>''' if show_release_status else ""}
@@ -676,24 +688,15 @@ def old_display_cards(card_data: pd.DataFrame, has_playthroughs=False, show_rele
                             ui.label(row['Game_comment'])
 
 
-def dark_table():
-    if config.dark_mode is None:
-        return browser_dm
-    else:
-        return config.dark_mode
-
-
 def display_table(aggrid_data: pd.DataFrame, has_playthroughs=False, show_release_status=False, show_filter=True):
-    dark_res = dark_table()
-
     def color_badges(val):
         if val in config.status_list_played_pos:
-            if dark_res:
+            if dark_table():
                 return """<span class="bg-green-900 text-green-100 px-3 py-2 rounded">""" + val + """</span>"""
             else:
                 return """<span class="bg-green-100 text-green-900 px-3 py-2 rounded">""" + val + """</span>"""
         if val in config.status_list_played_neg:
-            if dark_res:
+            if dark_table():
                 return """<span class="bg-red-900 text-red-100 px-3 py-2 rounded">""" + val + """</span>"""
             else:
                 return """<span class="bg-red-100 text-red-900 px-3 py-2 rounded">""" + val + """</span>"""
@@ -738,7 +741,7 @@ def display_table(aggrid_data: pd.DataFrame, has_playthroughs=False, show_releas
                        'headerClass': 'text-lg font-bold'}
     row_data = aggrid_data.to_dict('records')
     table = ui.aggrid({'columnDefs': columns, 'rowData': row_data, 'rowHeight': config.row_height, 'defaultColDef': default_col_def},
-                      theme=("alpine-dark" if dark_res else "alpine"),
+                      theme=("alpine-dark" if dark_table() else "alpine"),
                       html_columns=[0, 3],
                       auto_size_columns=False).classes('w-11/12 h-full self-center')
     table.on('cellClicked', lambda e: dialog_game_editor(e.args['data']['IGDB_ID']))
