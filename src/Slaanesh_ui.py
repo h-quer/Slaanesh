@@ -640,10 +640,15 @@ def display_cards(table_data: pd.DataFrame, has_playthroughs=False, show_release
                         <p align="center"><img class="max-h-[{config.card_height-80}px]" :src="props.row.IGDB_image"/></p>
                     </div>
                     <div class="text-center place-self-center leading-loose text-base w-4/12 px-4">
-                        {f'''<span :class="{config.status_list_played_pos}.includes(props.row.Status)
-                            ? 'bg-green-{'900' if dark_table() else '100'} text-green-{'100' if dark_table() else '900'} px-2 py-1 rounded'
-                            : 'bg-red-{'900' if dark_table() else '100'} text-red-{'100' if dark_table() else '900'} px-2 py-1 rounded'">
-                            ''' if config.color_coding else "<p>"}
+                        {f'''<span :class="{config.status_list_played_neg}.includes(props.row.Status)
+                            {r'''
+                                ? 'bg-red-900 text-red-100 px-2 py-1 rounded'
+                                : 'bg-green-900 text-green-100 px-2 py-1 rounded'">
+                                ''' if dark_table() else r'''
+                                ? 'bg-red-100 text-red-900 px-2 py-1 rounded'
+                                : 'bg-green-100 text-green-900 px-2 py-1 rounded'">
+                            '''}
+                        ''' if config.color_coding else "<p>"}
                         {{{{ props.row.Status }}}}
                         {f'''</span>''' if config.color_coding else "</p>"}
                         <p>{{{{ props.row.Platform }}}}</p>
