@@ -314,7 +314,7 @@ def panel_playing():
         case 'cards': x = display_cards
         case 'table': x = display_table
         case _: x = display_cards
-    x(res, has_playthroughs=False, show_release_status=False, show_filter=config.filter_playing)
+    x(res, has_playthroughs=False, show_release_status=False, show_filter=config.filter_playing, color_coding=False)
 
 
 @ui.refreshable
@@ -327,7 +327,7 @@ def panel_played():
         case 'cards': x = display_cards
         case 'table': x = display_table
         case _: x = display_table
-    x(res, has_playthroughs=True, show_release_status=False, show_filter=config.filter_played)
+    x(res, has_playthroughs=True, show_release_status=False, show_filter=config.filter_played, color_coding=config.color_coding)
 
 
 @ui.refreshable
@@ -340,7 +340,7 @@ def panel_backlog():
         case 'cards': x = display_cards
         case 'table': x = display_table
         case _: x = display_table
-    x(res, has_playthroughs=False, show_release_status=False, show_filter=config.filter_backlog)
+    x(res, has_playthroughs=False, show_release_status=False, show_filter=config.filter_backlog, color_coding=False)
 
 
 @ui.refreshable
@@ -353,7 +353,7 @@ def panel_wishlist():
         case 'cards': x = display_cards
         case 'table': x = display_table
         case _: x = display_table
-    x(res, has_playthroughs=False, show_release_status=True, show_filter=config.filter_wishlist)
+    x(res, has_playthroughs=False, show_release_status=True, show_filter=config.filter_wishlist, color_coding=False)
 
 
 @ui.refreshable
@@ -604,7 +604,7 @@ def dark_table():
         return config.dark_mode
 
 
-def display_cards(table_data: pd.DataFrame, has_playthroughs=False, show_release_status=False, show_filter=True):
+def display_cards(table_data: pd.DataFrame, has_playthroughs=False, show_release_status=False, show_filter=True, color_coding=False):
     if show_release_status:
         today = dt.date.today()
         table_data['Release_status'] = table_data.apply(lambda x: get_release_status(x['Release_date'], x['IGDB_status'], today), axis=1)
@@ -648,9 +648,9 @@ def display_cards(table_data: pd.DataFrame, has_playthroughs=False, show_release
                                 ? 'bg-red-100 text-red-900 px-2 py-1 rounded'
                                 : 'bg-green-100 text-green-900 px-2 py-1 rounded'">
                             '''}
-                        ''' if config.color_coding else "<p>"}
+                        ''' if color_coding else "<p>"}
                         {{{{ props.row.Status }}}}
-                        {f'''</span>''' if config.color_coding else "</p>"}
+                        {f'''</span>''' if color_coding else "</p>"}
                         <p>{{{{ props.row.Platform }}}}</p>
                         {r'''<p>{{ props.row.StrDate }}</p>''' if has_playthroughs else ""}
                         {r'''<p>{{ props.row.Release_status }}</p>''' if show_release_status else ""}
@@ -668,7 +668,7 @@ def display_cards(table_data: pd.DataFrame, has_playthroughs=False, show_release
         table.bind_filter(table_filter, 'value')
 
 
-def display_table(aggrid_data: pd.DataFrame, has_playthroughs=False, show_release_status=False, show_filter=True):
+def display_table(aggrid_data: pd.DataFrame, has_playthroughs=False, show_release_status=False, show_filter=True, color_coding=False):
     def color_badges(val):
         if val in config.status_list_played_pos:
             if dark_table():
@@ -691,7 +691,7 @@ def display_table(aggrid_data: pd.DataFrame, has_playthroughs=False, show_releas
         aggrid_data['StrDate'] = aggrid_data['Date'].apply(lambda x: x.strftime('%Y-%m-%d'))
         aggrid_data['Comment'] = aggrid_data['Playthrough_comment'].replace({None: " "}) + " " + aggrid_data['Game_comment'].replace({None: " "})
         aggrid_data.drop(['Game_comment', 'Playthrough_comment', 'Date'], axis=1, inplace=True)
-    if config.color_coding:
+    if color_coding:
         aggrid_data['Status'] = aggrid_data.apply(lambda x: color_badges(x['Status']), axis=1)
     aggrid_data.drop(['IGDB_queried', 'Release_date', 'Steam_ID', 'IGDB_status', 'IGDB_url'], axis=1, inplace=True)
 
