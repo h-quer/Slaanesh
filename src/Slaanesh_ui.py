@@ -636,7 +636,7 @@ def display_cards(table_data: pd.DataFrame, has_playthroughs=False, show_release
             </div>
             <q-card-section horizontal>
                 <div class="h-[{config.card_height}px] px-4">
-                    <p align="center"><img :src="props.row.IGDB_image"/></p>
+                    <p align="center"><img class="h-[{config.card_height-16}px]" :src="props.row.IGDB_image"/></p>
                 </div>
                 <div class="text-center place-self-center leading-loose text-base w-[160px] px-4">
                     {f'''<span :class="{config.status_list_played_neg}.includes(props.row.Status)
