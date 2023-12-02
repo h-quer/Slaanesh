@@ -630,36 +630,34 @@ def display_cards(table_data: pd.DataFrame, has_playthroughs=False, show_release
     table = ui.table(columns=columns, rows=rows, pagination=40).classes('w-11/12 h-full self-center')
     table.props(add='grid')
     table.add_slot('item', f'''
-        <div class="q-pa-xs col-xs-12 col-sm-6 col-md-3">
-            <q-card @click="() => $parent.$emit('edit', props.row.IGDB_ID)" class="h-[{config.card_height}px]">
-                <div class="w-full text-center text-lg text-bold p-4">
-                    <p>{{{{ props.row.Name }}}}</p>
+        <q-card @click="() => $parent.$emit('edit', props.row.IGDB_ID)" class="m-2 w-[{(config.card_height*0.75)+160+8}px]">
+            <div class="w-full text-center text-lg text-bold p-4">
+                <p>{{{{ props.row.Name }}}}</p>
+            </div>
+            <q-card-section horizontal>
+                <div class="h-[{config.card_height}px] px-4">
+                    <p align="center"><img :src="props.row.IGDB_image"/></p>
                 </div>
-                <q-card-section horizontal>
-                    <div class="h-full w-8/12 px-4">
-                        <p align="center"><img class="max-h-[{config.card_height-80}px]" :src="props.row.IGDB_image"/></p>
-                    </div>
-                    <div class="text-center place-self-center leading-loose text-base w-4/12 px-4">
-                        {f'''<span :class="{config.status_list_played_neg}.includes(props.row.Status)
-                            {r'''
-                                ? 'bg-red-900 text-red-100 px-2 py-1 rounded'
-                                : 'bg-green-900 text-green-100 px-2 py-1 rounded'">
-                                ''' if dark_table() else r'''
-                                ? 'bg-red-100 text-red-900 px-2 py-1 rounded'
-                                : 'bg-green-100 text-green-900 px-2 py-1 rounded'">
-                            '''}
-                        ''' if color_coding else "<p>"}
-                        {{{{ props.row.Status }}}}
-                        {f'''</span>''' if color_coding else "</p>"}
-                        <p>{{{{ props.row.Platform }}}}</p>
-                        {r'''<p>{{ props.row.StrDate }}</p>''' if has_playthroughs else ""}
-                        {r'''<p>{{ props.row.Release_status }}</p>''' if show_release_status else ""}
-                        <p class="text-sm">{{{{ props.row.Game_comment }}}}</p>
-                        {r'''<p class="text-sm">{{ props.row.Playthrough_comment }}</p>''' if has_playthroughs else ""}
-                    </div>
-                </q-card-section>
-            </q-card>
-        </div>
+                <div class="text-center place-self-center leading-loose text-base w-[160px] px-4">
+                    {f'''<span :class="{config.status_list_played_neg}.includes(props.row.Status)
+                        {r'''
+                            ? 'bg-red-900 text-red-100 px-2 py-1 rounded'
+                            : 'bg-green-900 text-green-100 px-2 py-1 rounded'">
+                            ''' if dark_table() else r'''
+                            ? 'bg-red-100 text-red-900 px-2 py-1 rounded'
+                            : 'bg-green-100 text-green-900 px-2 py-1 rounded'">
+                        '''}
+                    ''' if color_coding else "<p>"}
+                    {{{{ props.row.Status }}}}
+                    {f'''</span>''' if color_coding else "</p>"}
+                    <p>{{{{ props.row.Platform }}}}</p>
+                    {r'''<p>{{ props.row.StrDate }}</p>''' if has_playthroughs else ""}
+                    {r'''<p>{{ props.row.Release_status }}</p>''' if show_release_status else ""}
+                    <p class="text-sm">{{{{ props.row.Game_comment }}}}</p>
+                    {r'''<p class="text-sm">{{ props.row.Playthrough_comment }}</p>''' if has_playthroughs else ""}
+                </div>
+            </q-card-section>
+        </q-card>
     ''')
     table.on("edit", lambda x: dialog_game_editor(x.args))
     if show_filter:
@@ -683,7 +681,7 @@ def display_table(aggrid_data: pd.DataFrame, has_playthroughs=False, show_releas
         return val
 
     aggrid_data.update(aggrid_data['IGDB_image'].apply(
-        lambda x: f"""<img class="h-full py-2 place-self-center" src="{x}"/>"""))
+        lambda x: f"""<img class="h-full py-1 place-self-center" src="{x}"/>"""))
     if show_release_status:
         today = dt.date.today()
         aggrid_data['Release_status'] = aggrid_data.apply(lambda x: get_release_status(x['Release_date'], x['IGDB_status'], today), axis=1)

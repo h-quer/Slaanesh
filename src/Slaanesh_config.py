@@ -37,7 +37,7 @@ color_coding = True
 row_height = 96
 card_height = 384
 
-display_types = ['cards', 'table', 'alt_table']
+display_types = ['cards', 'table']
 type_playing = 'cards'
 type_played = 'table'
 type_backlog = 'cards'
