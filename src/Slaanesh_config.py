@@ -1,6 +1,6 @@
 import configparser
 
-version = "0.3-beta"
+version = "0.6-beta"
 
 # local files
 game_list = r'/files/database/gamelist.feather'
@@ -28,14 +28,13 @@ client_id = ""
 client_secret = ""
 auth_token = ""
 token_timestamp = ""
-data_refresh_period = 90
 data_refresh_limit = 1
 
 gt_name = "Slaanesh"
 dark_mode = None
 color_coding = True
 row_height = 96
-card_height = 384
+card_width = 310
 
 display_types = ['cards', 'table']
 type_playing = 'cards'
@@ -57,22 +56,21 @@ def load_config():
     global status_list_unplayed, status_list_backlog, status_list_wishlist, status_list_playing
     config.read(file_config)
     if 'igdb' in config:
-        global client_id, client_secret, auth_token, token_timestamp, data_refresh_period, data_refresh_limit
+        global client_id, client_secret, auth_token, token_timestamp, data_refresh_limit
         client_id = config['igdb']['client_id']
         client_secret = config['igdb']['client_secret']
         auth_token = config['igdb']['auth_token']
         token_timestamp = config['igdb']['token_timestamp']
-        data_refresh_period = config.getint('igdb', 'data_refresh_period', fallback=data_refresh_period)
         data_refresh_limit = config.getint('igdb', 'data_refresh_limit', fallback=data_refresh_limit)
     else:
         print('IGDB parameters not set')
         return
     if 'ui' in config:
-        global row_height, dark_mode, card_height, color_coding, gt_name
+        global row_height, dark_mode, card_width, color_coding, gt_name
         gt_name = config.get('ui', 'name', fallback=gt_name)
         row_height = config.getint('ui', 'row_height', fallback=row_height)
         dark_mode = config.getboolean('ui', 'dark_mode', fallback=dark_mode)
-        card_height = config.getint('ui', 'card_height', fallback=card_height)
+        card_width = config.getint('ui', 'card_width', fallback=card_width)
         color_coding = config.getboolean('ui', 'color_coding', fallback=color_coding)
     if 'tabs' in config:
         global type_playing, type_played, type_backlog, type_wishlist, filter_playing, filter_played, filter_backlog, filter_wishlist
@@ -120,7 +118,7 @@ def load_config():
 
 def update_config(new_access_token=None, new_expiry_timestamp=None,
                   new_platform_list=None, new_backlog=None, new_wishlist=None, new_playing=None, new_played_pos=None, new_played_neg=None,
-                  new_row_height=None, new_dark_mode=None, new_card_height=None, new_color_coding=None,
+                  new_row_height=None, new_dark_mode=None, new_card_width=None, new_color_coding=None,
                   new_type_playing=None, new_type_played=None, new_type_backlog=None, new_type_wishlist=None,
                   new_filter_playing=None, new_filter_played=None, new_filter_backlog=None, new_filter_wishlist=None):
     if new_access_token is not None:
@@ -193,10 +191,10 @@ def update_config(new_access_token=None, new_expiry_timestamp=None,
         else:
             dark_mode = None
             config.remove_option('ui', 'dark_mode')
-    if new_card_height is not None:
-        global card_height
-        card_height = int(new_card_height)
-        config['ui']['card_height'] = str(card_height)
+    if new_card_width is not None:
+        global card_width
+        card_width = int(new_card_width)
+        config['ui']['card_width'] = str(card_width)
     if new_color_coding is not None:
         global color_coding
         color_coding = bool(new_color_coding)
