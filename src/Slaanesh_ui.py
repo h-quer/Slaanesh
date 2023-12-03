@@ -62,7 +62,7 @@ def ui_header():
 def dialog_settings():
     async def update_config(check_confirm=True, button=None,
                             platforms=None, played_pos=None, played_neg=None, playing=None, backlog=None, wishlist=None,
-                            dark_mode=None, color_coding=None, row_height=None, card_height=None,
+                            dark_mode=None, color_coding=None, row_height=None, card_width=None,
                             type_playing=None, type_played=None, type_backlog=None, type_wishlist=None,
                             filter_playing=None, filter_played=None, filter_backlog=None, filter_wishlist=None):
         if check_confirm:
@@ -75,7 +75,7 @@ def dialog_settings():
             try:
                 config.update_config(new_platform_list=platforms, new_backlog=backlog, new_playing=playing,
                                      new_wishlist=wishlist, new_played_neg=played_neg, new_played_pos=played_pos,
-                                     new_dark_mode=dark_mode, new_color_coding=color_coding, new_row_height=row_height, new_card_height=card_height,
+                                     new_dark_mode=dark_mode, new_color_coding=color_coding, new_row_height=row_height, new_card_width=card_width,
                                      new_type_playing=type_playing, new_type_played=type_played, new_type_backlog=type_backlog,
                                      new_type_wishlist=type_wishlist, new_filter_playing=filter_playing, new_filter_played=filter_played,
                                      new_filter_backlog=filter_backlog, new_filter_wishlist=filter_wishlist)
@@ -116,11 +116,11 @@ def dialog_settings():
                                                                                                 row_height=new_row_height.value)).props('round size=sm')
                         save_row_height.set_visibility(False)
                     with ui.row().classes('items-center flex-nowrap'):
-                        new_card_height = ui.number(label='Card height (px)', value=config.card_height, format='%d',
-                                                    on_change=lambda: save_card_height.set_visibility(True))
-                        save_card_height = ui.button(icon='save', on_click=lambda: update_config(button=save_card_height, check_confirm=False,
-                                                                                                 card_height=new_card_height.value)).props('round size=sm')
-                        save_card_height.set_visibility(False)
+                        new_card_width = ui.number(label='Card width (px)', value=config.card_width, format='%d',
+                                                   on_change=lambda: save_card_width.set_visibility(True))
+                        save_card_width = ui.button(icon='save', on_click=lambda: update_config(button=save_card_width, check_confirm=False,
+                                                                                                card_width=new_card_width.value)).props('round size=sm')
+                        save_card_width.set_visibility(False)
 
             # Tabs settings
             with ui.card().classes('w-full'):
@@ -604,14 +604,14 @@ def dark_table():
         return config.dark_mode
 
 
-def display_cards(table_data: pd.DataFrame, has_playthroughs=False, show_release_status=False, show_filter=True, color_coding=False):
+def display_cards(cards_data: pd.DataFrame, has_playthroughs=False, show_release_status=False, show_filter=True, color_coding=False):
     if show_release_status:
         today = dt.date.today()
-        table_data['Release_status'] = table_data.apply(lambda x: get_release_status(x['Release_date'], x['IGDB_status'], today), axis=1)
+        cards_data['Release_status'] = cards_data.apply(lambda x: get_release_status(x['Release_date'], x['IGDB_status'], today), axis=1)
     if has_playthroughs:
-        table_data['StrDate'] = table_data['Date'].apply(lambda x: x.strftime('%Y-%m-%d'))
-        table_data.drop(['Date'], axis=1, inplace=True)
-    table_data.drop(['IGDB_queried', 'Release_date', 'Steam_ID', 'IGDB_status', 'IGDB_url'], axis=1, inplace=True)
+        cards_data['StrDate'] = cards_data['Date'].apply(lambda x: x.strftime('%Y-%m-%d'))
+        cards_data.drop(['Date'], axis=1, inplace=True)
+    cards_data.drop(['IGDB_queried', 'Release_date', 'Steam_ID', 'IGDB_status', 'IGDB_url'], axis=1, inplace=True)
 
     columns = [{'name': 'Image', 'label': '', 'field': 'IGDB_image'},
                {'name': 'Name', 'label': 'Name', 'field': 'Name'},
@@ -625,27 +625,30 @@ def display_cards(table_data: pd.DataFrame, has_playthroughs=False, show_release
     if has_playthroughs:
         columns.append({'name': 'Playthrough_comment', 'label': 'Playthrough Comment', 'field': 'Playthrough_comment'})
 
-    rows = table_data.to_dict('records')
+    rows = cards_data.to_dict('records')
 
-    table = ui.table(columns=columns, rows=rows, pagination=40).classes('w-11/12 h-full self-center')
+    table = ui.table(columns=columns, rows=rows).classes('w-11/12 h-full self-center')
     table.props(add='grid')
+    # $(this).parent().height()
+    # $parent.$height()
     table.add_slot('item', f'''
-        <q-card @click="() => $parent.$emit('edit', props.row.IGDB_ID)" class="m-2 w-[{(config.card_height*0.75)+160+8}px]">
-            <div class="w-full text-center text-lg text-bold p-4">
+        <q-card @click="() => $parent.$emit('edit', props.row.IGDB_ID)"
+                class="m-2 w-[{config.card_width}px]">
+            <div class="w-full text-center text-lg text-bold pt-4">
                 <p>{{{{ props.row.Name }}}}</p>
             </div>
             <q-card-section horizontal>
-                <div class="h-[{config.card_height}px] px-4">
-                    <p align="center"><img class="h-[{config.card_height-16}px]" :src="props.row.IGDB_image"/></p>
+                <div class="min-w-1/2 p-4">
+                    <p align="center"><img :src="props.row.IGDB_image"/></p>
                 </div>
-                <div class="text-center place-self-center leading-loose text-base w-[160px] px-4">
+                <div class="text-center place-self-center leading-loose text-base max-w-[160px] w-1/2 p-4">
                     {f'''<span :class="{config.status_list_played_neg}.includes(props.row.Status)
                         {r'''
-                            ? 'bg-red-900 text-red-100 px-2 py-1 rounded'
-                            : 'bg-green-900 text-green-100 px-2 py-1 rounded'">
+                            ? 'bg-red-900 text-red-50 px-2 py-1 rounded'
+                            : 'bg-green-900 text-green-50 px-2 py-1 rounded'">
                             ''' if dark_table() else r'''
-                            ? 'bg-red-100 text-red-900 px-2 py-1 rounded'
-                            : 'bg-green-100 text-green-900 px-2 py-1 rounded'">
+                            ? 'bg-red-100 text-red-950 px-2 py-1 rounded'
+                            : 'bg-green-100 text-green-950 px-2 py-1 rounded'">
                         '''}
                     ''' if color_coding else "<p>"}
                     {{{{ props.row.Status }}}}
@@ -666,32 +669,32 @@ def display_cards(table_data: pd.DataFrame, has_playthroughs=False, show_release
         table.bind_filter(table_filter, 'value')
 
 
-def display_table(aggrid_data: pd.DataFrame, has_playthroughs=False, show_release_status=False, show_filter=True, color_coding=False):
+def display_table(table_data: pd.DataFrame, has_playthroughs=False, show_release_status=False, show_filter=True, color_coding=False):
     def color_badges(val):
         if val in config.status_list_played_pos:
             if dark_table():
-                return """<span class="bg-green-900 text-green-100 px-3 py-2 rounded">""" + val + """</span>"""
+                return """<span class="bg-green-900 text-green-50 px-3 py-2 rounded">""" + val + """</span>"""
             else:
-                return """<span class="bg-green-100 text-green-900 px-3 py-2 rounded">""" + val + """</span>"""
+                return """<span class="bg-green-100 text-green-950 px-3 py-2 rounded">""" + val + """</span>"""
         if val in config.status_list_played_neg:
             if dark_table():
-                return """<span class="bg-red-900 text-red-100 px-3 py-2 rounded">""" + val + """</span>"""
+                return """<span class="bg-red-900 text-red-50 px-3 py-2 rounded">""" + val + """</span>"""
             else:
-                return """<span class="bg-red-100 text-red-900 px-3 py-2 rounded">""" + val + """</span>"""
+                return """<span class="bg-red-100 text-red-950 px-3 py-2 rounded">""" + val + """</span>"""
         return val
 
-    aggrid_data.update(aggrid_data['IGDB_image'].apply(
+    table_data.update(table_data['IGDB_image'].apply(
         lambda x: f"""<img class="h-full py-1 place-self-center" src="{x}"/>"""))
     if show_release_status:
         today = dt.date.today()
-        aggrid_data['Release_status'] = aggrid_data.apply(lambda x: get_release_status(x['Release_date'], x['IGDB_status'], today), axis=1)
+        table_data['Release_status'] = table_data.apply(lambda x: get_release_status(x['Release_date'], x['IGDB_status'], today), axis=1)
     if has_playthroughs:
-        aggrid_data['StrDate'] = aggrid_data['Date'].apply(lambda x: x.strftime('%Y-%m-%d'))
-        aggrid_data['Comment'] = aggrid_data['Playthrough_comment'].replace({None: " "}) + " " + aggrid_data['Game_comment'].replace({None: " "})
-        aggrid_data.drop(['Game_comment', 'Playthrough_comment', 'Date'], axis=1, inplace=True)
+        table_data['StrDate'] = table_data['Date'].apply(lambda x: x.strftime('%Y-%m-%d'))
+        table_data['Comment'] = table_data['Playthrough_comment'].replace({None: " "}) + " " + table_data['Game_comment'].replace({None: " "})
+        table_data.drop(['Game_comment', 'Playthrough_comment', 'Date'], axis=1, inplace=True)
     if color_coding:
-        aggrid_data['Status'] = aggrid_data.apply(lambda x: color_badges(x['Status']), axis=1)
-    aggrid_data.drop(['IGDB_queried', 'Release_date', 'Steam_ID', 'IGDB_status', 'IGDB_url'], axis=1, inplace=True)
+        table_data['Status'] = table_data.apply(lambda x: color_badges(x['Status']), axis=1)
+    table_data.drop(['IGDB_queried', 'Release_date', 'Steam_ID', 'IGDB_status', 'IGDB_url'], axis=1, inplace=True)
 
     columns = [
         {'headerName': '', 'field': 'IGDB_image', 'cellDataType': 'object', 'maxWidth': 128, 'cellClass': 'justify-center', 'filter': False},
@@ -717,10 +720,10 @@ def display_table(aggrid_data: pd.DataFrame, has_playthroughs=False, show_releas
                        'cellStyle': {'display': 'flex'},
                        'cellClass': 'justify-center items-center text-base font-normal',
                        'headerClass': 'text-lg font-bold'}
-    row_data = aggrid_data.to_dict('records')
+    row_data = table_data.to_dict('records')
     table = ui.aggrid({'columnDefs': columns, 'rowData': row_data, 'rowHeight': config.row_height, 'defaultColDef': default_col_def},
                       theme=("alpine-dark" if dark_table() else "alpine"),
-                      html_columns=[0, 3],
+                      html_columns=[0, 3] if color_coding else [0],
                       auto_size_columns=False).classes('w-11/12 h-full self-center')
     table.on('cellClicked', lambda e: dialog_game_editor(e.args['data']['IGDB_ID']))
 
