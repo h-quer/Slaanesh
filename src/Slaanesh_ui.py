@@ -633,7 +633,7 @@ def display_cards(cards_data: pd.DataFrame, has_playthroughs=False, show_release
     # $parent.$height()
     table.add_slot('item', f'''
         <q-card @click="() => $parent.$emit('edit', props.row.IGDB_ID)"
-                class="m-2 w-[{config.card_width}px]">
+                class="m-2 w-[{config.card_width}px] h-fit">
             <div class="w-full text-center text-lg text-bold pt-4 px-4">
                 <p>{{{{ props.row.Name }}}}</p>
             </div>
