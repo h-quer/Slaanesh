@@ -629,8 +629,6 @@ def display_cards(cards_data: pd.DataFrame, has_playthroughs=False, show_release
 
     table = ui.table(columns=columns, rows=rows).classes('w-11/12 h-full self-center')
     table.props(add='grid')
-    # $(this).parent().height()
-    # $parent.$height()
     table.add_slot('item', f'''
         <q-card @click="() => $parent.$emit('edit', props.row.IGDB_ID)"
                 class="m-2 w-[{config.card_width}px] h-fit">
@@ -639,7 +637,7 @@ def display_cards(cards_data: pd.DataFrame, has_playthroughs=False, show_release
             </div>
             <q-card-section horizontal>
                 <div class="min-w-1/2 py-4 pl-4">
-                    <p align="center"><img :src="props.row.IGDB_image"/></p>
+                    <img :src="props.row.IGDB_image"/>
                 </div>
                 <div class="text-center place-self-center leading-loose text-base max-w-[160px] w-1/2 p-4">
                     {f'''<span :class="{config.status_list_played_neg}.includes(props.row.Status)
@@ -696,16 +694,28 @@ def display_table(table_data: pd.DataFrame, has_playthroughs=False, show_release
         table_data['Status'] = table_data.apply(lambda x: color_badges(x['Status']), axis=1)
     table_data.drop(['IGDB_queried', 'Release_date', 'Steam_ID', 'IGDB_status', 'IGDB_url'], axis=1, inplace=True)
 
+    ui.add_head_html(r'''
+    <style>
+        .ag-header-cell.text-center {
+            .ag-header-cell-label {
+                justify-content: center;}}
+    </style>
+    ''')
+
     columns = [
         {'headerName': '', 'field': 'IGDB_image', 'cellDataType': 'object', 'maxWidth': 128, 'cellClass': 'justify-center', 'filter': False},
         {'headerName': 'ID', 'field': 'IGDB_id', 'hide': True},
         {'headerName': 'Name', 'field': 'Name', 'cellDataType': 'text', 'cellClass': 'justify-start items-center text-base font-medium', 'flex': 6},
-        {'headerName': 'Status', 'field': 'Status', 'cellDataType': 'text', 'flex': 2}]
+        {'headerName': 'Status', 'field': 'Status', 'cellDataType': 'text', 'flex': 2,
+         'headerClass': 'text-center text-lg font-bold'}]
     if has_playthroughs:
-        columns.append({'headerName': 'Date', 'field': 'StrDate', 'cellDataType': 'dateString', 'flex': 2})
+        columns.append({'headerName': 'Date', 'field': 'StrDate', 'cellDataType': 'dateString', 'flex': 2,
+                        'headerClass': 'text-center text-lg font-bold'})
     if show_release_status:
-        columns.append({'headerName': 'Release Status', 'field': 'Release_status', 'cellDataType': 'text', 'flex': 2})
-    columns.append({'headerName': 'Platform', 'field': 'Platform', 'cellDataType': 'text', 'flex': 2})
+        columns.append({'headerName': 'Release Status', 'field': 'Release_status', 'cellDataType': 'text', 'flex': 2,
+                        'headerClass': 'text-center text-lg font-bold'})
+    columns.append({'headerName': 'Platform', 'field': 'Platform', 'cellDataType': 'text', 'flex': 2,
+                    'headerClass': 'text-center text-lg font-bold'})
     if has_playthroughs:
         columns.append({'headerName': 'Comment', 'field': 'Comment', 'cellDataType': 'text', 'flex': 5,
                         'cellClass': 'justify-start items-center text-base font-normal'})
