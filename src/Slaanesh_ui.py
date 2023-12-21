@@ -37,7 +37,7 @@ async def handle_connection():
 def display_ui():
     global dark
     dark.set_value(config.dark_mode)
-    with ui.column().classes('w-full h-[95vh] flex-nowrap'):
+    with ui.column().classes('w-full h-[96vh] flex-nowrap'):
         ui_header()
         tabs_lists()
     app.on_connect(handle_connection)
@@ -641,13 +641,8 @@ def display_cards(cards_data: pd.DataFrame, has_playthroughs=False, show_release
                 </div>
                 <div class="text-center place-self-center leading-loose text-base max-w-[160px] w-1/2 p-4">
                     {f'''<span :class="{config.status_list_played_neg}.includes(props.row.Status)
-                        {r'''
-                            ? 'bg-red-900 text-red-50 px-2 py-1 rounded'
-                            : 'bg-green-900 text-green-50 px-2 py-1 rounded'">
-                            ''' if dark_table() else r'''
-                            ? 'bg-red-100 text-red-950 px-2 py-1 rounded'
-                            : 'bg-green-100 text-green-950 px-2 py-1 rounded'">
-                        '''}
+                            ? 'bg-red-100 text-red-950 dark:bg-red-900 dark:text-red-50 px-2 py-1 rounded'
+                            : 'bg-green-100 text-green-950 dark:bg-green-900 dark:text-green-50 px-2 py-1 rounded'">
                     ''' if color_coding else "<p>"}
                     {{{{ props.row.Status }}}}
                     {f'''</span>''' if color_coding else "</p>"}
@@ -670,15 +665,9 @@ def display_cards(cards_data: pd.DataFrame, has_playthroughs=False, show_release
 def display_table(table_data: pd.DataFrame, has_playthroughs=False, show_release_status=False, show_filter=True, color_coding=False):
     def color_badges(val):
         if val in config.status_list_played_pos:
-            if dark_table():
-                return """<span class="bg-green-900 text-green-50 px-3 py-2 rounded">""" + val + """</span>"""
-            else:
-                return """<span class="bg-green-100 text-green-950 px-3 py-2 rounded">""" + val + """</span>"""
+            return """<span class="bg-green-100 text-green-950 dark:bg-green-900 dark:text-green-50 px-3 py-2 rounded">""" + val + """</span>"""
         if val in config.status_list_played_neg:
-            if dark_table():
-                return """<span class="bg-red-900 text-red-50 px-3 py-2 rounded">""" + val + """</span>"""
-            else:
-                return """<span class="bg-red-100 text-red-950 px-3 py-2 rounded">""" + val + """</span>"""
+            return """<span class="bg-red-100 text-red-950 dark:bg-red-900 dark:text-red-50 px-3 py-2 rounded">""" + val + """</span>"""
         return val
 
     table_data.update(table_data['IGDB_image'].apply(
