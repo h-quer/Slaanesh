@@ -35,6 +35,13 @@ async def handle_connection():
 
 
 def display_ui():
+    ui.add_head_html(r'''
+        <style>
+            .ag-header-cell.text-center {
+                .ag-header-cell-label {
+                    justify-content: center;}}
+        </style>
+        ''')
     global dark
     dark.set_value(config.dark_mode)
     with ui.column().classes('w-full h-[96vh] flex-nowrap'):
@@ -683,14 +690,6 @@ def display_table(table_data: pd.DataFrame, has_playthroughs=False, show_release
         table_data['Status'] = table_data.apply(lambda x: color_badges(x['Status']), axis=1)
     table_data.drop(['IGDB_queried', 'Release_date', 'Steam_ID', 'IGDB_status', 'IGDB_url'], axis=1, inplace=True)
 
-    ui.add_head_html(r'''
-    <style>
-        .ag-header-cell.text-center {
-            .ag-header-cell-label {
-                justify-content: center;}}
-    </style>
-    ''')
-
     columns = [
         {'headerName': '', 'field': 'IGDB_image', 'cellDataType': 'object', 'maxWidth': 128, 'cellClass': 'justify-center', 'filter': False},
         {'headerName': 'ID', 'field': 'IGDB_id', 'hide': True},
@@ -732,11 +731,12 @@ def get_release_status(timestamp: int, status: int, today: dt.date) -> str:
     if not timestamp > 0:
         return "unknown"
     date = dt.date.fromtimestamp(timestamp)
+    datestr = date.strftime("%Y-%m-%d")
     if status == 4:
-        return "early access\n" + date.strftime("%Y-%m-%d")
+        return "early access\n" + datestr
     if date <= today:
-        return "released\n" + date.strftime("%Y-%m-%d")
-    return "unreleased\n" + date.strftime("%Y-%m-%d")
+        return "released\n" + datestr
+    return "unreleased\n" + datestr
 
 
 def action_import_csv():
