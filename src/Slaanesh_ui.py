@@ -702,7 +702,8 @@ def display_table(table_data: pd.DataFrame, has_playthroughs=False, show_release
                         'headerClass': 'text-center text-lg font-bold'})
     if show_release_status:
         columns.append({'headerName': 'Release Status', 'field': 'Release_status', 'cellDataType': 'text', 'flex': 2,
-                        'headerClass': 'text-center text-lg font-bold'})
+                        'headerClass': 'text-center text-lg font-bold',
+                        'cellStyle': {'display': 'flex', 'white-space': 'pre-line', 'text-align': 'center', 'line-height': 'normal'}})
     columns.append({'headerName': 'Platform', 'field': 'Platform', 'cellDataType': 'text', 'flex': 2,
                     'headerClass': 'text-center text-lg font-bold'})
     if has_playthroughs:
@@ -728,14 +729,14 @@ def display_table(table_data: pd.DataFrame, has_playthroughs=False, show_release
 
 
 def get_release_status(timestamp: int, status: int, today: dt.date) -> str:
-    if status == 4:
-        return "early access"
     if not timestamp > 0:
         return "unknown"
     date = dt.date.fromtimestamp(timestamp)
+    if status == 4:
+        return "early access\n" + date.strftime("%Y-%m-%d")
     if date <= today:
-        return "released"
-    return date.strftime("%Y-%m-%d")
+        return "released\n" + date.strftime("%Y-%m-%d")
+    return "unreleased\n" + date.strftime("%Y-%m-%d")
 
 
 def action_import_csv():
