@@ -355,7 +355,7 @@ def panel_wishlist():
     res = data.gl[data.gl.Status.isin(config.status_list_wishlist)].copy()
     res['Platform'] = pd.Categorical(res['Platform'], config.platform_list)
     res['Status'] = pd.Categorical(res['Status'], config.status_list_wishlist)
-    res.sort_values(by=['Status', 'Platform', 'Release_date', 'Game_comment'], key=lambda col: col.replace(0, np.nan), na_position='last', inplace=True)
+    res.sort_values(by=['Status', 'Release_date', 'Platform', 'Game_comment'], key=lambda col: col.replace(0, np.nan), na_position='last', inplace=True)
     match config.type_wishlist:
         case 'cards': x = display_cards
         case 'table': x = display_table
@@ -702,6 +702,7 @@ def display_table(table_data: pd.DataFrame, has_playthroughs=False, show_release
     if show_release_status:
         columns.append({'headerName': 'Release Status', 'field': 'Release_status', 'cellDataType': 'text', 'flex': 2,
                         'headerClass': 'text-center text-lg font-bold',
+                        # 'cellClass': 'whitespace-pre-line justify-center items-center text-base font-normal'})
                         'cellStyle': {'display': 'flex', 'white-space': 'pre-line', 'text-align': 'center', 'line-height': 'normal'}})
     columns.append({'headerName': 'Platform', 'field': 'Platform', 'cellDataType': 'text', 'flex': 2,
                     'headerClass': 'text-center text-lg font-bold'})
@@ -736,7 +737,7 @@ def get_release_status(timestamp: int, status: int, today: dt.date) -> str:
         return "early access\n" + datestr
     if date <= today:
         return "released\n" + datestr
-    return "unreleased\n" + datestr
+    return "upcoming\n" + datestr
 
 
 def action_import_csv():
