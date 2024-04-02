@@ -77,12 +77,14 @@ Folders to mount are:
 
 ## Scope and roadmap
 ### Roadmap
-Features I am currently slowly but actively working on (pull requests still very welcome for support on these!):
+Features I am currently slowly but actively working on (pull requests still very welcome for support on these):
 * Adding additional columns, as well as an option to show/hide columns. Useful ones I'd add:
-  * Time played or time to complete to games (ideally linking to the howlongtobeat.com API to pull the completion times - although I don't think there is a good way to match IGDB IDs to HLTB IDs and search by name is quite error-prone, so at first it'd just be a user input field)
-  * Ratings for games
-  * Game version
+  * Time played or time to complete to games (ideally linking to the howlongtobeat.com API to pull the completion times - although I don't think there is a good way to match IGDB IDs to HLTB IDs and search by name is quite error-prone, so at first it'd just be a user input field), linked to playthrough table
+  * Ratings for games, linked to playthrough table
+  * Game version, linked to playthrough table
   * Secondary and maybe tertiary comment field for more flexible options (e.g. to record extra info for DLCs or similar)
+  * Moving platform info from game to playthrough table
+  * Adding status info to playthrough table, differentiating the played status' within that table for each pt
 * General UI improvements, especially considering responsiveness - there is probably a lot that can be done with asyncio which I have barely used so far
 * Build a native mode version for local (not self-hosted) usage
 * Make it render properly on mobile
