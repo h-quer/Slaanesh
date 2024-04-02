@@ -43,8 +43,6 @@ Also adjust the docker-compose.yml to match your setup.
 
 ```yaml
 ---
-version: "3.9"
-
 services:
   slaanesh:
     image: ghcr.io/h-quer/slaanesh:latest
