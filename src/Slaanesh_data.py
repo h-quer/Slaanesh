@@ -82,7 +82,7 @@ def rem_pt(pt_index, gl_index):
 
 def add_game(name: str, igdb_id: int, platform: str, status: str, comment: str):
     global gl
-    if igdb_id in gl['IGDB_ID'].values:
+    if int(igdb_id) in gl['IGDB_ID'].values:
         raise Exception('Game already in database')
     pt.reset_index(drop=True, inplace=True)
     gl.loc[len(gl.index)] = ["", int(igdb_id), name, platform, status,
