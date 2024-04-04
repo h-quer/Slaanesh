@@ -30,7 +30,7 @@ def update_igdb_data(new_data):
     for index, row in new_data.iterrows():
         gl_index = gl.index[gl['IGDB_ID'] == row['IGDB_ID']][0]
         save_cover(row['IGDB_image'], row['IGDB_ID'])
-        gl.loc[[gl_index], ['IGDB_image']] = config.server_path_covers + str(row['IGDB_ID']) + '.png'
+        gl.loc[[gl_index], ['IGDB_image']] = config.server_path_covers + '/' + str(row['IGDB_ID']) + '.png'
         gl.loc[[gl_index], ['Name']] = row['Name']
         gl.loc[[gl_index], ['IGDB_queried']] = row['IGDB_queried']
         gl.loc[[gl_index], ['Steam_ID']] = int(re.findall("\\d+", row['Steam_ID'])[0]) if type(row['Steam_ID']) is str else int(0)
