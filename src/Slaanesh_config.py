@@ -3,17 +3,17 @@ import configparser
 version = "0.6-beta"
 
 # local files
-game_list = r'/files/database/gamelist.feather'
-playthrough_list = r'/files/database/playthroughs.feather'
-file_icon = r'/files/assets/Slaanesh.png'
-file_config = r'/files/config/config.ini'
-path_covers = r'/files/covers/'
-path_import = r'/files/import/'
-path_export = r'/files/export/'
+game_list = r'./files/database/gamelist.feather'
+playthrough_list = r'./files/database/playthroughs.feather'
+file_icon = r'./files/assets/Slaanesh.png'
+file_config = r'./files/config/config.ini'
+path_covers = r'./files/covers/'
+path_import = r'./files/import/'
+path_export = r'./files/export/'
 
 # serving files
 server_file_icon = r'/assets/Slaanesh.png'
-server_path_covers = r'/covers/'
+server_path_covers = r'/covers'
 
 status_list_playing = ["playing", "on hold"]
 status_list_played_pos = ["completed", "mastered"]
