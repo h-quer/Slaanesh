@@ -23,12 +23,12 @@ def import_csv():
     pt_dtypes = {'IGDB_ID': 'int64',
                  'Date': str,
                  'Playthrough_comment': str}
-    gl_parser = ['IGDB_queried']
-    pt_parser = ['Date']
     new_gl = pd.read_csv(config.path_import + 'gamelist.csv',
-                         sep=separator, escapechar=escapechar, quotechar=quotechar, dtype=gl_dtypes, parse_dates=gl_parser)
+                         sep=separator, escapechar=escapechar, quotechar=quotechar, dtype=gl_dtypes)
     new_pt = pd.read_csv(config.path_import + 'playthroughs.csv',
-                         sep=separator, escapechar=escapechar, quotechar=quotechar, dtype=pt_dtypes, parse_dates=pt_parser)
+                         sep=separator, escapechar=escapechar, quotechar=quotechar, dtype=pt_dtypes)
+    new_gl['IGDB_queried'] = pd.to_datetime(new_gl['IGDB_queried'], format="ISO8601")
+    new_pt['Date'] = pd.to_datetime(new_pt['Date'], format="ISO8601")
     duplicate_check = new_gl.merge(data.gl, how='inner', on='IGDB_ID')
     if not duplicate_check.empty:
         raise Exception(f'{len(duplicate_check)} game(s) to import already in database')
