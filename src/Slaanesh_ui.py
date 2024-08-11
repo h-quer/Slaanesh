@@ -23,7 +23,6 @@ with ui.dialog() as confirmation, ui.card():
 def refresh_ui():
     global dark
     dark.set_value(config.dark_mode)
-    config.load_config()
     panel_overview.refresh()
     panel_playing.refresh()
     panel_played.refresh()
@@ -38,7 +37,6 @@ async def handle_connection():
 
 
 def display_ui(Native:bool):
-    config.load_config()
     ui.add_head_html(r'''
         <style>
             .ag-header-cell.text-center {
