@@ -5,15 +5,19 @@ version = "0.61-beta"
 # local files
 game_list = r'/files/database/gamelist.feather'
 playthrough_list = r'/files/database/playthroughs.feather'
+slaanesh_backup = r'/files/downloads/slaanesh_backup'
 file_icon = r'/files/assets/Slaanesh.png'
 file_config = r'/files/config/config.ini'
 path_covers = r'/files/covers/'
 path_import = r'/files/import/'
 path_export = r'/files/export/'
+path_downloads = r'/files/downloads'
 
 # serving files
 server_file_icon = r'/assets/Slaanesh.png'
 server_path_covers = r'/covers'
+server_path_downloads = r'/downloads'
+server_path_export = r'/export'
 
 status_list_playing = ["playing", "on hold"]
 status_list_played_pos = ["completed", "mastered"]
@@ -45,6 +49,9 @@ filter_playing = True
 filter_played = True
 filter_backlog = False
 filter_wishlist = False
+
+scheduled_export = False
+scheduled_period = 15
 
 config = configparser.ConfigParser(allow_no_value=True)
 config.optionxform = str
@@ -112,6 +119,11 @@ def load_config():
         status_list_wishlist.clear()
         for key in config['wishlist']:
             status_list_wishlist.append(key)
+    if 'export' in config:
+        global scheduled_export, scheduled_period
+        scheduled_export = config.getboolean('export', 'scheduled_export', fallback=scheduled_export)
+        scheduled_period = config.getint('export', 'scheduled_period', fallback=scheduled_period)
+
     status_list_played = status_list_played_pos + status_list_played_neg
     status_list_unplayed = status_list_backlog + status_list_wishlist + status_list_playing
 
@@ -120,7 +132,7 @@ def update_config(new_access_token=None, new_expiry_timestamp=None,
                   new_platform_list=None, new_backlog=None, new_wishlist=None, new_playing=None, new_played_pos=None, new_played_neg=None,
                   new_row_height=None, new_dark_mode=None, new_card_width=None, new_color_coding=None,
                   new_type_playing=None, new_type_played=None, new_type_backlog=None, new_type_wishlist=None,
-                  new_filter_playing=None, new_filter_played=None, new_filter_backlog=None, new_filter_wishlist=None):
+                  new_filter_playing=None, new_filter_played=None, new_filter_backlog=None, new_filter_wishlist=None, new_scheduled_export=None, new_scheduled_period=None):
     if new_access_token is not None:
         global auth_token
         config['igdb']['auth_token'] = auth_token = new_access_token
@@ -230,6 +242,17 @@ def update_config(new_access_token=None, new_expiry_timestamp=None,
         global filter_wishlist
         filter_wishlist = new_filter_wishlist
         config['tabs']['filter_wishlist'] = str(filter_wishlist)
+
+    if 'export' not in config:
+        config.add_section('export')    
+    if new_scheduled_export is not None:
+        global scheduled_export
+        scheduled_export = new_scheduled_export
+        config['export']['scheduled_export'] = str(scheduled_export)
+    if new_scheduled_period is not None:
+        global scheduled_period
+        scheduled_period = new_scheduled_period
+        config['export']['scheduled_period'] = str(scheduled_period)
 
     with open(file_config, 'w') as configfile:
         config.write(configfile)
