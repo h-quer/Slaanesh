@@ -3,3 +3,7 @@ numpy>=1.26.2
 nicegui>=1.4.3
 igdb-api-v4>=0.3.2
 pyarrow>=14.0.1
+pywebview>=5.1
+PyQt>=5.15.11
+PyQtWebEngine>=5.15.7
+QtPy>=2.4.1

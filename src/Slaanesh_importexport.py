@@ -1,4 +1,5 @@
 import pandas as pd
+import shutil
 import Slaanesh_data as data
 import Slaanesh_config as config
 
@@ -41,6 +42,10 @@ def export_csv():
     global separator
     data.gl.to_csv(config.path_export + 'gamelist.csv', sep=separator, escapechar=escapechar, quotechar=quotechar, index=False)
     data.pt.to_csv(config.path_export + 'playthroughs.csv', sep=separator, escapechar=escapechar, quotechar=quotechar, index=False)
+
+def export_Download():
+    export_csv()
+    shutil.make_archive(config.slaanesh_backup, 'zip', root_dir=config.path_export)
 
 
 def export_id_name_list(id_name_list: pd.DataFrame):

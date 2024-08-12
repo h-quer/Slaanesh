@@ -10,6 +10,8 @@ import Slaanesh_IGDB as igdb
 dark = ui.dark_mode()
 browser_dm = None
 
+exportTimer = ui.timer(config.scheduled_period, lambda:{imex.export_csv()}, active=config.scheduled_export)
+
 # general confirmation dialog
 with ui.dialog() as confirmation, ui.card():
     ui.label('Are you sure?')
@@ -34,7 +36,7 @@ async def handle_connection():
     refresh_ui()
 
 
-def display_ui():
+def display_ui(Native:bool):
     ui.add_head_html(r'''
         <style>
             .ag-header-cell.text-center {
@@ -42,13 +44,14 @@ def display_ui():
                     justify-content: center;}}
         </style>
         ''')
-    global dark
+    global dark, exportTimer
     dark.set_value(config.dark_mode)
+    exportTimer.interval = config.scheduled_period
     with ui.column().classes('w-full h-[96vh] flex-nowrap'):
         ui_header()
         tabs_lists()
     app.on_connect(handle_connection)
-    ui.run(title=config.gt_name, favicon=config.file_icon, reload=False)
+    ui.run(title=config.gt_name, favicon=config.file_icon, reload=False, native=Native)
 
 
 def ui_header():
@@ -235,7 +238,7 @@ def dialog_tools():
             ui.button(icon='close', on_click=lambda: dialog.delete()).props('round size=sm')
         with ui.card():
             with ui.row():
-                ui.label('Import / Export').classes('text-lg font-bold')
+                ui.label('Import').classes('text-lg font-bold')
             with ui.row():
                 async def import_csv():
                     confirm = await confirmation
@@ -243,7 +246,28 @@ def dialog_tools():
                         action_import_csv()
 
                 ui.button('Import CSV', on_click=import_csv)
+
+            with ui.row():
+                ui.label('Export').classes('text-lg font-bold')
+            with ui.row():
+                
                 ui.button('Export CSV', on_click=lambda: action_export_csv())
+                ui.button('Export and Download CSV', on_click=lambda:{
+                        action_export_download(),
+                        ui.download(config.slaanesh_backup + '.zip')
+                    }
+                )
+                ui.button('Export Config', on_click=lambda: ui.download(config.file_config))
+
+            with ui.row():
+                ui.label('Scheduled Export').classes('text-lg font-bold')
+
+            with ui.column():
+                global exportTimer
+                exportSwitch = ui.switch('Use Scheduled Export', value=config.scheduled_export, on_change=lambda: config.update_config(new_scheduled_export = exportSwitch.value)).bind_value_to(exportTimer, 'active')
+                exportSelect = ui.toggle({86400: 'Daily', 604800: 'Weekly'}, value=config.scheduled_period, on_change=lambda: action_schedule_change(exportSelect.value)).bind_visibility_from(exportSwitch, 'value')
+
+
         with ui.card():
             with ui.row():
                 ui.label('IGDB').classes('text-lg font-bold')
@@ -757,6 +781,9 @@ def action_export_csv():
         ui.notify('Successfully exported CSV files')
     except Exception as e:
         ui.notify('CSV export not successful: ' + str(e))
+    
+def action_export_download():
+    imex.export_Download()
 
 
 def action_update_api_data():
@@ -867,3 +894,8 @@ def action_match_ids_to_names(names: str):
         ui.notify('Name-to-ID list export not successful: ' + str(e))
         return
     ui.notify('Name-to-ID list successfully exported')
+
+def action_schedule_change(value):
+    global exportTimer
+    config.update_config(new_scheduled_period = value)
+    exportTimer.interval = value
