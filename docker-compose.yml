@@ -11,5 +11,6 @@ services:
       - your_export_dir:/files/export
       - your_covers_dir:/files/covers
       - your_database_dir:/files/database
+      - your_downloads_dir:/files/downloads
     ports:
       - 8428:8080
