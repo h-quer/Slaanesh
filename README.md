@@ -55,6 +55,7 @@ services:
       - your_export_dir:/files/export        # adjust path
       - your_covers_dir:/files/covers        # adjust path
       - your_database_dir:/files/database    # adjust path
+      - your_downloads_dir:/files/downloads  # adjust path
     ports:
       - 8428:8080                            # remove if using reverse proxy and accessing via container name
 ```
@@ -74,6 +75,7 @@ Folders to mount are:
 * export - receive exported files from here, both database exports (gamelist.csv and playthroughs.csv) as well as the name to IGDB ID matching tool output
 * covers - game covers are saved here, you can manually edit them if necessary
 * database - location of the Slaanesh database, do not edit manually but if you value your data, make sure it is part of your 3-2-1 backup system, and also make sure to check backup integrety and practise restores regularly
+* downloads - location where files to be downloaded from the webgui will be.
 
 ## Scope and roadmap
 ### Roadmap
