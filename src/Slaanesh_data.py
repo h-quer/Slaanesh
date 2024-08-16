@@ -76,7 +76,7 @@ def rem_pt(pt_index, gl_index):
     pt.reset_index(drop=True, inplace=True)
     if sum(pt['IGDB_ID'].eq(igdb_id)) == 0:
         global gl
-        gl.loc[gl_index, 'Status'] = config.status_list_backlog[0]
+        gl.loc[gl_index, 'Status'] = config.configDictionary['backlog'][0]
     write_dataframes()
 
 
@@ -140,15 +140,15 @@ def check_consistency():
     if sum(res['Name'].isna()) > 0:
         raise Exception('Game missing for playthrough')
     # check whether all games with playthroughs have a played status
-    if sum(res['Status'].isin(config.status_list_unplayed)) > 0:
+    if sum(res['Status'].isin(config.configDictionary['unplayed'])) > 0:
         raise Exception('Game with playthrough has unplayed status')
     # check whether all games without playthoughs have an unplayed status
     tes = ~gl['IGDB_ID'].isin(pt['IGDB_ID'])
-    if sum(gl.loc[tes, 'Status'].isin(config.status_list_played)) > 0:
+    if sum(gl.loc[tes, 'Status'].isin(config.configDictionary['played'])) > 0:
         raise Exception('Game without playthrough has played status')
     # check whether all games have valid status
-    if sum(~gl['Status'].isin(config.status_list_played + config.status_list_unplayed)) > 0:
+    if sum(~gl['Status'].isin(config.configDictionary['status_list_played'] + config.configDictionary['unplayed'])) > 0:
         raise Exception('Game has invalid status')
     # check whether all games have valid platform
-    if sum(~gl['Platform'].isin(config.platform_list)) > 0:
+    if sum(~gl['Platform'].isin(config.configDictionary['platforms'])) > 0:
         raise Exception('Game has invalid platform')
