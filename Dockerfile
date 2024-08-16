@@ -13,6 +13,7 @@ RUN mkdir -p /files/import
 RUN mkdir -p /files/export
 RUN mkdir -p /files/database
 RUN mkdir -p /files/config
+RUN mkdir -p /files/downloads
 
 COPY assets/ /files/assets
 
