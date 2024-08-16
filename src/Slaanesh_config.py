@@ -137,7 +137,11 @@ def load_config():
 def update_config(updates):
     global configDictionary, file_config
     for update in updates:
-        if (update.section is not None and update.section in config):
+        if (update.section is not None):
+
+            if(update.section not in config):
+                config.add_section(update.section)
+            
             #lists
             if(update.key is None):
                 list = update.value.split(sep=',')
