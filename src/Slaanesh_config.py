@@ -1,5 +1,4 @@
 import configparser
-import ast
 
 version = "0.61-beta"
 
