@@ -111,16 +111,13 @@ def load_config():
         for key in config[section]:
 
             #int
-            int_check = False
-
             try:
-                int_check = bool(int(config[section][key]))
+                if(isinstance(int(config[section][key]), (int))):
+                    configDictionary[section][key] = config.getint(section, key, fallback=configDictionary[section][key])
+                    continue
             except:
                 pass
             
-            if(int_check):
-                configDictionary[section][key] = config.getint(section, key, fallback=configDictionary[section][key])
-                continue
 
             #boolean
             if(config[section][key] == 'True' or config[section][key] == 'False'):
