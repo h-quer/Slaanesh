@@ -783,7 +783,7 @@ def action_export_csv():
         ui.notify('CSV export not successful: ' + str(e))
     
 def action_export_download():
-    imex.export_Download()
+    imex.export_download()
 
 
 def action_update_api_data():
