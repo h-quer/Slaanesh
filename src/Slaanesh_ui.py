@@ -10,7 +10,7 @@ import Slaanesh_IGDB as igdb
 dark = ui.dark_mode()
 browser_dm = None
 
-exportTimer = ui.timer(config.configDictionary['export']['scheduled_period'], lambda:{imex.export_csv()}, active=config.configDictionary['export']['scheduled_export'])
+export_timer = ui.timer(config.config_dictionary['export']['scheduled_period'], lambda:{imex.export_csv()}, active=config.config_dictionary['export']['scheduled_export'])
 
 # general confirmation dialog
 with ui.dialog() as confirmation, ui.card():
@@ -22,7 +22,7 @@ with ui.dialog() as confirmation, ui.card():
 
 def refresh_ui():
     global dark
-    dark.set_value(config.configDictionary['ui']['dark_mode'])
+    dark.set_value(config.config_dictionary['ui']['dark_mode'])
     panel_overview.refresh()
     panel_playing.refresh()
     panel_played.refresh()
@@ -44,21 +44,21 @@ def display_ui(Native:bool):
                     justify-content: center;}}
         </style>
         ''')
-    global dark, exportTimer
-    dark.set_value(config.configDictionary['ui']['dark_mode'])
-    exportTimer.interval = config.configDictionary['export']['scheduled_period']
+    global dark, export_timer
+    dark.set_value(config.config_dictionary['ui']['dark_mode'])
+    export_timer.interval = config.config_dictionary['export']['scheduled_period']
     with ui.column().classes('w-full h-[96vh] flex-nowrap'):
         ui_header()
         tabs_lists()
     app.on_connect(handle_connection)
-    ui.run(title=config.configDictionary['ui']['name'], favicon=config.file_icon, reload=False, native=Native)
+    ui.run(title=config.config_dictionary['ui']['name'], favicon=config.file_icon, reload=False, native=Native)
 
 
 def ui_header():
     with ui.grid(columns=3).classes('w-full'):
         with ui.row().classes('justify-center items-center'):
             ui.image(config.file_icon).classes('w-12')
-            ui.label(config.configDictionary['ui']['name']).classes('text-4xl')
+            ui.label(config.config_dictionary['ui']['name']).classes('text-4xl')
         with ui.row().classes('justify-center items-center'):
             ui.button(text='Add game', icon='add_circle', on_click=action_add_game)
         with ui.row().classes('justify-center items-center'):
@@ -96,7 +96,7 @@ def dialog_settings():
                     ui.label('General UI settings').classes('text-lg font-bold w-full')
                 with ui.grid(columns=4).classes('justify-center items-center w-full'):
                     with ui.row().classes('items-center flex-nowrap'):
-                        new_dark_mode = ui.checkbox(text='Dark mode', value=config.configDictionary['ui']['dark_mode'],
+                        new_dark_mode = ui.checkbox(text='Dark mode', value=config.config_dictionary['ui']['dark_mode'],
                                                     on_change=lambda: save_dark_mode.set_visibility(True))
                         new_dark_mode.props(add='toggle-indeterminate')
                         new_dark_mode.props(add='indeterminate-value="default"')
@@ -104,20 +104,20 @@ def dialog_settings():
                                                                                                update=[config.configUpdate('ui','dark_mode',new_dark_mode.value)])).props('round size=sm')
                         save_dark_mode.set_visibility(False)
                     with ui.row().classes('items-center flex-nowrap'):
-                        new_color_coding = ui.checkbox(text='Color coding', value=config.configDictionary['ui']['color_coding'],
+                        new_color_coding = ui.checkbox(text='Color coding', value=config.config_dictionary['ui']['color_coding'],
                                                        on_change=lambda: save_color_coding.set_visibility(True))
                         save_color_coding = ui.button(icon='save',
                                                       on_click=lambda: update_config(button=save_color_coding, check_confirm=False,
                                                                                      update=[config.configUpdate('ui','color_coding',new_color_coding.value)])).props('round size=sm')
                         save_color_coding.set_visibility(False)
                     with ui.row().classes('items-center flex-nowrap'):
-                        new_row_height = ui.number(label='Row height (px)', value=config.configDictionary['ui']['row_height'], format='%d',
+                        new_row_height = ui.number(label='Row height (px)', value=config.config_dictionary['ui']['row_height'], format='%d',
                                                    on_change=lambda: save_row_height.set_visibility(True))
                         save_row_height = ui.button(icon='save', on_click=lambda: update_config(button=save_row_height, check_confirm=False,
                                                                                                 update=[config.configUpdate('ui','row_height',new_row_height.value)])).props('round size=sm')
                         save_row_height.set_visibility(False)
                     with ui.row().classes('items-center flex-nowrap'):
-                        new_card_width = ui.number(label='Card width (px)', value=config.configDictionary['ui']['card_width'], format='%d',
+                        new_card_width = ui.number(label='Card width (px)', value=config.config_dictionary['ui']['card_width'], format='%d',
                                                    on_change=lambda: save_card_width.set_visibility(True))
                         save_card_width = ui.button(icon='save', on_click=lambda: update_config(button=save_card_width, check_confirm=False,
                                                                                                 update=[config.configUpdate('ui','card_width',new_card_width.value)])).props('round size=sm')
@@ -138,9 +138,9 @@ def dialog_settings():
                                                                                         ])).props('round size=sm')
                             s_playing.set_visibility(False)
                         with ui.row().classes('justify-center items-center flex-nowrap w-full'):
-                            playing_type = ui.select(config.display_types, label='Style', value=config.configDictionary['tabs']['type_playing'],
+                            playing_type = ui.select(config.display_types, label='Style', value=config.config_dictionary['tabs']['type_playing'],
                                                      on_change=lambda: s_playing.set_visibility(True))
-                            playing_filter = ui.checkbox(text='Filter', value=config.configDictionary['tabs']['filter_playing'],
+                            playing_filter = ui.checkbox(text='Filter', value=config.config_dictionary['tabs']['filter_playing'],
                                                          on_change=lambda: s_playing.set_visibility(True))
                     with ui.card():
                         with ui.row().classes('justify-center items-center flex-nowrap w-full font-bold'):
@@ -152,9 +152,9 @@ def dialog_settings():
                                                                                         ])).props('round size=sm')
                             s_played.set_visibility(False)
                         with ui.row().classes('justify-center items-center flex-nowrap w-full'):
-                            played_type = ui.select(config.display_types, label='Style', value=config.configDictionary['tabs']['type_played'],
+                            played_type = ui.select(config.display_types, label='Style', value=config.config_dictionary['tabs']['type_played'],
                                                     on_change=lambda: s_played.set_visibility(True))
-                            played_filter = ui.checkbox(text='Filter', value=config.configDictionary['tabs']['filter_played'],
+                            played_filter = ui.checkbox(text='Filter', value=config.config_dictionary['tabs']['filter_played'],
                                                         on_change=lambda: s_played.set_visibility(True))
                     with ui.card():
                         with ui.row().classes('justify-center items-center flex-nowrap w-full font-bold'):
@@ -166,9 +166,9 @@ def dialog_settings():
                                                                                         ])).props('round size=sm')
                             s_backlog.set_visibility(False)
                         with ui.row().classes('justify-center items-center flex-nowrap w-full'):
-                            backlog_type = ui.select(config.display_types, label='Style', value=config.configDictionary['tabs']['type_backlog'],
+                            backlog_type = ui.select(config.display_types, label='Style', value=config.config_dictionary['tabs']['type_backlog'],
                                                      on_change=lambda: s_backlog.set_visibility(True))
-                            backlog_filter = ui.checkbox(text='Filter', value=config.configDictionary['tabs']['filter_backlog'],
+                            backlog_filter = ui.checkbox(text='Filter', value=config.config_dictionary['tabs']['filter_backlog'],
                                                          on_change=lambda: s_backlog.set_visibility(True))
                     with ui.card():
                         with ui.row().classes('justify-center items-center flex-nowrap w-full font-bold'):
@@ -180,9 +180,9 @@ def dialog_settings():
                                                                                         ])).props('round size=sm')
                             s_wishlist.set_visibility(False)
                         with ui.row().classes('justify-center items-center flex-nowrap w-full'):
-                            wishlist_type = ui.select(config.display_types, label='Style', value=config.configDictionary['tabs']['type_wishlist'],
+                            wishlist_type = ui.select(config.display_types, label='Style', value=config.config_dictionary['tabs']['type_wishlist'],
                                                       on_change=lambda: s_wishlist.set_visibility(True))
-                            wishlist_filter = ui.checkbox(text='Filter', value=config.configDictionary['tabs']['filter_wishlist'],
+                            wishlist_filter = ui.checkbox(text='Filter', value=config.config_dictionary['tabs']['filter_wishlist'],
                                                           on_change=lambda: s_wishlist.set_visibility(True))
 
             # Platform and category settings
@@ -190,37 +190,37 @@ def dialog_settings():
                 with ui.row():
                     ui.label('Platforms and categories').classes('text-lg font-bold w-full')
                 with ui.row().classes('justify-between items-center flex-nowrap w-full'):
-                    new_platform_list = ui.input(label='Platforms', value=config.configDictionary['platforms'],
+                    new_platform_list = ui.input(label='Platforms', value=config.config_dictionary['platforms'],
                                                  on_change=lambda: save_platforms.set_visibility(True)).classes('w-full')
                     save_platforms = ui.button(icon='save', on_click=lambda: update_config(button=save_platforms,
                                                                                            update=[config.configUpdate('platforms',None,new_platform_list.value)])).props('round size=sm')
                     save_platforms.set_visibility(False)
                 with ui.row().classes('justify-between items-center flex-nowrap w-full'):
-                    new_playing = ui.input(label='Playing', value=config.configDictionary['playing'],
+                    new_playing = ui.input(label='Playing', value=config.config_dictionary['playing'],
                                            on_change=lambda: save_playing.set_visibility(True)).classes('w-full')
                     save_playing = ui.button(icon='save', on_click=lambda: update_config(button=save_playing,
                                                                                          update=[config.configUpdate('playing',None,new_playing.value)])).props('round size=sm')
                     save_playing.set_visibility(False)
                 with ui.row().classes('justify-between items-center flex-nowrap w-full'):
-                    new_played_pos = ui.input(label='Played positive', value=config.configDictionary['played positive'],
+                    new_played_pos = ui.input(label='Played positive', value=config.config_dictionary['played positive'],
                                               on_change=lambda: save_played_pos.set_visibility(True)).classes('w-full')
                     save_played_pos = ui.button(icon='save', on_click=lambda: update_config(button=save_played_pos,
                                                                                             update=[config.configUpdate('played positive',None,new_played_pos.value)])).props('round size=sm')
                     save_played_pos.set_visibility(False)
                 with ui.row().classes('justify-between items-center flex-nowrap w-full'):
-                    new_played_neg = ui.input(label='Played negative', value=config.configDictionary['played negative'],
+                    new_played_neg = ui.input(label='Played negative', value=config.config_dictionary['played negative'],
                                               on_change=lambda: save_played_neg.set_visibility(True)).classes('w-full')
                     save_played_neg = ui.button(icon='save', on_click=lambda: update_config(button=save_played_neg,
                                                                                             update=[config.configUpdate('played negative',None,new_played_neg.value)])).props('round size=sm')
                     save_played_neg.set_visibility(False)
                 with ui.row().classes('justify-between items-center flex-nowrap w-full'):
-                    new_backlog = ui.input(label='Backlog', value=config.configDictionary['backlog'],
+                    new_backlog = ui.input(label='Backlog', value=config.config_dictionary['backlog'],
                                            on_change=lambda: save_backlog.set_visibility(True)).classes('w-full')
                     save_backlog = ui.button(icon='save', on_click=lambda: update_config(button=save_backlog,
                                                                                          update=[config.configUpdate('backlog',None,new_backlog.value)])).props('round size=sm')
                     save_backlog.set_visibility(False)
                 with ui.row().classes('justify-between items-center flex-nowrap w-full'):
-                    new_wishlist = ui.input(label='Wishlist', value=config.configDictionary['wishlist'],
+                    new_wishlist = ui.input(label='Wishlist', value=config.config_dictionary['wishlist'],
                                             on_change=lambda: save_wishlist.set_visibility(True)).classes('w-full')
                     save_wishlist = ui.button(icon='save', on_click=lambda: update_config(button=save_wishlist,
                                                                                           update=[config.configUpdate('wishlist',None,new_wishlist.value)])).props('round size=sm')
@@ -258,9 +258,9 @@ def dialog_tools():
                 ui.label('Scheduled Export').classes('text-lg font-bold')
 
             with ui.column():
-                global exportTimer
-                exportSwitch = ui.switch('Use Scheduled Export', value=config.configDictionary['export']['scheduled_export'], on_change=lambda: config.update_config(updates=[config.configUpdate('export','scheduled_export',exportSwitch.value)])).bind_value_to(exportTimer, 'active')
-                exportSelect = ui.toggle({86400: 'Daily', 604800: 'Weekly'}, value=config.configDictionary['export']['scheduled_period'], on_change=lambda: action_schedule_change(exportSelect.value)).bind_visibility_from(exportSwitch, 'value')
+                global export_timer
+                export_switch = ui.switch('Use Scheduled Export', value=config.config_dictionary['export']['scheduled_export'], on_change=lambda: config.update_config(updates=[config.configUpdate('export','scheduled_export',export_switch.value)])).bind_value_to(export_timer, 'active')
+                export_select = ui.toggle({86400: 'Daily', 604800: 'Weekly'}, value=config.config_dictionary['export']['scheduled_period'], on_change=lambda: action_schedule_change(export_select.value)).bind_visibility_from(export_switch, 'value')
 
 
         with ui.card():
@@ -332,54 +332,54 @@ def tabs_lists():
 
 @ui.refreshable
 def panel_playing():
-    res = data.gl[data.gl.Status.isin(config.configDictionary['playing'])].copy()
-    res['Platform'] = pd.Categorical(res['Platform'], config.configDictionary['platforms'])
-    res['Status'] = pd.Categorical(res['Status'], config.configDictionary['playing'])
+    res = data.gl[data.gl.Status.isin(config.config_dictionary['playing'])].copy()
+    res['Platform'] = pd.Categorical(res['Platform'], config.config_dictionary['platforms'])
+    res['Status'] = pd.Categorical(res['Status'], config.config_dictionary['playing'])
     res.sort_values(by=['Status', 'Platform', 'Game_comment'], inplace=True)
-    match config.configDictionary['tabs']['type_playing']:
+    match config.config_dictionary['tabs']['type_playing']:
         case 'cards': x = display_cards
         case 'table': x = display_table
         case _: x = display_cards
-    x(res, has_playthroughs=False, show_release_status=False, show_filter=config.configDictionary['tabs']['filter_playing'], color_coding=False)
+    x(res, has_playthroughs=False, show_release_status=False, show_filter=config.config_dictionary['tabs']['filter_playing'], color_coding=False)
 
 
 @ui.refreshable
 def panel_played():
     res = pd.merge(data.pt, data.gl, how='left', on='IGDB_ID')
-    res['Platform'] = pd.Categorical(res['Platform'], config.configDictionary['platforms'])
-    res['Status'] = pd.Categorical(res['Status'], config.configDictionary['played'])
+    res['Platform'] = pd.Categorical(res['Platform'], config.config_dictionary['platforms'])
+    res['Status'] = pd.Categorical(res['Status'], config.config_dictionary['played'])
     res.sort_values(by='Date', ascending=False, inplace=True)
-    match config.configDictionary['tabs']['type_played']:
+    match config.config_dictionary['tabs']['type_played']:
         case 'cards': x = display_cards
         case 'table': x = display_table
         case _: x = display_table
-    x(res, has_playthroughs=True, show_release_status=False, show_filter=config.configDictionary['tabs']['filter_played'], color_coding=config.configDictionary['ui']['color_coding'])
+    x(res, has_playthroughs=True, show_release_status=False, show_filter=config.config_dictionary['tabs']['filter_played'], color_coding=config.config_dictionary['ui']['color_coding'])
 
 
 @ui.refreshable
 def panel_backlog():
-    res = data.gl[data.gl.Status.isin(config.configDictionary['backlog'])].copy()
-    res['Platform'] = pd.Categorical(res['Platform'], config.configDictionary['platforms'])
-    res['Status'] = pd.Categorical(res['Status'], config.configDictionary['backlog'])
+    res = data.gl[data.gl.Status.isin(config.config_dictionary['backlog'])].copy()
+    res['Platform'] = pd.Categorical(res['Platform'], config.config_dictionary['platforms'])
+    res['Status'] = pd.Categorical(res['Status'], config.config_dictionary['backlog'])
     res.sort_values(by=['Status', 'Platform', 'Game_comment'], inplace=True)
-    match config.configDictionary['tabs']['type_backlog']:
+    match config.config_dictionary['tabs']['type_backlog']:
         case 'cards': x = display_cards
         case 'table': x = display_table
         case _: x = display_table
-    x(res, has_playthroughs=False, show_release_status=False, show_filter=config.configDictionary['tabs']['filter_backlog'], color_coding=False)
+    x(res, has_playthroughs=False, show_release_status=False, show_filter=config.config_dictionary['tabs']['filter_backlog'], color_coding=False)
 
 
 @ui.refreshable
 def panel_wishlist():
-    res = data.gl[data.gl.Status.isin(config.configDictionary['wishlist'])].copy()
-    res['Platform'] = pd.Categorical(res['Platform'], config.configDictionary['platforms'])
-    res['Status'] = pd.Categorical(res['Status'], config.configDictionary['wishlist'])
+    res = data.gl[data.gl.Status.isin(config.config_dictionary['wishlist'])].copy()
+    res['Platform'] = pd.Categorical(res['Platform'], config.config_dictionary['platforms'])
+    res['Status'] = pd.Categorical(res['Status'], config.config_dictionary['wishlist'])
     res.sort_values(by=['Status', 'Release_date', 'Platform', 'Game_comment'], key=lambda col: col.replace(0, np.nan), na_position='last', inplace=True)
-    match config.configDictionary['tabs']['type_wishlist']:
+    match config.config_dictionary['tabs']['type_wishlist']:
         case 'cards': x = display_cards
         case 'table': x = display_table
         case _: x = display_table
-    x(res, has_playthroughs=False, show_release_status=True, show_filter=config.configDictionary['tabs']['filter_wishlist'], color_coding=False)
+    x(res, has_playthroughs=False, show_release_status=True, show_filter=config.config_dictionary['tabs']['filter_wishlist'], color_coding=False)
 
 
 @ui.refreshable
@@ -403,17 +403,17 @@ def panel_overview():
                     'yAxis': {'type': 'log', 'splitLine': {'lineStyle': {'color': '#333' if dark_table() else '#eee'}}},
                     'xAxis': {'type': 'category', 'data': ['Playing', 'Played', 'Backlog', 'Wishlist']},
                     'tooltip': {'trigger': 'item'},
-                    'series': {'type': 'bar', 'data': [sum(data.gl['Status'].isin(config.configDictionary['playing'])),
-                                                       sum(data.gl['Status'].isin(config.configDictionary['played'])),
-                                                       sum(data.gl['Status'].isin(config.configDictionary['backlog'])),
-                                                       sum(data.gl['Status'].isin(config.configDictionary['wishlist']))],
+                    'series': {'type': 'bar', 'data': [sum(data.gl['Status'].isin(config.config_dictionary['playing'])),
+                                                       sum(data.gl['Status'].isin(config.config_dictionary['played'])),
+                                                       sum(data.gl['Status'].isin(config.config_dictionary['backlog'])),
+                                                       sum(data.gl['Status'].isin(config.config_dictionary['wishlist']))],
                                'label': {'normal': {'show': True, 'position': 'top', 'textStyle': {'color': 'white' if dark_table() else 'black'}}}},
                 })
 
         with ui.column().classes('w-full'):
             # Completion rate
             graph_data = []
-            for status in config.configDictionary['played']:
+            for status in config.config_dictionary['played']:
                 graph_data.append({'value': sum(res.loc[:, 'Status'] == str(status)), 'name': status})
 
             with ui.card().classes('w-full'):
@@ -428,7 +428,7 @@ def panel_overview():
             with ui.card().classes('w-full'):
                 graph_data = []
                 platform_names = []
-                for x in config.configDictionary['platforms']:
+                for x in config.config_dictionary['platforms']:
                     platform_names.append(x)
                     graph_data.append(sum(data.gl['Platform'].isin([x, ])))
 
@@ -451,7 +451,7 @@ def panel_overview():
                 graph_data = []
                 list_years = list(range(dt.datetime.now().year, dt.datetime.now().year-7, -1))
                 list_years.append(str(dt.datetime.now().year-7) + "\nand\nbefore")
-                for status in config.configDictionary['played']:
+                for status in config.config_dictionary['played']:
                     yearly_data = []
                     for year in range(dt.datetime.now().year, dt.datetime.now().year-7, -1):
                         a = res['Date'] >= dt.datetime(year, 1, 1)
@@ -517,9 +517,9 @@ def dialog_game_editor(igdb_id: int):
                                 editor_g.delete()
 
                         with ui.dialog(value=True) as d_editor_g, ui.card():
-                            d_status = ui.select(config.configDictionary['played'] if has_pt else config.configDictionary['unplayed'],
+                            d_status = ui.select(config.config_dictionary['played'] if has_pt else config.config_dictionary['unplayed'],
                                                  label='Status', value=game_info['Status'][game_index])
-                            d_platform = ui.select(config.configDictionary['platforms'], label='Platform', value=game_info['Platform'][game_index])
+                            d_platform = ui.select(config.config_dictionary['platforms'], label='Platform', value=game_info['Platform'][game_index])
                             d_comment = ui.input(label='Game comment', value=game_info['Game_comment'][game_index])
                             with ui.row():
                                 ui.button('Commit', on_click=lambda: action(d_status.value, d_platform.value, d_comment.value, d_editor_g))
@@ -566,8 +566,8 @@ def dialog_game_editor(igdb_id: int):
                     except Exception as e:
                         ui.notify('Add playthrough not successful: ' + str(e))
 
-                pt_status = ui.select(config.configDictionary['played'], label='Status',
-                                      value=game_info['Status'][game_index] if has_pt else config.configDictionary['played'][0]).classes('w-1/4 flex-1')
+                pt_status = ui.select(config.config_dictionary['played'], label='Status',
+                                      value=game_info['Status'][game_index] if has_pt else config.config_dictionary['played'][0]).classes('w-1/4 flex-1')
                 with ui.input('Date', value=dt.date.today().strftime("%Y-%m-%d")).classes('w-1/4 flex-1') as pt_date:
                     with pt_date.add_slot('append'):
                         ui.icon('edit_calendar').on('click', lambda: menu.open()).classes('cursor-pointer')
@@ -624,10 +624,10 @@ def dialog_game_editor(igdb_id: int):
 
 
 def dark_table():
-    if config.configDictionary['ui']['dark_mode'] is None:
+    if type(config.config_dictionary['ui']['dark_mode']) is None:
         return browser_dm
     else:
-        return config.configDictionary['ui']['dark_mode']
+        return config.config_dictionary['ui']['dark_mode']
 
 
 def display_cards(cards_data: pd.DataFrame, has_playthroughs=False, show_release_status=False, show_filter=True, color_coding=False):
@@ -657,7 +657,7 @@ def display_cards(cards_data: pd.DataFrame, has_playthroughs=False, show_release
     table.props(add='grid')
     table.add_slot('item', f'''
         <q-card @click="() => $parent.$emit('edit', props.row.IGDB_ID)"
-                class="m-2 w-[{config.configDictionary['ui']['card_width']}px] h-fit">
+                class="m-2 w-[{config.config_dictionary['ui']['card_width']}px] h-fit">
             <div class="w-full text-center text-lg text-bold pt-4 px-4">
                 <p>{{{{ props.row.Name }}}}</p>
             </div>
@@ -666,7 +666,7 @@ def display_cards(cards_data: pd.DataFrame, has_playthroughs=False, show_release
                     <img :src="props.row.IGDB_image"/>
                 </div>
                 <div class="text-center place-self-center leading-loose text-base max-w-[160px] w-1/2 p-4">
-                    {f'''<span :class="{config.configDictionary['played negative']}.includes(props.row.Status)
+                    {f'''<span :class="{config.config_dictionary['played negative']}.includes(props.row.Status)
                             ? 'bg-red-100 text-red-950 dark:bg-red-900 dark:text-red-50 px-2 py-1 rounded'
                             : 'bg-green-100 text-green-950 dark:bg-green-900 dark:text-green-50 px-2 py-1 rounded'">
                     ''' if color_coding else "<p>"}
@@ -690,9 +690,9 @@ def display_cards(cards_data: pd.DataFrame, has_playthroughs=False, show_release
 
 def display_table(table_data: pd.DataFrame, has_playthroughs=False, show_release_status=False, show_filter=True, color_coding=False):
     def color_badges(val):
-        if val in config.configDictionary['played positive']:
+        if val in config.config_dictionary['played positive']:
             return """<span class="bg-green-100 text-green-950 dark:bg-green-900 dark:text-green-50 px-3 py-2 rounded">""" + val + """</span>"""
-        if val in config.configDictionary['played negative']:
+        if val in config.config_dictionary['played negative']:
             return """<span class="bg-red-100 text-red-950 dark:bg-red-900 dark:text-red-50 px-3 py-2 rounded">""" + val + """</span>"""
         return val
 
@@ -740,7 +740,7 @@ def display_table(table_data: pd.DataFrame, has_playthroughs=False, show_release
                        'cellClass': 'justify-center items-center text-base font-normal',
                        'headerClass': 'text-lg font-bold'}
     row_data = table_data.to_dict('records')
-    table = ui.aggrid({'columnDefs': columns, 'rowData': row_data, 'rowHeight': config.configDictionary['ui']['row_height'], 'defaultColDef': default_col_def},
+    table = ui.aggrid({'columnDefs': columns, 'rowData': row_data, 'rowHeight': config.config_dictionary['ui']['row_height'], 'defaultColDef': default_col_def},
                       theme=("alpine-dark" if dark_table() else "alpine"),
                       html_columns=[0, 3] if color_coding else [0],
                       auto_size_columns=False).classes('w-11/12 h-full self-center')
@@ -816,14 +816,14 @@ async def action_add_game():
             d_igdb_id = ui.input(label="IGDB ID").bind_visibility_from(d_add_by_id, 'value')
             d_name = ui.input(label="Name").bind_visibility_from(d_add_by_id, 'value', backward=lambda x: not x)
         with ui.row().classes('items-center flex-nowrap'):
-            d_status_g = ui.select(config.configDictionary['unplayed'], label="Status", value=config.configDictionary['unplayed'][0]).classes('w-1/4')
-            d_platform = ui.select(config.configDictionary['platforms'], label="Platform", value=config.configDictionary['platforms'][0]).classes('w-1/4')
+            d_status_g = ui.select(config.config_dictionary['unplayed'], label="Status", value=config.config_dictionary['unplayed'][0]).classes('w-1/4')
+            d_platform = ui.select(config.config_dictionary['platforms'], label="Platform", value=config.config_dictionary['platforms'][0]).classes('w-1/4')
             d_game_comment = ui.input(label='Game comment').classes('w-5/12')
         with ui.row().classes('items-center flex-nowrap'):
             d_add_pt = ui.checkbox('Also add playthrough', value=False)
             d_status_g.bind_visibility_from(d_add_pt, 'value', backward=lambda x: not x)
         with ui.row().classes('items-center flex-nowrap').bind_visibility_from(d_add_pt, 'value'):
-            d_status_pt = ui.select(config.configDictionary['played'], label="Status", value=config.configDictionary['played'][0])
+            d_status_pt = ui.select(config.config_dictionary['played'], label="Status", value=config.config_dictionary['played'][0])
             d_status_pt.bind_visibility_from(d_add_pt, 'value').classes('w-1/4')
             with ui.input('Date', value=dt.date.today().strftime("%Y-%m-%d")).classes('w-1/4') as d_date:
                 with d_date.add_slot('append'):
@@ -891,6 +891,6 @@ def action_match_ids_to_names(names: str):
     ui.notify('Name-to-ID list successfully exported')
 
 def action_schedule_change(value):
-    global exportTimer
+    global export_timer
     config.update_config(updates=[config.configUpdate('export','scheduled_period',value)])
-    exportTimer.interval = value
+    export_timer.interval = value

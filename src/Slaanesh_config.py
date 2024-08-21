@@ -21,7 +21,7 @@ server_path_export = r'/export'
 #display types
 display_types = ['cards', 'table']
 
-configDictionary = {
+config_dictionary = {
     #values in config.ini
     'ui': {
         'name': 'Slaanesh1',
@@ -91,7 +91,7 @@ class configUpdate:
 
 
 def load_config():
-    global configDictionary
+    global config_dictionary
     config.read(file_config)
 
     for section in config:
@@ -102,10 +102,10 @@ def load_config():
             continue
 
         #list
-        if(type(configDictionary[section]) is list):
-            configDictionary[section].clear()
+        if(type(config_dictionary[section]) is list):
+            config_dictionary[section].clear()
             for key in config[section]:
-                configDictionary[section].append(key)
+                config_dictionary[section].append(key)
             continue
 
         for key in config[section]:
@@ -113,7 +113,7 @@ def load_config():
             #int
             try:
                 if(isinstance(int(config[section][key]), (int))):
-                    configDictionary[section][key] = config.getint(section, key, fallback=configDictionary[section][key])
+                    config_dictionary[section][key] = config.getint(section, key, fallback=config_dictionary[section][key])
                     continue
             except:
                 pass
@@ -121,18 +121,18 @@ def load_config():
 
             #boolean
             if(config[section][key] == 'True' or config[section][key] == 'False'):
-                configDictionary[section][key] = config.getboolean(section, key, fallback=configDictionary[section][key])
+                config_dictionary[section][key] = config.getboolean(section, key, fallback=config_dictionary[section][key])
                 continue
 
             #other
-            configDictionary[section][key] = config[section][key]
+            config_dictionary[section][key] = config[section][key]
 
-    configDictionary['played'] = configDictionary['played positive'] + configDictionary['played negative']
-    configDictionary['unplayed'] = configDictionary['backlog'] + configDictionary['wishlist'] + configDictionary['playing']
+    config_dictionary['played'] = config_dictionary['played positive'] + config_dictionary['played negative']
+    config_dictionary['unplayed'] = config_dictionary['backlog'] + config_dictionary['wishlist'] + config_dictionary['playing']
 
 
-def update_config(updates):
-    global configDictionary, file_config
+def update_config(updates:configUpdate):
+    global config_dictionary, file_config
     for update in updates:
         if (update.section is not None):
 
@@ -142,19 +142,26 @@ def update_config(updates):
             #lists
             if(update.key is None):
                 list = update.value.split(sep=',')
-                configDictionary[update.section] = list
+                config_dictionary[update.section] = list
                 config[update.section].clear()
                 for item in list:
                     config.set(update.section, item)
                 continue
 
-            # #others
+            #others
             if (update.key in config[update.section]):
                 if(type(update.value) is bool):
-                    configDictionary[update.section][update.key] = update.value
+                    config_dictionary[update.section][update.key] = update.value
                     config[update.section][update.key] = str(update.value)
                     continue
-                config[update.section][update.key] = configDictionary[update.section][update.key] = str(update.value)
+                try:
+                    if(type(int(update.value) is int)):
+                        config_dictionary[update.section][update.key] = int(update.value)
+                        config[update.section][update.key] = str(int(update.value))
+                        continue
+                except:
+                    pass
+                config[update.section][update.key] = config_dictionary[update.section][update.key] = str(update.value)
 
     with open(file_config, 'w') as configfile:
         config.write(configfile)
