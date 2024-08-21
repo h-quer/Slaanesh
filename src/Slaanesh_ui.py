@@ -778,7 +778,7 @@ def action_export_csv():
         ui.notify('CSV export not successful: ' + str(e))
     
 def action_export_download():
-    imex.export_Download()
+    imex.export_download()
 
 
 def action_update_api_data():
@@ -894,3 +894,4 @@ def action_schedule_change(value):
     global export_timer
     config.update_config(updates=[config.configUpdate('export','scheduled_period',value)])
     export_timer.interval = value
+
