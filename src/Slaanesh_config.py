@@ -15,7 +15,7 @@ path_export = r'/files/export/'
 path_downloads = r'/files/downloads'
 # serving files,
 server_file_icon = r'/assets/Slaanesh.png'
-server_path_covers =  r'/covers'
+server_path_covers = r'/covers'
 server_path_downloads = r'/downloads'
 server_path_export = r'/export'
 #display types
