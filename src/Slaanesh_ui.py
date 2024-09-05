@@ -101,26 +101,26 @@ def dialog_settings():
                         new_dark_mode.props(add='toggle-indeterminate')
                         new_dark_mode.props(add='indeterminate-value="default"')
                         save_dark_mode = ui.button(icon='save', on_click=lambda: update_config(button=save_dark_mode, check_confirm=False,
-                                                                                               update=[config.configUpdate('ui','dark_mode',new_dark_mode.value)])).props('round size=sm')
+                                                                                               update=[('ui','dark_mode',new_dark_mode.value)])).props('round size=sm')
                         save_dark_mode.set_visibility(False)
                     with ui.row().classes('items-center flex-nowrap'):
                         new_color_coding = ui.checkbox(text='Color coding', value=config.config_dictionary['ui']['color_coding'],
                                                        on_change=lambda: save_color_coding.set_visibility(True))
                         save_color_coding = ui.button(icon='save',
                                                       on_click=lambda: update_config(button=save_color_coding, check_confirm=False,
-                                                                                     update=[config.configUpdate('ui','color_coding',new_color_coding.value)])).props('round size=sm')
+                                                                                     update=[('ui','color_coding',new_color_coding.value)])).props('round size=sm')
                         save_color_coding.set_visibility(False)
                     with ui.row().classes('items-center flex-nowrap'):
                         new_row_height = ui.number(label='Row height (px)', value=config.config_dictionary['ui']['row_height'], format='%d',
                                                    on_change=lambda: save_row_height.set_visibility(True))
                         save_row_height = ui.button(icon='save', on_click=lambda: update_config(button=save_row_height, check_confirm=False,
-                                                                                                update=[config.configUpdate('ui','row_height',new_row_height.value)])).props('round size=sm')
+                                                                                                update=[('ui','row_height',new_row_height.value)])).props('round size=sm')
                         save_row_height.set_visibility(False)
                     with ui.row().classes('items-center flex-nowrap'):
                         new_card_width = ui.number(label='Card width (px)', value=config.config_dictionary['ui']['card_width'], format='%d',
                                                    on_change=lambda: save_card_width.set_visibility(True))
                         save_card_width = ui.button(icon='save', on_click=lambda: update_config(button=save_card_width, check_confirm=False,
-                                                                                                update=[config.configUpdate('ui','card_width',new_card_width.value)])).props('round size=sm')
+                                                                                                update=[('ui','card_width',new_card_width.value)])).props('round size=sm')
                         save_card_width.set_visibility(False)
 
             # Tabs settings
@@ -133,8 +133,8 @@ def dialog_settings():
                             ui.label('Playing')
                             s_playing = ui.button(icon='save',
                                                   on_click=lambda: update_config(button=s_playing, check_confirm=False,
-                                                                                 update=[config.configUpdate('tabs','type_playing',playing_type.value),
-                                                                                         config.configUpdate('tabs','filter_playing',playing_filter.value)
+                                                                                 update=[('tabs','type_playing',playing_type.value),
+                                                                                         ('tabs','filter_playing',playing_filter.value)
                                                                                         ])).props('round size=sm')
                             s_playing.set_visibility(False)
                         with ui.row().classes('justify-center items-center flex-nowrap w-full'):
@@ -147,8 +147,8 @@ def dialog_settings():
                             ui.label('Played')
                             s_played = ui.button(icon='save',
                                                  on_click=lambda: update_config(button=s_played, check_confirm=False,
-                                                                                update=[config.configUpdate('tabs','type_played',played_type.value),
-                                                                                         config.configUpdate('tabs','filter_played',played_filter.value)
+                                                                                update=[('tabs','type_played',played_type.value),
+                                                                                         ('tabs','filter_played',played_filter.value)
                                                                                         ])).props('round size=sm')
                             s_played.set_visibility(False)
                         with ui.row().classes('justify-center items-center flex-nowrap w-full'):
@@ -161,8 +161,8 @@ def dialog_settings():
                             ui.label('Backlog')
                             s_backlog = ui.button(icon='save',
                                                   on_click=lambda: update_config(button=s_backlog, check_confirm=False,
-                                                                                 update=[config.configUpdate('tabs','type_backlog',backlog_type.value),
-                                                                                         config.configUpdate('tabs','filter_backlog',backlog_filter.value)
+                                                                                 update=[('tabs','type_backlog',backlog_type.value),
+                                                                                         ('tabs','filter_backlog',backlog_filter.value)
                                                                                         ])).props('round size=sm')
                             s_backlog.set_visibility(False)
                         with ui.row().classes('justify-center items-center flex-nowrap w-full'):
@@ -175,8 +175,8 @@ def dialog_settings():
                             ui.label('Wishlist')
                             s_wishlist = ui.button(icon='save',
                                                    on_click=lambda: update_config(button=s_wishlist, check_confirm=False,
-                                                                                  update=[config.configUpdate('tabs','type_wishlist',wishlist_type.value),
-                                                                                         config.configUpdate('tabs','filter_wishlist',wishlist_filter.value)
+                                                                                  update=[('tabs','type_wishlist',wishlist_type.value),
+                                                                                         ('tabs','filter_wishlist',wishlist_filter.value)
                                                                                         ])).props('round size=sm')
                             s_wishlist.set_visibility(False)
                         with ui.row().classes('justify-center items-center flex-nowrap w-full'):
@@ -193,37 +193,37 @@ def dialog_settings():
                     new_platform_list = ui.input(label='Platforms', value=config.config_dictionary['platforms'],
                                                  on_change=lambda: save_platforms.set_visibility(True)).classes('w-full')
                     save_platforms = ui.button(icon='save', on_click=lambda: update_config(button=save_platforms,
-                                                                                           update=[config.configUpdate('platforms',None,new_platform_list.value)])).props('round size=sm')
+                                                                                           update=[('platforms',None,new_platform_list.value)])).props('round size=sm')
                     save_platforms.set_visibility(False)
                 with ui.row().classes('justify-between items-center flex-nowrap w-full'):
                     new_playing = ui.input(label='Playing', value=config.config_dictionary['playing'],
                                            on_change=lambda: save_playing.set_visibility(True)).classes('w-full')
                     save_playing = ui.button(icon='save', on_click=lambda: update_config(button=save_playing,
-                                                                                         update=[config.configUpdate('playing',None,new_playing.value)])).props('round size=sm')
+                                                                                         update=[('playing',None,new_playing.value)])).props('round size=sm')
                     save_playing.set_visibility(False)
                 with ui.row().classes('justify-between items-center flex-nowrap w-full'):
                     new_played_pos = ui.input(label='Played positive', value=config.config_dictionary['played positive'],
                                               on_change=lambda: save_played_pos.set_visibility(True)).classes('w-full')
                     save_played_pos = ui.button(icon='save', on_click=lambda: update_config(button=save_played_pos,
-                                                                                            update=[config.configUpdate('played positive',None,new_played_pos.value)])).props('round size=sm')
+                                                                                            update=[('played positive',None,new_played_pos.value)])).props('round size=sm')
                     save_played_pos.set_visibility(False)
                 with ui.row().classes('justify-between items-center flex-nowrap w-full'):
                     new_played_neg = ui.input(label='Played negative', value=config.config_dictionary['played negative'],
                                               on_change=lambda: save_played_neg.set_visibility(True)).classes('w-full')
                     save_played_neg = ui.button(icon='save', on_click=lambda: update_config(button=save_played_neg,
-                                                                                            update=[config.configUpdate('played negative',None,new_played_neg.value)])).props('round size=sm')
+                                                                                            update=[('played negative',None,new_played_neg.value)])).props('round size=sm')
                     save_played_neg.set_visibility(False)
                 with ui.row().classes('justify-between items-center flex-nowrap w-full'):
                     new_backlog = ui.input(label='Backlog', value=config.config_dictionary['backlog'],
                                            on_change=lambda: save_backlog.set_visibility(True)).classes('w-full')
                     save_backlog = ui.button(icon='save', on_click=lambda: update_config(button=save_backlog,
-                                                                                         update=[config.configUpdate('backlog',None,new_backlog.value)])).props('round size=sm')
+                                                                                         update=[('backlog',None,new_backlog.value)])).props('round size=sm')
                     save_backlog.set_visibility(False)
                 with ui.row().classes('justify-between items-center flex-nowrap w-full'):
                     new_wishlist = ui.input(label='Wishlist', value=config.config_dictionary['wishlist'],
                                             on_change=lambda: save_wishlist.set_visibility(True)).classes('w-full')
                     save_wishlist = ui.button(icon='save', on_click=lambda: update_config(button=save_wishlist,
-                                                                                          update=[config.configUpdate('wishlist',None,new_wishlist.value)])).props('round size=sm')
+                                                                                          update=[('wishlist',None,new_wishlist.value)])).props('round size=sm')
                     save_wishlist.set_visibility(False)
 
 
@@ -259,7 +259,7 @@ def dialog_tools():
 
             with ui.column():
                 global export_timer
-                export_switch = ui.switch('Use Scheduled Export', value=config.config_dictionary['export']['scheduled_export'], on_change=lambda: config.update_config(updates=[config.configUpdate('export','scheduled_export',export_switch.value)])).bind_value_to(export_timer, 'active')
+                export_switch = ui.switch('Use Scheduled Export', value=config.config_dictionary['export']['scheduled_export'], on_change=lambda: config.update_config(updates=[('export','scheduled_export',export_switch.value)])).bind_value_to(export_timer, 'active')
                 export_select = ui.toggle({86400: 'Daily', 604800: 'Weekly'}, value=config.config_dictionary['export']['scheduled_period'], on_change=lambda: action_schedule_change(export_select.value)).bind_visibility_from(export_switch, 'value')
 
 
@@ -892,6 +892,6 @@ def action_match_ids_to_names(names: str):
 
 def action_schedule_change(value):
     global export_timer
-    config.update_config(updates=[config.configUpdate('export','scheduled_period',value)])
+    config.update_config(updates=[('export','scheduled_period',value)])
     export_timer.interval = value
 

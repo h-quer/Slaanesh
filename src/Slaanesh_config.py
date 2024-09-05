@@ -15,7 +15,7 @@ path_export = r'/files/export/'
 path_downloads = r'/files/downloads'
 # serving files,
 server_file_icon = r'/assets/Slaanesh.png'
-server_path_covers =  r'/covers'
+server_path_covers = r'/covers'
 server_path_downloads = r'/downloads'
 server_path_export = r'/export'
 #display types
@@ -83,13 +83,6 @@ config_dictionary = {
 config = configparser.ConfigParser(allow_no_value=True)
 config.optionxform = str
 
-class configUpdate:
-    def __init__(self, section, key, value):
-        self.section = section
-        self.key = key
-        self.value = value
-
-
 def load_config():
     global config_dictionary
     config.read(file_config)
@@ -131,37 +124,37 @@ def load_config():
     config_dictionary['unplayed'] = config_dictionary['backlog'] + config_dictionary['wishlist'] + config_dictionary['playing']
 
 
-def update_config(updates:configUpdate):
+def update_config(updates):
     global config_dictionary, file_config
     for update in updates:
-        if (update.section is not None):
+        if (update[0] is not None):
 
-            if(update.section not in config):
-                config.add_section(update.section)
+            if(update[0] not in config):
+                config.add_section(update[0])
             
             #lists
-            if(update.key is None):
-                list = update.value.split(sep=',')
-                config_dictionary[update.section] = list
-                config[update.section].clear()
+            if(update[1] is None):
+                list = update[2].split(sep=',')
+                config_dictionary[update[0]] = list
+                config[update[0]].clear()
                 for item in list:
-                    config.set(update.section, item)
+                    config.set(update[0], item)
                 continue
 
             #others
-            if (update.key in config[update.section]):
-                if(type(update.value) is bool):
-                    config_dictionary[update.section][update.key] = update.value
-                    config[update.section][update.key] = str(update.value)
+            if (update[1] in config[update[0]]):
+                if(type(update[2]) is bool):
+                    config_dictionary[update[0]][update[1]] = update[2]
+                    config[update[0]][update[1]] = str(update[2])
                     continue
                 try:
-                    if(type(int(update.value) is int)):
-                        config_dictionary[update.section][update.key] = int(update.value)
-                        config[update.section][update.key] = str(int(update.value))
+                    if(type(int(update[2]) is int)):
+                        config_dictionary[update[0]][update[1]] = int(update[2])
+                        config[update[0]][update[1]] = str(int(update[2]))
                         continue
                 except:
                     pass
-                config[update.section][update.key] = config_dictionary[update.section][update.key] = str(update.value)
+                config[update[0]][update[1]] = config_dictionary[update[0]][update[1]] = str(update[2])
 
     with open(file_config, 'w') as configfile:
         config.write(configfile)

@@ -72,8 +72,8 @@ def refresh_igdb_token():
     expiry_timestamp = now + dt.timedelta(seconds=int(dataframe_response['expires_in'][0])) - dt.timedelta(days=2)
     expiry_string = dt.datetime.strftime(expiry_timestamp, "%Y-%m-%d %H:%M:%S")
     config.update_config([
-                            config.configUpdate('igdb','auth_token', dataframe_response['access_token'][0]),
-                            config.configUpdate('igdb','token_timestamp', expiry_string)
+                            ('igdb','auth_token', dataframe_response['access_token'][0]),
+                            ('igdb','token_timestamp', expiry_string)
                         ])
 
 
