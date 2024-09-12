@@ -133,7 +133,7 @@ def update_config(updates):
                 config.add_section(update[0])
             
             #lists
-            if(update[1] is None):
+            if(update[1] is None and update[2] is not None):
                 list = update[2].split(sep=',')
                 config_dictionary[update[0]] = list
                 config[update[0]].clear()
@@ -142,7 +142,7 @@ def update_config(updates):
                 continue
 
             #others
-            if (update[1] in config[update[0]]):
+            if (update[1] in config[update[0]] and update[2] is not None):
                 if(type(update[2]) is bool):
                     config_dictionary[update[0]][update[1]] = update[2]
                     config[update[0]][update[1]] = str(update[2])
