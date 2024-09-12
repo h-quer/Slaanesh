@@ -10,7 +10,7 @@ import Slaanesh_importexport as imex
 import threading
 import queue
 
-igdb = IGDBWrapper(config.client_id, config.auth_token)
+igdb = IGDBWrapper(config.config_dictionary['igdb']['client_id'], config.config_dictionary['igdb']['auth_token'])
 update_id_queue = queue.Queue()
 
 request_limit = 105
@@ -18,7 +18,7 @@ request_limit = 105
 
 def init_api():
     global igdb
-    igdb = IGDBWrapper(config.client_id, config.auth_token)
+    igdb = IGDBWrapper(config.config_dictionary['igdb']['client_id'], config.config_dictionary['igdb']['auth_token'])
     check_igdb_token()
 
 
@@ -42,7 +42,7 @@ def igdb_update_daemon():
                 update_id_queue.task_done()
                 continue
             tmp = data.gl.index[data.gl['IGDB_ID'] == item].tolist()
-            check = data.gl.at[tmp[0], 'IGDB_queried'] + dt.timedelta(hours=config.data_refresh_limit) > dt.datetime.now()
+            check = data.gl.at[tmp[0], 'IGDB_queried'] + dt.timedelta(hours=config.config_dictionary['igdb']['data_refresh_limit']) > dt.datetime.now()
             if check:
                 update_id_queue.task_done()
                 continue
@@ -55,7 +55,7 @@ def igdb_update_daemon():
 
 
 def check_igdb_token():
-    expiry_datetime = dt.datetime.strptime(config.token_timestamp, "%Y-%m-%d %H:%M:%S")
+    expiry_datetime = dt.datetime.strptime(config.config_dictionary['igdb']['token_timestamp'], "%Y-%m-%d %H:%M:%S")
     if dt.datetime.now() > expiry_datetime:
         refresh_igdb_token()
 
@@ -63,15 +63,18 @@ def check_igdb_token():
 def refresh_igdb_token():
     now = dt.datetime.now()
     url = 'https://id.twitch.tv/oauth2/token'
-    params = {'client_id': config.client_id,
-              'client_secret': config.client_secret,
+    params = {'client_id': config.config_dictionary['igdb']['client_id'],
+              'client_secret': config.config_dictionary['igdb']['client_secret'],
               'grant_type': 'client_credentials'}
     response = requests.post(url, json=params)
     json_response = json.loads(response.text)
     dataframe_response = pd.json_normalize(json_response)
     expiry_timestamp = now + dt.timedelta(seconds=int(dataframe_response['expires_in'][0])) - dt.timedelta(days=2)
     expiry_string = dt.datetime.strftime(expiry_timestamp, "%Y-%m-%d %H:%M:%S")
-    config.update_config(new_access_token=dataframe_response['access_token'][0], new_expiry_timestamp=expiry_string)
+    config.update_config([
+                            ('igdb','auth_token', dataframe_response['access_token'][0]),
+                            ('igdb','token_timestamp', expiry_string)
+                        ])
 
 
 def collect_game_info(query_list: tuple) -> pd.DataFrame:
