@@ -36,7 +36,7 @@ async def handle_connection():
     refresh_ui()
 
 
-def display_ui(Native:bool):
+def display_ui(native:bool):
     ui.add_head_html(r'''
         <style>
             .ag-header-cell.text-center {
@@ -51,8 +51,7 @@ def display_ui(Native:bool):
         ui_header()
         tabs_lists()
     app.on_connect(handle_connection)
-    ui.run(title=config.config_dictionary['ui']['name'], favicon=config.file_icon, reload=False, native=Native)
-
+    ui.run(title=config.config_dictionary['ui']['name'], favicon=config.file_icon, reload=False, native=native)
 
 def ui_header():
     with ui.grid(columns=3).classes('w-full'):
@@ -249,7 +248,7 @@ def dialog_tools():
                 ui.button('Export CSV', on_click=lambda: action_export_csv())
                 ui.button('Export and Download CSV', on_click=lambda:{
                         action_export_download(),
-                        ui.download(config.slaanesh_backup + '.zip')
+                        ui.download(config.path_export + '/backup.zip')
                     }
                 )
                 ui.button('Export Config', on_click=lambda: ui.download(config.file_config))
@@ -780,7 +779,6 @@ def action_export_csv():
 def action_export_download():
     imex.export_download()
 
-
 def action_update_api_data():
     tmp = data.gl['IGDB_ID'].tolist()
     for x in tmp:
@@ -790,7 +788,7 @@ def action_update_api_data():
 
 
 def action_update_release_dates():
-    relevance = (data.gl['Release_date'] == 0) | (data.gl['Status'].isin(config.status_list_wishlist))
+    relevance = (data.gl['Release_date'] == 0) | (data.gl['Status'].isin(config.config_dictionary['wishlist']))
     for x in data.gl[relevance]['IGDB_ID'].tolist():
         igdb.update_id_queue.put(x)
     igdb.start_update_daemon()
@@ -894,4 +892,3 @@ def action_schedule_change(value):
     global export_timer
     config.update_config(updates=[('export','scheduled_period',value)])
     export_timer.interval = value
-

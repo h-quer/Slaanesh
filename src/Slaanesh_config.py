@@ -2,21 +2,17 @@ import configparser
 
 version = "0.61-beta"
 
-#values not in config.ini
 # local files
-game_list = r'/files/database/gamelist.feather'
-playthrough_list = r'/files/database/playthroughs.feather'
-slaanesh_backup = r'/files/downloads/slaanesh_backup'
-file_icon = r'/files/assets/Slaanesh.png'
-file_config = r'/files/config/config.ini'
-path_covers = r'/files/covers/'
-path_import = r'/files/import/'
-path_export = r'/files/export/'
-path_downloads = r'/files/downloads'
+game_list = r'files/database/gamelist.feather'
+playthrough_list = r'files/database/playthroughs.feather'
+file_icon = r'files/assets/Slaanesh.png'
+file_config = r'files/config/config.ini'
+path_covers = r'files/covers/'
+path_import = r'files/import/'
+path_export = r'files/export/'
 # serving files,
 server_file_icon = r'/assets/Slaanesh.png'
 server_path_covers = r'/covers'
-server_path_downloads = r'/downloads'
 server_path_export = r'/export'
 #display types
 display_types = ['cards', 'table']
@@ -50,7 +46,7 @@ config_dictionary = {
     'platforms': [
         'PC', 
         'PlayStation', 
-        'Xbox', 
+        'Xbox',
         'Nintendo', 
         'VR'
     ],
@@ -89,31 +85,29 @@ def load_config():
 
     for section in config:
         #skip default
-        if(section == 'default'):
+        if section == 'default':
             continue
-        if(section == 'DEFAULT'):
+        if section == 'DEFAULT' :
             continue
 
         #list
-        if(type(config_dictionary[section]) is list):
+        if type(config_dictionary[section]) is list:
             config_dictionary[section].clear()
             for key in config[section]:
                 config_dictionary[section].append(key)
             continue
 
         for key in config[section]:
-
             #int
             try:
-                if(isinstance(int(config[section][key]), (int))):
+                if isinstance(int(config[section][key]), int):
                     config_dictionary[section][key] = config.getint(section, key, fallback=config_dictionary[section][key])
                     continue
             except:
                 pass
-            
 
             #boolean
-            if(config[section][key] == 'True' or config[section][key] == 'False'):
+            if config[section][key] == 'True' or config[section][key] == 'False':
                 config_dictionary[section][key] = config.getboolean(section, key, fallback=config_dictionary[section][key])
                 continue
 
@@ -127,28 +121,28 @@ def load_config():
 def update_config(updates):
     global config_dictionary, file_config
     for update in updates:
-        if (update[0] is not None):
+        if update[0] is not None:
 
-            if(update[0] not in config):
+            if update[0] not in config:
                 config.add_section(update[0])
             
             #lists
-            if(update[1] is None and update[2] is not None):
-                list = update[2].split(sep=',')
-                config_dictionary[update[0]] = list
+            if update[1] is None and update[2] is not None:
+                clist = update[2].split(sep=',')
+                config_dictionary[update[0]] = clist
                 config[update[0]].clear()
-                for item in list:
+                for item in clist:
                     config.set(update[0], item)
                 continue
 
             #others
-            if (update[1] in config[update[0]] and update[2] is not None):
-                if(type(update[2]) is bool):
+            if update[1] in config[update[0]] and update[2] is not None:
+                if type(update[2]) is bool:
                     config_dictionary[update[0]][update[1]] = update[2]
                     config[update[0]][update[1]] = str(update[2])
                     continue
                 try:
-                    if(type(int(update[2]) is int)):
+                    if type(int(update[2]) is int):
                         config_dictionary[update[0]][update[1]] = int(update[2])
                         config[update[0]][update[1]] = str(int(update[2]))
                         continue
