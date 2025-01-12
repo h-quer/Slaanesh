@@ -43,9 +43,10 @@ def export_csv():
     data.gl.to_csv(config.path_export + 'gamelist.csv', sep=separator, escapechar=escapechar, quotechar=quotechar, index=False)
     data.pt.to_csv(config.path_export + 'playthroughs.csv', sep=separator, escapechar=escapechar, quotechar=quotechar, index=False)
 
-def export_Download():
+
+def export_download():
     export_csv()
-    shutil.make_archive(config.slaanesh_backup, 'zip', root_dir=config.path_export)
+    shutil.make_archive(config.path_export + '/backup.zip', 'zip', root_dir=config.path_export)
 
 
 def export_id_name_list(id_name_list: pd.DataFrame):
