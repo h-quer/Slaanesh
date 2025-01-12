@@ -98,8 +98,8 @@ def collect_game_info(query_list: tuple) -> pd.DataFrame:
     res = name_url_status_release.merge(steam_id, on='IGDB_ID', how='left').merge(cover, on='IGDB_ID', how='left')
     res['IGDB_queried'] = timestamp
     res = res.astype({'IGDB_ID': int})
-    res['IGDB_status'].fillna(0, inplace=True)
-    res['Release_date'].fillna(0, inplace=True)
+    res['IGDB_status'] = res['IGDB_status'].fillna(0)
+    res['Release_date'] = res['Release_date'].fillna(0)
     return res
 
 

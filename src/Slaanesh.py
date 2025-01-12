@@ -3,7 +3,6 @@ import Slaanesh_data as data
 import Slaanesh_config as config
 import Slaanesh_IGDB as igdb
 from nicegui import app
-import sys
 
 def init():
     config.load_config()
@@ -14,9 +13,6 @@ def init():
     
 
 if __name__ in {"__main__", "__mp_main__"}:
-    native = False
-    if len(sys.argv) >= 2 and sys.argv[1]=='1':
-        native = True
     init()
-    ui.display_ui(native = native)
+    ui.display_ui()
     igdb.update_id_queue.join()

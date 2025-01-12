@@ -1,4 +1,4 @@
-from nicegui import app, ui
+from nicegui import ui
 import datetime as dt
 import pandas as pd
 import numpy as np
@@ -8,9 +8,18 @@ import Slaanesh_importexport as imex
 import Slaanesh_IGDB as igdb
 
 dark = ui.dark_mode()
-browser_dm = None
+browser_dm = True
 
 export_timer = ui.timer(config.config_dictionary['export']['scheduled_period'], lambda:{imex.export_csv()}, active=config.config_dictionary['export']['scheduled_export'])
+
+# todo: Browser dark mode currently not working, setup broke with new version
+# Call in display_ui:     app.on_connect(handle_connection)
+#
+#async def handle_connection():
+#    global browser_dm
+#    browser_dm = await ui.run_javascript('''return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;''')
+#    refresh_ui()
+
 
 # general confirmation dialog
 with ui.dialog() as confirmation, ui.card():
@@ -29,14 +38,7 @@ def refresh_ui():
     panel_backlog.refresh()
     panel_wishlist.refresh()
 
-
-async def handle_connection():
-    global browser_dm
-    browser_dm = await ui.run_javascript('''return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;''')
-    refresh_ui()
-
-
-def display_ui(native:bool):
+def display_ui():
     ui.add_head_html(r'''
         <style>
             .ag-header-cell.text-center {
@@ -50,8 +52,7 @@ def display_ui(native:bool):
     with ui.column().classes('w-full h-[96vh] flex-nowrap'):
         ui_header()
         tabs_lists()
-    app.on_connect(handle_connection)
-    ui.run(title=config.config_dictionary['ui']['name'], favicon=config.file_icon, reload=False, native=native)
+    ui.run(title=config.config_dictionary['ui']['name'], favicon=config.file_icon, reload=False, native=config.config_dictionary['ui']['native'])
 
 def ui_header():
     with ui.grid(columns=3).classes('w-full'):
@@ -97,8 +98,9 @@ def dialog_settings():
                     with ui.row().classes('items-center flex-nowrap'):
                         new_dark_mode = ui.checkbox(text='Dark mode', value=config.config_dictionary['ui']['dark_mode'],
                                                     on_change=lambda: save_dark_mode.set_visibility(True))
-                        new_dark_mode.props(add='toggle-indeterminate')
-                        new_dark_mode.props(add='indeterminate-value="default"')
+                        # todo: intermediate (user browser default) not working any more, find workaround, disabled for now
+                        #new_dark_mode.props(add='toggle-indeterminate')
+                        #new_dark_mode.props(add='indeterminate-value="default"')
                         save_dark_mode = ui.button(icon='save', on_click=lambda: update_config(button=save_dark_mode, check_confirm=False,
                                                                                                update=[('ui','dark_mode',new_dark_mode.value)])).props('round size=sm')
                         save_dark_mode.set_visibility(False)
@@ -413,7 +415,7 @@ def panel_overview():
             # Completion rate
             graph_data = []
             for status in config.config_dictionary['played']:
-                graph_data.append({'value': sum(res.loc[:, 'Status'] == str(status)), 'name': status})
+                graph_data.append({'value': sum(res.loc[:, 'Status'].isin([str(status)])), 'name': status})
 
             with ui.card().classes('w-full'):
                 with ui.row().classes('justify-center w-full'):
@@ -456,10 +458,10 @@ def panel_overview():
                         a = res['Date'] >= dt.datetime(year, 1, 1)
                         b = res['Date'] < dt.datetime(year + 1, 1, 1)
                         tmp = res.loc[a & b, 'Status']
-                        count = sum(tmp == str(status))
+                        count = sum(tmp.isin([str(status)]))
                         yearly_data.append(count)
                     b = res['Date'] < dt.datetime(dt.datetime.now().year-6, 1, 1)
-                    yearly_data.append(sum(res.loc[b, 'Status'] == str(status)))
+                    yearly_data.append(sum(res.loc[b, 'Status'].isin([str(status)])))
                     graph_data.append({'type': 'bar', 'name': status, 'data': yearly_data,
                                        'label': {'normal': {'show': True, 'position': 'right',
                                                             'textStyle': {'color': 'white' if dark_table() else 'black'}}}})

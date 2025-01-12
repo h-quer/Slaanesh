@@ -133,21 +133,22 @@ def check_consistency():
     if sum(gl['IGDB_ID'].duplicated()) > 0:
         raise Exception('Duplicate IGDB IDs in game list')
     # check whether all playthroughs have a date
-    if sum(pt['Date'].isnull()) + sum(pt['Date'].isna()) + sum(pt['Date'] == "") > 0:
+    if sum(pt['Date'].isnull()) + sum(pt['Date'].isna()) + sum(pt['Date'].isin([''])) > 0:
         raise Exception('Not all playthroughs have a date')
     res = pd.merge(pt, gl, how='left', on='IGDB_ID')
     # check whether all playthroughs have a game in gamelist
     if sum(res['Name'].isna()) > 0:
         raise Exception('Game missing for playthrough')
     # check whether all games with playthroughs have a played status
-    if sum(res['Status'].isin(config.config_dictionary['unplayed'])) > 0:
+    true_unplayed = [x for x in config.config_dictionary['unplayed'] if x not in config.config_dictionary['played']]
+    if sum(res['Status'].isin(true_unplayed)) > 0:
         raise Exception('Game with playthrough has unplayed status')
     # check whether all games without playthoughs have an unplayed status
     tes = ~gl['IGDB_ID'].isin(pt['IGDB_ID'])
     if sum(gl.loc[tes, 'Status'].isin(config.config_dictionary['played'])) > 0:
         raise Exception('Game without playthrough has played status')
     # check whether all games have valid status
-    if sum(~gl['Status'].isin(config.config_dictionary['status_list_played'] + config.config_dictionary['unplayed'])) > 0:
+    if sum(~gl['Status'].isin(config.config_dictionary['played'] + config.config_dictionary['unplayed'])) > 0:
         raise Exception('Game has invalid status')
     # check whether all games have valid platform
     if sum(~gl['Platform'].isin(config.config_dictionary['platforms'])) > 0:
