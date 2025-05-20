@@ -10,8 +10,6 @@ import Slaanesh_IGDB as igdb
 dark = ui.dark_mode()
 browser_dm = True
 
-export_timer = ui.timer(config.config_dictionary['export']['scheduled_period'], lambda:{imex.export_csv()}, active=config.config_dictionary['export']['scheduled_export'])
-
 # todo: Browser dark mode currently not working; setup broke with new version
 # Call in display_ui:     app.on_connect(handle_connection)
 #
@@ -46,9 +44,8 @@ def display_ui():
                     justify-content: center;}}
         </style>
         ''')
-    global dark, export_timer
+    global dark
     dark.set_value(config.config_dictionary['ui']['dark_mode'])
-    export_timer.interval = config.config_dictionary['export']['scheduled_period']
     with ui.column().classes('w-full h-[96vh] flex-nowrap'):
         ui_header()
         tabs_lists()
@@ -234,35 +231,16 @@ def dialog_tools():
             ui.button(icon='close', on_click=lambda: dialog.delete()).props('round size=sm')
         with ui.card():
             with ui.row():
-                ui.label('Import').classes('text-lg font-bold')
+                ui.label('Import and export').classes('text-lg font-bold')
             with ui.row():
                 async def import_csv():
                     confirm = await confirmation
                     if confirm:
                         action_import_csv()
-
                 ui.button('Import CSV', on_click=import_csv)
-
             with ui.row():
-                ui.label('Export').classes('text-lg font-bold')
-            with ui.row():
-                
                 ui.button('Export CSV', on_click=lambda: action_export_csv())
-                ui.button('Export and Download CSV', on_click=lambda:{
-                        action_export_download(),
-                        ui.download(config.path_export + '/backup.zip')
-                    }
-                )
-                ui.button('Export Config', on_click=lambda: ui.download(config.file_config))
-
-            with ui.row():
-                ui.label('Scheduled Export').classes('text-lg font-bold')
-
-            with ui.column():
-                global export_timer
-                export_switch = ui.switch('Use Scheduled Export', value=config.config_dictionary['export']['scheduled_export'], on_change=lambda: config.update_config(updates=[('export','scheduled_export',export_switch.value)])).bind_value_to(export_timer, 'active')
-                export_select = ui.toggle({86400: 'Daily', 604800: 'Weekly'}, value=config.config_dictionary['export']['scheduled_period'], on_change=lambda: action_schedule_change(export_select.value)).bind_visibility_from(export_switch, 'value')
-
+                ui.button('Download config', on_click=lambda: ui.download(config.file_config))
 
         with ui.card():
             with ui.row():
@@ -777,9 +755,6 @@ def action_export_csv():
         ui.notify('Successfully exported CSV files')
     except Exception as e:
         ui.notify('CSV export not successful: ' + str(e))
-    
-def action_export_download():
-    imex.export_download()
 
 def action_update_api_data():
     tmp = data.gl['IGDB_ID'].tolist()
@@ -889,8 +864,3 @@ def action_match_ids_to_names(names: str):
         ui.notify('Name-to-ID list export not successful: ' + str(e))
         return
     ui.notify('Name-to-ID list successfully exported')
-
-def action_schedule_change(value):
-    global export_timer
-    config.update_config(updates=[('export','scheduled_period',value)])
-    export_timer.interval = value

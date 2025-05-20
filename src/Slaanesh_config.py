@@ -71,10 +71,6 @@ config_dictionary = {
         'wishlist'
     ],
     'unplayed': [],
-    'export': {
-        'scheduled_export': False,
-        'scheduled_period': 86400
-    }
 }
 
 config = configparser.ConfigParser(allow_no_value=True)
