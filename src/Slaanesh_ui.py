@@ -12,7 +12,7 @@ browser_dm = True
 
 export_timer = ui.timer(config.config_dictionary['export']['scheduled_period'], lambda:{imex.export_csv()}, active=config.config_dictionary['export']['scheduled_export'])
 
-# todo: Browser dark mode currently not working, setup broke with new version
+# todo: Browser dark mode currently not working; setup broke with new version
 # Call in display_ui:     app.on_connect(handle_connection)
 #
 #async def handle_connection():
@@ -98,7 +98,7 @@ def dialog_settings():
                     with ui.row().classes('items-center flex-nowrap'):
                         new_dark_mode = ui.checkbox(text='Dark mode', value=config.config_dictionary['ui']['dark_mode'],
                                                     on_change=lambda: save_dark_mode.set_visibility(True))
-                        # todo: intermediate (user browser default) not working any more, find workaround, disabled for now
+                        # todo: intermediate (use browser default) not working any more, find workaround, disabled for now
                         #new_dark_mode.props(add='toggle-indeterminate')
                         #new_dark_mode.props(add='indeterminate-value="default"')
                         save_dark_mode = ui.button(icon='save', on_click=lambda: update_config(button=save_dark_mode, check_confirm=False,
