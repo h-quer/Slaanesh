@@ -10,14 +10,6 @@ import Slaanesh_IGDB as igdb
 dark = ui.dark_mode()
 browser_dm = True
 
-# todo: Browser dark mode currently not working; setup broke with new version
-# Call in display_ui:     app.on_connect(handle_connection)
-#
-#async def handle_connection():
-#    global browser_dm
-#    browser_dm = await ui.run_javascript('''return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;''')
-#    refresh_ui()
-
 
 # general confirmation dialog
 with ui.dialog() as confirmation, ui.card():
@@ -36,6 +28,7 @@ def refresh_ui():
     panel_backlog.refresh()
     panel_wishlist.refresh()
 
+
 def display_ui():
     ui.add_head_html(r'''
         <style>
@@ -50,6 +43,7 @@ def display_ui():
         ui_header()
         tabs_lists()
     ui.run(title=config.config_dictionary['ui']['name'], favicon=config.file_icon, reload=False, native=config.config_dictionary['ui']['native'])
+
 
 def ui_header():
     with ui.grid(columns=3).classes('w-full'):
@@ -95,7 +89,7 @@ def dialog_settings():
                     with ui.row().classes('items-center flex-nowrap'):
                         new_dark_mode = ui.checkbox(text='Dark mode', value=config.config_dictionary['ui']['dark_mode'],
                                                     on_change=lambda: save_dark_mode.set_visibility(True))
-                        # todo: intermediate (use browser default) not working any more, find workaround, disabled for now
+                        # intermediate (use browser default) not working automatically with AG Grid tables, not usable for now until fixed in NiceGUI
                         #new_dark_mode.props(add='toggle-indeterminate')
                         #new_dark_mode.props(add='indeterminate-value="default"')
                         save_dark_mode = ui.button(icon='save', on_click=lambda: update_config(button=save_dark_mode, check_confirm=False,
@@ -428,7 +422,7 @@ def panel_overview():
                 ui.label('Yearly stats').classes('text-xl font-bold')
             with ui.row().classes('w-full'):
                 graph_data = []
-                list_years = list(range(dt.datetime.now().year, dt.datetime.now().year-7, -1))
+                list_years = list(str(range(dt.datetime.now().year, dt.datetime.now().year-7, -1)))
                 list_years.append(str(dt.datetime.now().year-7) + "\nand\nbefore")
                 for status in config.config_dictionary['played']:
                     yearly_data = []
@@ -473,15 +467,19 @@ def dialog_game_editor(igdb_id: int):
                 ui.label('')
                 ui.label(game_info['Name'][game_index]).classes('text-xl flex-1 flex-wrap font-bold')
                 with ui.row().classes('justify-end'):
+                    # todo: a bit hacky, deletes dialog by refreshing ui
+                    def remove_editor_dialog():
+                        refresh_ui()
+                        # game_editor.clear()
+                        # game_editor.delete()
+
                     async def remove_game():
                         delete = await confirmation
                         if delete:
                             try:
                                 data.rem_game(game_index, pt_index)
                                 ui.notify('Game removed successfully')
-                                # todo: a bit hacky, deletes dialog by refreshing ui
-                                refresh_ui()
-                                # game_editor.delete()
+                                remove_editor_dialog()
                             except Exception as e:
                                 ui.notify('Removal of game failed: ' + str(e))
 
@@ -506,8 +504,7 @@ def dialog_game_editor(igdb_id: int):
 
                     ui.button(icon='remove_circle', on_click=remove_game).props('round color=red-10 size=sm')
                     ui.button(icon='edit', on_click=edit_game).props('round color=yellow-10 size=sm')
-                    # todo: a bit hacky, closes by refreshing ui
-                    ui.button(icon='close', on_click=refresh_ui).props('round color=blue-10 size=sm')
+                    ui.button(icon='close', on_click=remove_editor_dialog).props('round color=blue-10 size=sm')
             with ui.grid(columns=2).classes('w-full items-center'):
                 ui.image(game_info['IGDB_image'][game_index]).classes('w-full h-full')
                 with ui.column():
@@ -638,7 +635,7 @@ def display_cards(cards_data: pd.DataFrame, has_playthroughs=False, show_release
         <q-card @click="() => $parent.$emit('edit', props.row.IGDB_ID)"
                 class="m-2 w-[{config.config_dictionary['ui']['card_width']}px] h-fit">
             <div class="w-full text-center text-lg text-bold pt-4 px-4">
-                <p>{{{{ props.row.Name }}}}</p>
+                <p style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{{{ props.row.Name }}}}</p>
             </div>
             <q-card-section horizontal>
                 <div class="min-w-1/2 py-4 pl-4">
