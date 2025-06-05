@@ -81,10 +81,8 @@ def load_config():
     config.read(file_config)
 
     for section in config:
-        #skip default
-        if section == 'default':
-            continue
-        if section == 'DEFAULT' :
+        #skip unused sections
+        if section not in config_dictionary:
             continue
 
         #list
