@@ -10,7 +10,6 @@ import Slaanesh_IGDB as igdb
 dark = ui.dark_mode()
 browser_dm = True
 
-# todo: Browser dark mode currently not working; setup broke with new version
 # Call in display_ui:     app.on_connect(handle_connection)
 #
 #async def handle_connection():
@@ -44,6 +43,7 @@ def display_ui():
                     justify-content: center;}}
         </style>
         ''')
+
     global dark
     dark.set_value(config.config_dictionary['ui']['dark_mode'])
     with ui.column().classes('w-full h-[96vh] flex-nowrap'):
@@ -240,6 +240,7 @@ def dialog_tools():
                 ui.button('Import CSV', on_click=import_csv)
             with ui.row():
                 ui.button('Export CSV', on_click=lambda: action_export_csv())
+
                 ui.button('Download config', on_click=lambda: ui.download(config.file_config))
 
         with ui.card():
