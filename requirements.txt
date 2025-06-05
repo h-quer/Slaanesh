@@ -1,8 +1,8 @@
-pandas>=2.1.3
-numpy>=1.26.2
-nicegui>=1.4.3
-igdb-api-v4>=0.3.2
-pyarrow>=14.0.1
+pandas>=2.2.3
+numpy>=2.2.6
+nicegui>=2.17.0
+igdb-api-v4>=0.3.3
+pyarrow>=20.0.0
 requests>=2.32.3
 # enable for native mode
 #pywebview>=5.1
