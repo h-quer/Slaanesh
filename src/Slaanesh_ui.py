@@ -10,7 +10,6 @@ import Slaanesh_IGDB as igdb
 dark = ui.dark_mode()
 browser_dm = True
 
-
 # general confirmation dialog
 with ui.dialog() as confirmation, ui.card():
     ui.label('Are you sure?')
@@ -37,6 +36,7 @@ def display_ui():
                     justify-content: center;}}
         </style>
         ''')
+    
     global dark
     dark.set_value(config.config_dictionary['ui']['dark_mode'])
     with ui.column().classes('w-full h-[96vh] flex-nowrap'):
@@ -89,7 +89,6 @@ def dialog_settings():
                     with ui.row().classes('items-center flex-nowrap'):
                         new_dark_mode = ui.checkbox(text='Dark mode', value=config.config_dictionary['ui']['dark_mode'],
                                                     on_change=lambda: save_dark_mode.set_visibility(True))
-                        # intermediate (use browser default) not working automatically with AG Grid tables, not usable for now until fixed in NiceGUI
                         #new_dark_mode.props(add='toggle-indeterminate')
                         #new_dark_mode.props(add='indeterminate-value="default"')
                         save_dark_mode = ui.button(icon='save', on_click=lambda: update_config(button=save_dark_mode, check_confirm=False,
