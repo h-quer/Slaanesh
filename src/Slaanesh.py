@@ -4,6 +4,7 @@ import Slaanesh_config as config
 import Slaanesh_IGDB as igdb
 from nicegui import app
 
+
 def init():
     config.load_config()
     igdb.init_api()
