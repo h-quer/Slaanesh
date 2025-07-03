@@ -421,7 +421,7 @@ def panel_overview():
                 ui.label('Yearly stats').classes('text-xl font-bold')
             with ui.row().classes('w-full'):
                 graph_data = []
-                list_years = list(str(range(dt.datetime.now().year, dt.datetime.now().year-7, -1)))
+                list_years = [str(x) for x in range(dt.datetime.now().year, dt.datetime.now().year-7, -1)]
                 list_years.append(str(dt.datetime.now().year-7) + "\nand\nbefore")
                 for status in config.config_dictionary['played']:
                     yearly_data = []
