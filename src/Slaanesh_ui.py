@@ -42,7 +42,7 @@ def display_ui():
     with ui.column().classes('w-full h-[96vh] flex-nowrap'):
         ui_header()
         tabs_lists()
-    ui.run(title=config.config_dictionary['ui']['name'], favicon=config.file_icon, reload=False, native=config.config_dictionary['ui']['native'])
+    ui.run(title=config.config_dictionary['ui']['name'], favicon=config.file_icon, reload=False, native=False)
 
 
 def ui_header():

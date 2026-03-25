@@ -1,15 +1,30 @@
 import configparser
+from pathlib import Path
 
 version = "0.70-beta"
 
 # local files
-game_list = r'../files/database/gamelist.feather'
-playthrough_list = r'../files/database/playthroughs.feather'
-file_icon = r'../files/assets/Slaanesh.png'
-file_config = r'../files/config/config.ini'
-path_covers = r'../files/covers/'
-path_import = r'../files/import/'
-path_export = r'../files/export/'
+testpath1 = Path("./files")
+testpath2 = Path("../files")
+if testpath1.is_dir():
+    game_list = r'./files/database/gamelist.feather'
+    playthrough_list = r'./files/database/playthroughs.feather'
+    file_icon = r'./files/assets/Slaanesh.png'
+    file_config = r'./files/config/config.ini'
+    path_covers = r'./files/covers/'
+    path_import = r'./files/import/'
+    path_export = r'./files/export/'
+elif testpath2.is_dir():
+    game_list = r'../files/database/gamelist.feather'
+    playthrough_list = r'../files/database/playthroughs.feather'
+    file_icon = r'../files/assets/Slaanesh.png'
+    file_config = r'../files/config/config.ini'
+    path_covers = r'../files/covers/'
+    path_import = r'../files/import/'
+    path_export = r'../files/export/'
+else:
+    print("Critical error, configuration files not found")
+    sys.exit()
 # serving files,
 server_file_icon = r'/assets/Slaanesh.png'
 server_path_covers = r'/covers'
@@ -21,7 +36,6 @@ config_dictionary = {
     #values in config.ini
     'ui': {
         'name': 'Slaanesh',
-        'native': False,
         'color_coding': True,
         'dark_mode': True,
         'row_height': 96,

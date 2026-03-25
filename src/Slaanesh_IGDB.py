@@ -55,7 +55,11 @@ def igdb_update_daemon():
 
 
 def check_igdb_token():
-    expiry_datetime = dt.datetime.strptime(config.config_dictionary['igdb']['token_timestamp'], "%Y-%m-%d %H:%M:%S")
+    expiry_datetime = dt.datetime.strptime("1990-01-01 01:01:01", "%Y-%m-%d %H:%M:%S")
+    try:
+        expiry_datetime = dt.datetime.strptime(config.config_dictionary['igdb']['token_timestamp'], "%Y-%m-%d %H:%M:%S")
+    except Exception as e:
+        print(str(e))
     if dt.datetime.now() > expiry_datetime:
         refresh_igdb_token()
 
@@ -68,7 +72,7 @@ def refresh_igdb_token():
               'grant_type': 'client_credentials'}
     response = requests.post(url, json=params)
     json_response = json.loads(response.text)
-    dataframe_response = pd.json_normalize(json_response)
+    dataframe_response = pd.json_normalize(json_response)    
     expiry_timestamp = now + dt.timedelta(seconds=int(dataframe_response['expires_in'][0])) - dt.timedelta(days=2)
     expiry_string = dt.datetime.strftime(expiry_timestamp, "%Y-%m-%d %H:%M:%S")
     config.update_config([
