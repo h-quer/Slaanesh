@@ -3,14 +3,27 @@ services:
   slaanesh:
     image: ghcr.io/h-quer/slaanesh:latest
     container_name: slaanesh
-    user: 1000:1000
     restart: unless-stopped
+    networks:
+      - slaanesh
     volumes:
-      - your_config_dir:/files/config
-      - your_import_dir:/files/import
-      - your_export_dir:/files/export
-      - your_covers_dir:/files/covers
-      - your_database_dir:/files/database
-      - your_downloads_dir:/files/downloads
+      - .:/files/config
+      - import:/files/import
+      - export:/files/export
+      - covers:/files/covers
+      - database:/files/database
+      - downloads:/files/downloads
     ports:
       - 8428:8080
+
+volumes:
+  import:
+  export:
+  covers:
+  database:
+  downloads:
+
+networks:
+  slaanesh:
+    driver: bridge
+
