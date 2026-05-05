@@ -1,3 +1,10 @@
+# Upcoming breaking change!
+
+Slaanesh will receive a major update soon, including an upgrade to the data structure.
+There will most likely be no automated transition between the old and new data structures. To keep your data with the new version, use the CSV export functionality of the old version and import these CSV files in the new one.
+
+---
+
 <h1 align="center">
   <img src="/assets/Slaanesh.png" width="auto" height="48"/>
   <br>
