@@ -3,6 +3,12 @@ name: Docker Image CI
 on:
   push:
     branches: [ "latest" ]
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to build'
+        required: true
+        default: 'latest'
 
 env:
   REGISTRY: ghcr.io
