@@ -3,6 +3,8 @@
 Slaanesh will receive a major update soon, including an upgrade to the data structure.
 There will most likely be no automated transition between the old and new data structures. To keep your data with the new version, use the CSV export functionality of the old version and import these CSV files in the new one.
 
+For the legacy version, check the legacy branch. If you do not want to update to the new version, point docker at the legacy tag instead of latest.
+
 ---
 
 <h1 align="center">
@@ -21,9 +23,10 @@ Yes, absolutely!
 
 This is why Slaanesh offers a simple export functionality. Even if Slaanesh somehow corrupts its database, as long as you at least occasionally press the csv export button, all your data will be safe in a very easy to read and easily accessible text format. Just make sure that both the database and export directory are part of the 3-2-1 backup system you are using for your server already anyway. If you don't run a 3-2-1 backup system on your server, then you have bigger things to worry about than Slaanesh ;)
 
-With that in mind, this still absolutely is a beta release. Not a "I've been using it for months and just calling it beta" release, but a true beta. Maybe alpha. Expect bugs - and ideally report or even help fix them, please.
+With that in mind, this still absolutely is a beta release. I have used it for a few months and done lots of testing, but there is only so much I will notice and there are probably some bugs left. If you encounter any, please create a bug report.
 
 ## Screenshots
+Screenshots of the legacy / old version, todo: Update with 2.0 UI
 <p align="center">
   <img src="/images/light_cards.png" alt="playing" width="48%"/>
   <img src="/images/dark_cards.png" alt="playing" width="48%"/>
@@ -40,9 +43,9 @@ With that in mind, this still absolutely is a beta release. Not a "I've been usi
 ## Setup and installation
 ### IGDB API token
 Slaanesh uses the IGDB API for all game data. For Slaanesh to work, you need to be able to acces the IGDB API. This is how you can register: https://api-docs.igdb.com/#account-creation.
-You then need to save your client id and client secret in the Slaanesh config file.
+You then need to save your client id and client secret in the Slaanesh compose file.
 
-Be aware: Client id and secret are (for now) stored in plain text. Doing so for your regular Twitch account (in case you already have one) is obviously a bad idea. In that case, best create a fresh one for dedicated use only as Slaanesh API slave.
+Be aware: Client id and secret are stored in plain text. Doing so for your regular Twitch account (in case you already have one) is obviously a bad idea. In that case, best create a fresh one for dedicated use only as Slaanesh API slave.
 
 ### Docker setup
 Create all necessary directories, adjust config file (IGDB token data! See sample config.ini in this repository) and copy it to the config directory.
@@ -56,48 +59,29 @@ services:
     container_name: slaanesh
     user: 1000:1000                          # or any other UID/GID that fit your setup
     restart: unless-stopped
-    volumes:
-      - your_config_dir:/files/config        # adjust path
-      - your_import_dir:/files/import        # adjust path
-      - your_export_dir:/files/export        # adjust path
-      - your_covers_dir:/files/covers        # adjust path
-      - your_database_dir:/files/database    # adjust path
-      - your_downloads_dir:/files/downloads  # adjust path
     ports:
-      - 8428:8080                            # remove if using reverse proxy and accessing via container name
+      - "8421:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - IGDB_CLIENT_ID=[insert]
+      - IGDB_CLIENT_SECRET=[insert]
+    volumes:
+      - /bind/mount/slaanesh/data:/usr/src/app/data
 ```
 Once it's set, simply pull and start the image:
 ```
 docker compose up -d
 ```
 
-Slaanesh should now be running on your specified port (8428 by default).
-
-### Directories and the config file
-Make sure to place the sample config file in the config directory. Slaanesh will not work without a config file containing least the mandatory IGDB info.
-
-Folders to mount are:
-* config - Config file location (and potentially the encrypted IGDB access information once encrypted is implemented)
-* import - place csv files for import here, must be named gamelist.csv and playthroughs.csv
-* export - receive exported files from here, both database exports (gamelist.csv and playthroughs.csv) as well as the name to IGDB ID matching tool output
-* covers - game covers are saved here, you can manually edit them if necessary
-* database - location of the Slaanesh database, do not edit manually but if you value your data, make sure it is part of your 3-2-1 backup system, and also make sure to check backup integrety and practise restores regularly
-* downloads - location where files to be downloaded from the webgui will be.
+Slaanesh should now be running on your specified port (8421 by default).
 
 ## Scope and roadmap
 ### Roadmap
-Features I am currently slowly but actively working on (pull requests still very welcome for support on these):
-* Adding additional columns, as well as an option to show/hide columns. Useful ones I'd add:
-  * Time played or time to complete to games (ideally linking to the howlongtobeat.com API to pull the completion times - although I don't think there is a good way to match IGDB IDs to HLTB IDs and search by name is quite error-prone, so at first it'd just be a user input field), linked to playthrough table
-  * Ratings for games, linked to playthrough table
-  * Game version, linked to playthrough table
-  * Secondary and maybe tertiary comment field for more flexible options (e.g. to record extra info for DLCs or similar)
-  * Moving platform info from game to playthrough table
-  * Adding status info to playthrough table, differentiating the played status' within that table for each pt
-* General UI improvements, especially considering responsiveness - there is probably a lot that can be done with asyncio which I have barely used so far
-* Build a native mode version for local (not self-hosted) usage
-* Make it render properly on mobile
-* Enable adding Twitch client ID and secret via the UI, save them not in plain text in the config file but encrypted somewhere else
+- Bugfixes and usability improvements
+- Optimization of the GOG import/sync
+- Improvements for the mobile layout
+- Enable encryption for Twitch API keys
 
 ### Not in scope
 Slaanesh does not and will not include:
@@ -108,13 +92,13 @@ Slaanesh does not and will not include:
 * Authentication: There are amazing tools for that, for example caddy or authentik (recommended), that allow for user authentication and redirecting to their own instance of Slaanesh - anything I can build wouldn't be safe enough to expose it to the web, better not offer the option in the first place and thus ensure that users rely on professional tools for this critical feature
 
 ### Feature wishlist
-Pull requests to implement these are extremely welcome. I'm not currently working on these, but might after the completing the roadmap:
-* A proper fuzzy search with a list of games matching the game name when adding games by name, complete with a selection dialog including covers to pick the correct one easily
-* More store IDs than just Steam (including config options to enable/disable)
-* General code cleanup, making things neat and doing some proper coding paradigm stuff instead of randomly mashing functions
+- Store integration other than GOG
+  - Currently, GOG import/sync is supported
+  - GOG sync includes stores linked with the GOG account, so e.g. Epic and Steam work via the GOG sync as well
+  - For Steam, Slaanesh already supports data supplementation via a localconfig.vdf file, adding play dates and play times
+  - All this works fully offline / based on database files
+  - Integrating more stores or e.g. Steam natively is possible, but that requires abandoning the "offline-only" approach, handling account data (potentially insecure), and is a lot of effort to maintain
+  - Currently I think limiting sync to GOG (and offering Steam/Epic/etc. only via GOG linked accounts) is fine, I do not plan on expanding the supported game stores, but if there is a lot of demand for it I might some time in the future
 
 ## How to contribute
 Bug reports are always useful (if you run into bugs, which of course I hope won't happen ...).
-
-Even better, it'd be absolutely awesome if you could submit a pull request for anything that might need fixing or improving :)
-
