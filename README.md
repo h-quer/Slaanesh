@@ -3,7 +3,7 @@
 Slaanesh will receive a major update soon, including an upgrade to the data structure.
 There will most likely be no automated transition between the old and new data structures. To keep your data with the new version, use the CSV export functionality of the old version and import these CSV files in the new one.
 
-For the legacy version, check the legacy branch. If you do not want to update to the new version, point docker at the legacy tag instead of latest.
+For the legacy version, check the legacy branch. If you do not want to update to the new version, point docker at the legacy tag instead of latest. If you are reading this because your setup broke with an auto-update and you want to use the new version, simply pull the legacy image and create the CSV export from there.
 
 ---
 
