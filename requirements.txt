@@ -1,6 +1,6 @@
 pandas>=2.2.3
 numpy>=2.2.6
-nicegui==3.9.0
+nicegui==2.17.0
 igdb-api-v4>=0.3.3
 pyarrow>=20.0.0
 requests>=2.32.3
