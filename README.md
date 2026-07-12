@@ -28,14 +28,14 @@ With that in mind, this still absolutely is a beta release. I have used it for a
 ## Screenshots
 Screenshots of the legacy / old version, todo: Update with 2.0 UI
 <p align="center">
-  <img src="/images/light_cards.png" alt="playing" width="48%"/>
-  <img src="/images/dark_cards.png" alt="playing" width="48%"/>
-  <img src="/images/dark_game_editor.png" alt="game editor" width="48%"/>
-  <img src="/images/light_game_editor.png" alt="game editor" width="48%"/>
-  <img src="/images/light_table.png" alt="played" width="48%"/>
-  <img src="/images/dark_table.png" alt="played" width="48%"/>
   <img src="/images/light_overview.png" alt="overview" width="48%"/>
   <img src="/images/dark_overview.png" alt="overview" width="48%"/>
+  <img src="/images/light_cards.png" alt="playing" width="48%"/>
+  <img src="/images/dark_cards.png" alt="playing" width="48%"/>
+  <img src="/images/light_table.png" alt="played" width="48%"/>
+  <img src="/images/dark_table.png" alt="played" width="48%"/>
+  <img src="/images/dark_game_editor.png" alt="game editor" width="48%"/>
+  <img src="/images/light_game_editor.png" alt="game editor" width="48%"/>
 </p>
 
 ## Setup and installation
