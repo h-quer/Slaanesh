@@ -1,0 +1,117 @@
+/* 
+  ========================================================================
+  SACRED TEMPLE OF COSMETIC OVERRIDES (custom.css)
+  ========================================================================
+  Any CSS rules defined here will automatically take precedence over the 
+  default visual styles defined in index.css.
+  
+  Simply uncomment the blocks below (remove the slash/asterisk wrapper)
+  and adjust the hex colors or rules to reconstruct the sensory experience 
+  of the catalog to your liking.
+*/
+
+/* 
+========================================================================
+1. SENSORY COLOR PALETTE OVERRIDES
+========================================================================
+Uncomment this root block to override the default deep purple twilight theme 
+with your own custom visual vibe (e.g., Deep Sea, Dark Emerald, or Rust).
+*/
+
+/*
+:root {
+  --bg-color: #0d0211;             / * Background: Main portal backdrop * /
+  --panel-color: #1a0a24;          / * Panel: Inside of modals, side panels * /
+  --accent-color: #e0128b;         / * Accent: Buttons, glow effects, active tags * /
+  --gold-color: #c5a059;           / * Gold: Titles, select borders, icons * /
+  --text-color: #f0e6f2;           / * Text: Crisp light text readouts * /
+  --accent-shadow: rgba(224, 18, 139, 0.6); / * Accent glow drop shadow color * /
+  --gold-shadow: rgba(197, 160, 89, 0.3);   / * Gold hover glow shadow color * /
+  --glass-bg: rgba(26, 10, 36, 0.6);        / * Translucent glass panels backplane * /
+  --card-gradient: linear-gradient(180deg, rgba(74, 14, 78, 0.3) 0%, rgba(13, 2, 17, 0.8) 100%);
+}
+*/
+
+
+/* 
+========================================================================
+2. ALTERNATIVE PALETTE PRESET EXAMPLES
+========================================================================
+Below are pre-harmonized color presets you can copy into the active 
+:root block above.
+*/
+
+/* 
+   PRESET A: DEEP SEA AQUATIC (Submerged Teal)
+------------------------------------------------------------------------
+:root {
+  --bg-color: #010b14;
+  --panel-color: #03182b;
+  --accent-color: #00e5ff;
+  --gold-color: #c5bba8;
+  --text-color: #e0f2f1;
+  --accent-shadow: rgba(0, 229, 255, 0.5);
+  --gold-shadow: rgba(197, 187, 168, 0.2);
+  --glass-bg: rgba(3, 24, 43, 0.7);
+  --card-gradient: linear-gradient(180deg, rgba(0, 150, 136, 0.2) 0%, rgba(1, 11, 20, 0.9) 100%);
+}
+*/
+
+/*
+   PRESET B: TOXIC EMERALD (Necron-Inspired Dark Green)
+------------------------------------------------------------------------
+:root {
+  --bg-color: #020d04;
+  --panel-color: #081d0d;
+  --accent-color: #39ff14;
+  --gold-color: #bfa15f;
+  --text-color: #e2fce1;
+  --accent-shadow: rgba(57, 255, 20, 0.5);
+  --gold-shadow: rgba(191, 161, 95, 0.25);
+  --glass-bg: rgba(8, 29, 13, 0.75);
+  --card-gradient: linear-gradient(180deg, rgba(16, 75, 22, 0.2) 0%, rgba(2, 13, 4, 0.9) 100%);
+}
+*/
+
+/*
+   PRESET C: CORRUPTED BLOOD (Gothic Rust & Crimson)
+------------------------------------------------------------------------
+:root {
+  --bg-color: #100505;
+  --panel-color: #1f0a0a;
+  --accent-color: #ff003c;
+  --gold-color: #cca43b;
+  --text-color: #fae6e6;
+  --accent-shadow: rgba(255, 0, 60, 0.5);
+  --gold-shadow: rgba(204, 164, 59, 0.25);
+  --glass-bg: rgba(31, 10, 10, 0.75);
+  --card-gradient: linear-gradient(180deg, rgba(139, 0, 0, 0.25) 0%, rgba(16, 5, 5, 0.9) 100%);
+}
+*/
+
+
+/* 
+========================================================================
+3. CUSTOM ELEMENT OVERRIDES
+========================================================================
+You can also append custom rules here. For example, to make borders less 
+rounded or make text look more cybernetic:
+*/
+
+/*
+/ * Change general font scale or selection colors * /
+::selection {
+  background-color: var(--accent-color) !important;
+  color: #fff !important;
+}
+
+/ * Force all cards to have rounded corner overrides * /
+.card-border {
+  border-radius: 0px !important; / * Brutalist hard-corners * /
+}
+
+/ * Add a neon glow border under headers * /
+.slaanesh-title {
+  text-shadow: 0 0 10px var(--accent-shadow);
+}
+*/

@@ -1,0 +1,15 @@
+services:
+  slaanesh:
+    image: ghcr.io/h-quer/slaanesh:latest
+    container_name: slaanesh
+    restart: unless-stopped
+    ports:
+      - "8421:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      # Pass IGDB API Keys
+      - IGDB_CLIENT_ID=[IGDB_CLIENT_ID]
+      - IGDB_CLIENT_SECRET=[IGDB_CLIENT_SECRET]
+    volumes:
+      - /bind/mount/slaanesh/data:/usr/src/app/data

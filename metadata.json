@@ -1,0 +1,6 @@
+{
+  "name": "Slaanesh",
+  "description": "A Warhammer 40k themed game tracker with IGDB integration, SQLite storage, and a focus on decadent completionism.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
