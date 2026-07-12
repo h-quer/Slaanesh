@@ -34,8 +34,6 @@ Screenshots of the legacy / old version, todo: Update with 2.0 UI
   <img src="/images/light_game_editor.png" alt="game editor" width="48%"/>
   <img src="/images/light_table.png" alt="played" width="48%"/>
   <img src="/images/dark_table.png" alt="played" width="48%"/>
-  <img src="/images/dark_add_game.png" alt="add game" width="48%"/>
-  <img src="/images/light_settings.png" alt="settings" width="48%"/>
   <img src="/images/light_overview.png" alt="overview" width="48%"/>
   <img src="/images/dark_overview.png" alt="overview" width="48%"/>
 </p>
