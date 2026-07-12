@@ -8,7 +8,7 @@ For the legacy version, check the legacy branch. If you do not want to update to
 ---
 
 <h1 align="center">
-  <img src="/assets/Slaanesh.png" width="auto" height="48"/>
+  <img src="/public/favicon-512.png" width="auto" height="48"/>
   <br>
   Slaanesh</h1>
 <p align="center">The self-hosted video game tracker</p>
