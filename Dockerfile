@@ -1,7 +1,7 @@
 # ==========================================
 # Stage 1: Build stage
 # ==========================================
-FROM node:20 AS builder
+FROM node:22 AS builder
 
 WORKDIR /usr/src/app
 
@@ -20,7 +20,7 @@ RUN npm run build
 # ==========================================
 # Stage 2: Production runner stage
 # ==========================================
-FROM node:20-slim AS runner
+FROM node:22-slim AS runner
 
 # Create data directory for persistent SQLite storage and ensure user ownership
 RUN mkdir -p /usr/src/app/data && chown -R node:node /usr/src/app
