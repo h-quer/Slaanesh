@@ -1,12 +1,3 @@
-# Upcoming breaking change!
-
-Slaanesh will receive a major update soon, including an upgrade to the data structure.
-There will most likely be no automated transition between the old and new data structures. To keep your data with the new version, use the CSV export functionality of the old version and import these CSV files in the new one.
-
-For the legacy version, check the legacy branch. If you do not want to update to the new version, point docker at the legacy tag instead of latest. If you are reading this because your setup broke with an auto-update and you want to use the new version, simply pull the legacy image and create the CSV export from there.
-
----
-
 <h1 align="center">
   <img src="/public/favicon-512.png" width="auto" height="48"/>
   <br>
@@ -77,6 +68,7 @@ Slaanesh should now be running on your specified port (8421 by default).
 ## Scope and roadmap
 ### Roadmap
 - Bugfixes and usability improvements
+- Pull additional metadata from IGDB and make it searchable via advanced search modal
 - Optimization of the GOG import/sync
 - Improvements for the mobile layout
 - Enable encryption for Twitch API keys
