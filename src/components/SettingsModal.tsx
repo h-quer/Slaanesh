@@ -451,24 +451,47 @@ export function SettingsModal(props: any) {
           <div className="flex flex-col gap-4">
             <h4 className="text-slaanesh-gold text-sm tracking-widest font-bold border-b border-slaanesh-gold/10 pb-1">Card Columns</h4>
             <div className="grid grid-cols-2 gap-x-6 gap-y-2">
-              {GAME_DISPLAY_COLS.filter(col => cat === 'played' || col.id !== 'game_rating').map(col => (
+              {GAME_DISPLAY_COLS.filter(col => (cat === 'played' || col.id !== 'game_rating') && (cat === 'playing' || col.id !== 'active_platform')).map(col => {
+                const isActivePlatform = col.id === 'active_platform';
+                const key = `ui_show_card_${cat}_${col.id}`;
+                let currentVal = getColSetting('card', col.id, cat);
+
+                let options = [
+                  { label: 'Yes', value: 'true' },
+                  { label: 'No', value: 'false' },
+                ];
+                if (isActivePlatform && cat === 'playing') {
+                  options.push({ label: 'Highlight in platform list', value: 'highlight' });
+                }
+
+                const currentOpt = options.find(o => o.value === currentVal) || options[0];
+
+                const cycleOption = () => {
+                  const currentIndex = options.findIndex(o => o.value === currentVal);
+                  const nextIndex = (currentIndex + 1) % options.length;
+                  updateUiSetting(key, options[nextIndex].value);
+                };
+
+                return (
                 <div key={col.id} className="flex items-center justify-between">
                   <label className="text-xs text-slaanesh-text/60 tracking-wider">
                      {cat === 'played' && col.id === 'game_rating' ? 'Seduction score (avg. rating)' : col.label}
                   </label>
                   <button
-                    onClick={() => updateUiSetting(`ui_show_card_${cat}_${col.id}`, isColVisible('card', col.id, cat) ? 'false' : 'true')}
+                    onClick={isActivePlatform && cat === 'playing' ? cycleOption : () => updateUiSetting(key, isColVisible('card', col.id, cat) ? 'false' : 'true')}
                     className={cn(
-                      "px-2 py-0.5 rounded border text-[10px] transition-all font-bold",
-                      isColVisible('card', col.id, cat) 
+                      "px-2 py-0.5 rounded border text-[10px] transition-all font-bold min-w-[3rem]",
+                      currentVal === 'true' 
                         ? "border-slaanesh-accent bg-slaanesh-accent/20 text-slaanesh-accent" 
-                        : "border-slaanesh-gold/10 text-slaanesh-gold/30 hover:border-slaanesh-gold/30"
+                        : currentVal === 'false'
+                        ? "border-slaanesh-gold/10 text-slaanesh-gold/30 hover:border-slaanesh-gold/30"
+                        : "border-slaanesh-gold/50 bg-slaanesh-gold/10 text-slaanesh-gold"
                     )}
                   >
-                    {isColVisible('card', col.id, cat) ? 'Yes' : 'No'}
+                    {isActivePlatform && cat === 'playing' ? currentOpt.label : (isColVisible('card', col.id, cat) ? 'Yes' : 'No')}
                   </button>
                 </div>
-              ))}
+              );})}
               {cat === 'played' && PLAYTHROUGH_DISPLAY_COLS.map(col => (
                 <div key={col.id} className="flex items-center justify-between">
                   <label className="text-xs text-slaanesh-accent/60 tracking-wider font-bold">{col.label}</label>
@@ -491,10 +514,11 @@ export function SettingsModal(props: any) {
           <div className="flex flex-col gap-4">
             <h4 className="text-slaanesh-gold text-sm tracking-widest font-bold border-b border-slaanesh-gold/10 pb-1">Table Columns</h4>
             <div className="grid grid-cols-2 gap-x-6 gap-y-2">
-              {GAME_DISPLAY_COLS.filter(col => cat === 'played' || col.id !== 'game_rating').map(col => {
+              {GAME_DISPLAY_COLS.filter(col => (cat === 'played' || col.id !== 'game_rating') && (cat === 'playing' || col.id !== 'active_platform')).map(col => {
                 const isGameRating = col.id === 'game_rating';
+                const isActivePlatform = col.id === 'active_platform';
                 const key = `ui_show_table_${cat}_${col.id}`;
-                let currentVal = isGameRating && cat === 'played' ? getColSetting('table', col.id, cat) : (isColVisible('table', col.id, cat) ? 'true' : 'false');
+                let currentVal = (isGameRating && cat === 'played') || (isActivePlatform && cat === 'playing') ? getColSetting('table', col.id, cat) : (isColVisible('table', col.id, cat) ? 'true' : 'false');
                 
                 let options = [
                   { label: 'Yes', value: 'true' },
@@ -502,6 +526,8 @@ export function SettingsModal(props: any) {
                 ];
                 if (isGameRating && cat === 'played') {
                   options.push({ label: 'With Comment', value: 'with_comment' });
+                } else if (isActivePlatform && cat === 'playing') {
+                  options.push({ label: 'Highlight in platform list', value: 'highlight' });
                 }
 
                 const currentOpt = options.find(o => o.value === currentVal) || options[0];
@@ -512,6 +538,8 @@ export function SettingsModal(props: any) {
                   updateUiSetting(key, options[nextIndex].value);
                 };
 
+                const isMulti = (isGameRating && cat === 'played') || (isActivePlatform && cat === 'playing');
+
                 return (
                 <div key={col.id} className="flex flex-col gap-1 justify-center border-b border-slaanesh-gold/5 pb-2">
                   <div className="flex items-center justify-between">
@@ -519,7 +547,7 @@ export function SettingsModal(props: any) {
                       {cat === 'played' && col.id === 'game_rating' ? 'Seduction score (avg. rating)' : col.label}
                     </label>
                     <button
-                      onClick={isGameRating && cat === 'played' ? cycleOption : () => updateUiSetting(`ui_show_table_${cat}_${col.id}`, isColVisible('table', col.id, cat) ? 'false' : 'true')}
+                      onClick={isMulti ? cycleOption : () => updateUiSetting(`ui_show_table_${cat}_${col.id}`, isColVisible('table', col.id, cat) ? 'false' : 'true')}
                       className={cn(
                         "px-2 py-0.5 rounded border text-[10px] transition-all font-bold min-w-[3rem]",
                         currentVal === 'true' 
@@ -529,11 +557,11 @@ export function SettingsModal(props: any) {
                           : "border-slaanesh-gold/50 bg-slaanesh-gold/10 text-slaanesh-gold"
                       )}
                     >
-                      {isGameRating && cat === 'played' ? currentOpt.label : (isColVisible('table', col.id, cat) ? 'Yes' : 'No')}
+                      {isMulti ? currentOpt.label : (isColVisible('table', col.id, cat) ? 'Yes' : 'No')}
                     </button>
                   </div>
                 </div>
-              )})}
+              );})}
               {cat === 'played' && PLAYTHROUGH_DISPLAY_COLS.map(col => {
                 const key = `ui_show_table_${cat}_${col.id}`;
                 let currentVal = getColSetting('table', col.id, cat);

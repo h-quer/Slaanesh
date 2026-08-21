@@ -31,6 +31,7 @@ const GAME_SORT_OPTS = [
  { id: 'last_updated', label: 'Last Activity' },
  { id: 'game_status', label: 'Status' },
  { id: 'game_platforms', label: 'Vessels' },
+ { id: 'active_platform', label: 'Active Vessel' },
  { id: 'game_release_date', label: 'Release Date' },
  { id: 'game_release_status', label: 'Release Status' },
  { id: 'game_shops', label: 'Gateways' },
@@ -65,6 +66,7 @@ const PLAYTHROUGH_SORT_OPTS = [
 const GAME_DISPLAY_COLS = [
   { id: 'game_status', label: 'Status' },
   { id: 'game_platforms', label: 'Vessels' },
+  { id: 'active_platform', label: 'Active Vessel' },
   { id: 'game_rating', label: 'Seduction Score' },
   { id: 'game_release_date', label: 'Release Date' },
   { id: 'game_release_status', label: 'Release Status' },
@@ -227,6 +229,10 @@ export default function App() {
   const key = `ui_show_${viewType}_${tab}_${colId}`;
   
   if (uiSettings[key] !== undefined) return uiSettings[key];
+
+  if (tab === 'playing' && colId === 'active_platform') {
+    return 'highlight';
+  }
 
   // Apply requested defaults if no setting exists
   if (viewType === 'table' && tab === 'played') {
@@ -418,6 +424,7 @@ export default function App() {
  case 'game_release_date': return g.release_date || '';
  case 'game_release_status': return (g.release_status || '').toLowerCase();
  case 'game_platforms': return (g.platforms || []).join(', ').toLowerCase();
+ case 'active_platform': return (g.active_platform || '').toLowerCase();
  case 'game_genres': return (g.genres || []).join(', ').toLowerCase();
  case 'game_themes': return (g.themes || []).join(', ').toLowerCase();
  case 'game_owned_vaults': return (g.owned_vaults || '').toLowerCase();
@@ -496,6 +503,7 @@ export default function App() {
             case 'game_status': return (selectedGame?.game_status || '').toLowerCase();
             case 'game_rating': return selectedGame?.game_rating || 0;
             case 'game_platforms': return (selectedGame?.platforms || []).join(', ').toLowerCase();
+            case 'active_platform': return (selectedGame?.active_platform || '').toLowerCase();
             case 'game_release_status': return selectedGame?.release_status || '';
             case 'game_shops': return (selectedGame?.shops || []).map((s: any) => s.name).join(', ').toLowerCase();
             case 'game_owned_vaults': return (selectedGame?.owned_vaults || '').toLowerCase();
@@ -633,25 +641,53 @@ export default function App() {
  }
  }, [selectedGame]);
 
- const updateGameStatus = async (statusId: string, customComment?: string, customOwnedVaults?: string) => {
+ const updateGameStatus = async (statusId: string, customComment?: string, customOwnedVaults?: string, customActivePlatform?: string | null) => {
    if (!selectedGame) return;
    
    const newStatus = statuses.game.find(s => s.id === statusId);
    const isOldPlayed = selectedGame.categories?.includes('played');
    const isNewPlayed = newStatus?.categories?.includes('played');
-    const finalComment = customComment !== undefined ? customComment : selectedGame.comment;
-    const finalVaults = customOwnedVaults !== undefined ? customOwnedVaults : selectedGame.owned_vaults;
+   const isNewPlaying = newStatus?.categories?.includes('playing');
+   const finalComment = customComment !== undefined ? customComment : selectedGame.comment;
+   const finalVaults = customOwnedVaults !== undefined ? customOwnedVaults : selectedGame.owned_vaults;
+   
+   const sortedPlatforms = sortOriginalPlatformsByMap(selectedGame.platforms || [], getPlatformMap(uiSettings));
+   const defaultPlatform = sortedPlatforms[0] || null;
+
+   let finalActivePlatform: string | null = null;
+   if (isNewPlaying) {
+     if (customActivePlatform !== undefined) {
+       finalActivePlatform = customActivePlatform || null;
+     } else {
+       finalActivePlatform = selectedGame.active_platform || defaultPlatform;
+     }
+   } else {
+     finalActivePlatform = null;
+   }
    
    const performUpdate = async (purge_rites = false) => {
      try {
        const res = await fetch(`/api/games/${selectedGame.igdb_id}`, {
          method: 'PUT',
          headers: { 'Content-Type': 'application/json' },
-         body: JSON.stringify({ status: statusId, comment: finalComment, owned_vaults: finalVaults, purge_rites })
+         body: JSON.stringify({ 
+           status: statusId, 
+           comment: finalComment, 
+           owned_vaults: finalVaults, 
+           active_platform: finalActivePlatform,
+           purge_rites 
+         })
        });
        if (res.ok) {
          fetchData();
-         setSelectedGame(prev => prev ? { ...prev, game_status: statusId, categories: newStatus?.categories || [], comment: finalComment, owned_vaults: finalVaults } : null);
+         setSelectedGame(prev => prev ? { 
+           ...prev, 
+           game_status: statusId, 
+           categories: newStatus?.categories || [], 
+           comment: finalComment, 
+           owned_vaults: finalVaults,
+           active_platform: newStatus?.categories?.includes('playing') ? (finalActivePlatform || null) : null
+         } : null);
        } else {
          const err = await res.json();
          showAlert('Constraint Violation', `Archival failure: ${err.error}`);
@@ -720,10 +756,16 @@ export default function App() {
  const isCompatible = compatibleStatuses.some(s => s.id === selectedGame.game_status);
  const defaultStatusId = isCompatible ? selectedGame.game_status : (compatibleStatuses[0]?.id || selectedGame.game_status);
 
+ const availablePlatforms = selectedGame.platforms || [];
+ const activeIsValid = selectedGame.active_platform && availablePlatforms.includes(selectedGame.active_platform);
+ const defaultPlatform = activeIsValid
+   ? selectedGame.active_platform
+   : (sortOriginalPlatformsByMap(availablePlatforms, getPlatformMap(uiSettings))[0] || '');
+
  setEditingRite(null);
  setRiteForm({
  date: new Date().toISOString().split('T')[0],
- platform: sortOriginalPlatformsByMap(selectedGame.platforms || [], getPlatformMap(uiSettings))[0] || '',
+ platform: defaultPlatform,
  status_id: '',
  game_status_id: defaultStatusId,
  time_played: '',
@@ -1131,7 +1173,12 @@ export default function App() {
  const targetStatus = statuses.game.find(s => s.id === ritualPrepForm.status_id);
     const targetCategories = targetStatus?.categories || [];
     const isPlayed = targetCategories.includes('played');
+    const isPlaying = targetCategories.includes('playing');
  
+ const originalPlatforms = game.platforms?.map((p: any) => p.name) || [];
+ const sortedPlatforms = sortOriginalPlatformsByMap(originalPlatforms, getPlatformMap(uiSettings));
+ const defaultActivePlatform = isPlaying ? (sortedPlatforms[0] || null) : null;
+
  let playthrough = null;
  if (isPlayed) {
   let ptStatusId = ritualPrepForm.playthrough_status_id;
@@ -1139,7 +1186,7 @@ export default function App() {
 
   playthrough = {
   date: ritualPrepForm.date,
-  platform: ritualPrepForm.platform || (game.platforms?.map((p: any) => p.name) || [])[0] || 'Unknown',
+  platform: ritualPrepForm.platform || sortedPlatforms[0] || 'Unknown',
   status_id: ptStatusId,
   time_played_minutes: parseTimePlayed(ritualPrepForm.time_played),
  rating: ritualPrepForm.rating,
@@ -1154,6 +1201,7 @@ export default function App() {
  body: JSON.stringify({ 
  igdb_id: game.id, 
  status_id: ritualPrepForm.status_id,
+ active_platform: defaultActivePlatform,
  playthrough
  })
  });
@@ -1312,6 +1360,13 @@ export default function App() {
           val = [...originalList, ...mappedList].join(', ');
           break;
         }
+        case 'active_platform': {
+          const orig = item.active_platform || '';
+          const pMap = getPlatformMap(uiSettings);
+          const mapped = getDisplayPlatform(orig, pMap);
+          val = orig === mapped ? orig : `${orig}, ${mapped}`;
+          break;
+        }
         case 'game_genres': val = (item.genres || []).join(', '); break;
         case 'game_themes': val = (item.themes || []).join(', '); break;
         case 'game_release_date': val = item.release_date; break;
@@ -1448,6 +1503,7 @@ export default function App() {
       activeTab={activeTab}
       sortedGames={sortedGames}
       isColVisible={isColVisible}
+      getColSetting={getColSetting}
       columnFilters={columnFilters[activeTab] || {}}
       setColumnFilters={(newFilters: any) => setColumnFilters(prev => ({ ...prev, [activeTab]: typeof newFilters === 'function' ? newFilters(prev[activeTab] || {}) : newFilters }))}
       activeFilterCol={activeFilterCol[activeTab] || null}

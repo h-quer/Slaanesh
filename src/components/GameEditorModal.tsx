@@ -33,6 +33,7 @@ interface GameEditorModalProps {
     statusId: string,
     customComment?: string,
     customOwnedVaults?: string,
+    customActivePlatform?: string | null,
   ) => Promise<void>;
   logPlaythrough: () => void;
   editPlaythrough: (p: any) => void;
@@ -63,6 +64,12 @@ export function GameEditorModal({
   const [vaultsValue, setVaultsValue] = useState("");
   const [commentValue, setCommentValue] = useState("");
 
+  const isPlayingCategory =
+    selectedGame?.categories?.includes("playing") ||
+    statuses.game
+      .find((s: any) => s.id === selectedGame?.game_status)
+      ?.categories?.includes("playing");
+
   useEffect(() => {
     if (selectedGame) {
       setVaultsValue(selectedGame.owned_vaults || "");
@@ -78,6 +85,7 @@ export function GameEditorModal({
       selectedGame.game_status,
       selectedGame.comment,
       vaultsValue,
+      selectedGame.active_platform,
     );
     setIsEditingVaults(false);
   };
@@ -88,8 +96,19 @@ export function GameEditorModal({
       selectedGame.game_status,
       commentValue,
       selectedGame.owned_vaults,
+      selectedGame.active_platform,
     );
     setIsEditingComment(false);
+  };
+
+  const handleActivePlatformChange = (val: string) => {
+    if (!selectedGame) return;
+    updateGameStatus(
+      selectedGame.game_status,
+      selectedGame.comment,
+      selectedGame.owned_vaults,
+      val || null,
+    );
   };
 
   return (
@@ -346,20 +365,35 @@ export function GameEditorModal({
                     getDisplayPlatform(p, pMap),
                   );
                   const uniqueMapped = Array.from(new Set(mapped));
+                  const activeMapped = selectedGame.active_platform
+                    ? getDisplayPlatform(selectedGame.active_platform, pMap)
+                    : null;
+
                   return (
                     <div className="flex flex-col gap-1">
                       <label className="text-xs text-slaanesh-gold/40 tracking-widest font-bold">
                         Vessels of Indulgence
                       </label>
                       <div className="flex flex-wrap gap-x-3 gap-y-1">
-                        {uniqueMapped.map((platform) => (
-                          <span
-                            key={platform}
-                            className="text-[10px] font-bold text-slaanesh-gold/70 tracking-wider transition-colors"
-                          >
-                            {platform}
-                          </span>
-                        ))}
+                        {uniqueMapped.map((platform) => {
+                          const isTarget =
+                            isPlayingCategory &&
+                            activeMapped &&
+                            platform.toLowerCase() === activeMapped.toLowerCase();
+                          return (
+                            <span
+                              key={platform}
+                              className={cn(
+                                "text-[10px] font-bold tracking-wider transition-colors",
+                                isTarget
+                                  ? "text-slaanesh-gold bg-slaanesh-gold/15 px-1.5 py-0.5 rounded border border-slaanesh-gold/40 shadow-sm"
+                                  : "text-slaanesh-gold/70",
+                              )}
+                            >
+                              {platform} {isTarget && "(Active)"}
+                            </span>
+                          );
+                        })}
                       </div>
                     </div>
                   );
@@ -409,7 +443,9 @@ export function GameEditorModal({
           <div
             className={cn(
               "grid grid-cols-1 gap-6 items-start",
-              uiSettings["ui_editor_show_owned_vaults"] !== "false"
+              isPlayingCategory && uiSettings["ui_editor_show_owned_vaults"] !== "false"
+                ? "lg:grid-cols-4"
+                : isPlayingCategory || uiSettings["ui_editor_show_owned_vaults"] !== "false"
                 ? "lg:grid-cols-3"
                 : "lg:grid-cols-2",
             )}
@@ -438,6 +474,47 @@ export function GameEditorModal({
                 </div>
               </div>
             </div>
+
+            {/* Column: Active Vessel (Only when Playing Category) */}
+            {isPlayingCategory && (
+              <div className="flex flex-col gap-3">
+                <div className="flex items-center justify-between h-[22px]">
+                  <label className="text-xs text-slaanesh-gold/60 font-bold tracking-wider">
+                    Active Vessel
+                  </label>
+                </div>
+                <div className="relative group">
+                  <select
+                    value={selectedGame?.active_platform || ""}
+                    onChange={(e) => handleActivePlatformChange(e.target.value)}
+                    className="w-full h-[42px] bg-slaanesh-panel/60 border border-slaanesh-gold/30 rounded-sm px-3 text-xs text-slaanesh-text appearance-none cursor-pointer focus:border-slaanesh-accent transition-all group-hover:border-slaanesh-gold/60"
+                  >
+                    <option value="" className="bg-[#1a0f1d] text-slaanesh-text/60 font-normal">
+                      None (Unset)
+                    </option>
+                    {(() => {
+                      const pMap = getPlatformMap(uiSettings);
+                      const sorted = sortOriginalPlatformsByMap(
+                        selectedGame?.platforms || [],
+                        pMap,
+                      );
+                      return sorted.map((p) => (
+                        <option
+                          key={p}
+                          value={p}
+                          className="bg-[#1a0f1d] text-slaanesh-gold font-bold"
+                        >
+                          {p}
+                        </option>
+                      ));
+                    })()}
+                  </select>
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slaanesh-gold/40 group-hover:text-slaanesh-gold/80 transition-colors">
+                    <ChevronDown size={14} />
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Column 2: Vaults of Possession */}
             {uiSettings["ui_editor_show_owned_vaults"] !== "false" && (

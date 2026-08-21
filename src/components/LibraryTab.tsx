@@ -17,7 +17,8 @@ const getFormattedPlatforms = (platforms: string[], uiSettings: any) => {
 interface LibraryTabProps {
   activeTab: string;
   sortedGames: Game[];
-  isColVisible: (viewType: "table" | "card", colId: string) => boolean;
+  isColVisible: (viewType: "table" | "card", colId: string, customTab?: string) => boolean;
+  getColSetting?: (viewType: "table" | "card", colId: string, customTab?: string) => string;
   columnFilters: Record<string, any>;
   setColumnFilters: (filters: any) => void;
   activeFilterCol: string | null;
@@ -31,6 +32,7 @@ export const LibraryTab: React.FC<LibraryTabProps> = ({
   activeTab,
   sortedGames,
   isColVisible,
+  getColSetting,
   columnFilters,
   setColumnFilters,
   activeFilterCol,
@@ -228,6 +230,38 @@ export const LibraryTab: React.FC<LibraryTabProps> = ({
                     </div>
                     <FilterMenu
                       colId="game_platforms"
+                      columnFilters={columnFilters}
+                      setColumnFilters={setColumnFilters}
+                      activeFilterCol={activeFilterCol}
+                      setActiveFilterCol={setActiveFilterCol}
+                    />
+                  </th>
+                )}
+                {isColVisible("table", "active_platform") && (
+                  <th className="p-4 relative">
+                    <div className="flex items-center gap-2">
+                      <span>Active Vessel</span>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setActiveFilterCol(
+                            activeFilterCol === "active_platform"
+                              ? null
+                              : "active_platform",
+                          );
+                        }}
+                        className={cn(
+                          "p-0.5 rounded hover:bg-slaanesh-accent/20 transition-colors",
+                          columnFilters["active_platform"]
+                            ? "text-slaanesh-accent"
+                            : "opacity-30",
+                        )}
+                      >
+                        <Filter size={10} />
+                      </button>
+                    </div>
+                    <FilterMenu
+                      colId="active_platform"
                       columnFilters={columnFilters}
                       setColumnFilters={setColumnFilters}
                       activeFilterCol={activeFilterCol}
@@ -448,8 +482,43 @@ export const LibraryTab: React.FC<LibraryTabProps> = ({
                   )}
                   {isColVisible("table", "game_platforms") && (
                     <td className="p-4 opacity-70 italic">
-                      {getFormattedPlatforms(game.platforms, uiSettings)
-                        .join(", ")}
+                      {(() => {
+                        const pMap = getPlatformMap(uiSettings);
+                        const formatted = getFormattedPlatforms(game.platforms || [], uiSettings);
+                        const isHighlight = activeTab === 'playing' && getColSetting?.("table", "active_platform", activeTab) === 'highlight';
+                        const activeMapped = game.active_platform ? getDisplayPlatform(game.active_platform, pMap) : null;
+
+                        if (formatted.length === 0) return <span className="opacity-20 italic">None</span>;
+
+                        return (
+                          <span>
+                            {formatted.map((p, idx) => {
+                              const isTarget = isHighlight && activeMapped && p.toLowerCase() === activeMapped.toLowerCase();
+                              return (
+                                <React.Fragment key={p}>
+                                  {idx > 0 && ", "}
+                                  {isTarget ? (
+                                    <span className="font-bold text-slaanesh-gold not-italic bg-slaanesh-gold/15 px-1.5 py-0.5 rounded border border-slaanesh-gold/40 shadow-sm inline-block">
+                                      {p}
+                                    </span>
+                                  ) : (
+                                    <span>{p}</span>
+                                  )}
+                                </React.Fragment>
+                              );
+                            })}
+                          </span>
+                        );
+                      })()}
+                    </td>
+                  )}
+                  {isColVisible("table", "active_platform") && (
+                    <td className="p-4 font-bold text-slaanesh-accent">
+                      {game.active_platform ? (
+                        getDisplayPlatform(game.active_platform, getPlatformMap(uiSettings))
+                      ) : (
+                        <span className="opacity-20 font-normal italic">-</span>
+                      )}
                     </td>
                   )}
                   {isColVisible("table", "game_shops") && (
@@ -574,9 +643,43 @@ export const LibraryTab: React.FC<LibraryTabProps> = ({
                   </div>
                   {isColVisible("card", "game_platforms") && (
                     <p className="text-sm text-slaanesh-text/60 italic leading-tight">
-                      {getFormattedPlatforms(game.platforms || [], uiSettings)
-                        .join(", ") || "Unknown Platform"}
+                      {(() => {
+                        const pMap = getPlatformMap(uiSettings);
+                        const formatted = getFormattedPlatforms(game.platforms || [], uiSettings);
+                        const isHighlight = activeTab === 'playing' && getColSetting?.("card", "active_platform", activeTab) === 'highlight';
+                        const activeMapped = game.active_platform ? getDisplayPlatform(game.active_platform, pMap) : null;
+
+                        if (formatted.length === 0) return "Unknown Platform";
+
+                        return (
+                          <span>
+                            {formatted.map((p, idx) => {
+                              const isTarget = isHighlight && activeMapped && p.toLowerCase() === activeMapped.toLowerCase();
+                              return (
+                                <React.Fragment key={p}>
+                                  {idx > 0 && ", "}
+                                  {isTarget ? (
+                                    <span className="font-bold text-slaanesh-gold not-italic bg-slaanesh-gold/15 px-1.5 py-0.5 rounded border border-slaanesh-gold/30 inline-block shadow-sm">
+                                      {p}
+                                    </span>
+                                  ) : (
+                                    <span>{p}</span>
+                                  )}
+                                </React.Fragment>
+                              );
+                            })}
+                          </span>
+                        );
+                      })()}
                     </p>
+                  )}
+                  {isColVisible("card", "active_platform") && game.active_platform && (
+                    <div className="text-xs flex items-center gap-1.5 font-mono">
+                      <span className="text-slaanesh-gold/50 font-bold">Active:</span>
+                      <span className="text-slaanesh-accent font-bold">
+                        {getDisplayPlatform(game.active_platform, getPlatformMap(uiSettings))}
+                      </span>
+                    </div>
                   )}
                   {isColVisible("card", "game_shops") &&
                     game.shops &&

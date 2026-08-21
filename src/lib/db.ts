@@ -189,6 +189,17 @@ export function initDb() {
   db.exec(`CREATE INDEX IF NOT EXISTS idx_games_game_status ON games(game_status)`);
   db.exec(`CREATE INDEX IF NOT EXISTS idx_status_category_map_status_id ON status_category_map(status_id)`);
 
+  // Active Sessions Helper Table (for games currently in the playing category)
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS active_sessions (
+      game_id INTEGER PRIMARY KEY,
+      platform TEXT NOT NULL,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (game_id) REFERENCES games(igdb_id) ON DELETE CASCADE
+    )
+  `);
+  db.exec(`CREATE INDEX IF NOT EXISTS idx_active_sessions_game_id ON active_sessions(game_id)`);
+
   // GOG Import Tracking Tables
   db.exec(`
     CREATE TABLE IF NOT EXISTS gog_import_reference (
@@ -272,7 +283,7 @@ export function initDb() {
     ];
 
     const allPossibleCols = [
-      'game_status', 'game_platforms', 'game_shops', 'game_owned_vaults', 'game_comment', 'game_release_date', 'game_release_status', 'game_rating',
+      'game_status', 'game_platforms', 'active_platform', 'game_shops', 'game_owned_vaults', 'game_comment', 'game_release_date', 'game_release_status', 'game_rating',
       'game_genres', 'game_themes',
       'p_date', 'p_platform', 'p_status', 'p_rating', 'p_time', 'p_comment'
     ];
@@ -282,7 +293,9 @@ export function initDb() {
         allPossibleCols.forEach(col => {
           let value = s.cols.includes(col) ? 'true' : 'false';
           
-          if (view === 'table' && s.tab === 'played') {
+          if (s.tab === 'playing' && col === 'active_platform') {
+            value = 'highlight';
+          } else if (view === 'table' && s.tab === 'played') {
             if (col === 'p_status') value = 'with_status';
             else if (col === 'p_comment') value = 'with_game_comment';
             else if (['p_version', 'p_rating', 'p_time', 'game_rating'].includes(col)) value = 'with_comment';
@@ -323,6 +336,13 @@ export function initDb() {
       insertSetting.run(field, 'true');
     });
   }
+
+  // Ensure playing active_platform settings exist if updating from older version
+  try {
+    const insertSettingIgnore = db.prepare('INSERT OR IGNORE INTO settings (key, value) VALUES (?, ?)');
+    insertSettingIgnore.run('ui_show_table_playing_active_platform', 'highlight');
+    insertSettingIgnore.run('ui_show_card_playing_active_platform', 'highlight');
+  } catch (e) {}
 }
 
 // Ensure database is fully initialized immediately on import to prevent "no such table" errors
@@ -333,6 +353,7 @@ export function wipeAndReinitDb() {
     db.exec(`
       PRAGMA foreign_keys = OFF;
       DROP TABLE IF EXISTS playthroughs;
+      DROP TABLE IF EXISTS active_sessions;
       DROP TABLE IF EXISTS games;
       DROP TABLE IF EXISTS status_category_map;
       DROP TABLE IF EXISTS game_statuses;

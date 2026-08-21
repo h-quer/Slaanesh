@@ -223,6 +223,7 @@ async function startServer() {
       const games = db.prepare(`
         SELECT 
           g.*, 
+          (SELECT platform FROM active_sessions WHERE game_id = g.igdb_id) as active_platform,
           (SELECT AVG(rating) FROM playthroughs WHERE igdb_id = g.igdb_id AND rating IS NOT NULL) as game_rating,
           (SELECT json_group_array(category_id) FROM status_category_map WHERE status_id = g.game_status) as categories,
           (
@@ -259,6 +260,7 @@ async function startServer() {
 
       const enrichedGames = games.map((g: any) => ({
         ...g,
+        active_platform: g.active_platform || null,
         platforms: parseJSON(g.platforms, []),
         websites: parseJSON(g.websites, []),
         shops: parseJSON(g.shops, []),
@@ -360,7 +362,7 @@ async function startServer() {
 
   app.post('/api/games', async (req, res) => {
     try {
-      const { igdb_id, status, status_id, playthrough } = req.body;
+      const { igdb_id, status, status_id, playthrough, active_platform } = req.body;
       const finalStatus = status || status_id;
       
       // Check if exists
@@ -382,6 +384,20 @@ async function startServer() {
 
       const transaction = db.transaction(() => {
         insertGameData(gameData, finalStatus, igdb_id);
+
+        const isPlayingTarget = targetCats.some(c => c.category_id === 'playing');
+        if (isPlayingTarget) {
+          let platformToSet = active_platform;
+          if (!platformToSet && gameData.platforms && gameData.platforms.length > 0) {
+            platformToSet = gameData.platforms[0].name;
+          }
+          if (platformToSet && String(platformToSet).trim()) {
+            db.prepare(`
+              INSERT INTO active_sessions (game_id, platform) VALUES (?, ?)
+              ON CONFLICT(game_id) DO UPDATE SET platform = excluded.platform
+            `).run(igdb_id, String(platformToSet).trim());
+          }
+        }
 
         if (playthrough) {
           db.prepare(`
@@ -1488,6 +1504,16 @@ async function startServer() {
               csvImportProgress.status = `Manifesting: ${gameData.name} (${processed}/${csvImportProgress.total})`;
               csvImportProgress.logs.push(`[${processed}/${csvImportProgress.total}] Transacting details for "${gameData.name}"`);
               insertGameData(gameData, status_id, igdb_id, item.comment, item.owned_vaults);
+
+              if (item.active_platform && String(item.active_platform).trim()) {
+                const cats = db.prepare('SELECT category_id FROM status_category_map WHERE status_id = ?').all(status_id) as any[];
+                if (cats.some(c => c.category_id === 'playing')) {
+                  db.prepare(`
+                    INSERT INTO active_sessions (game_id, platform) VALUES (?, ?)
+                    ON CONFLICT(game_id) DO UPDATE SET platform = excluded.platform
+                  `).run(igdb_id, String(item.active_platform).trim());
+                }
+              }
             }
           }
 
@@ -1501,6 +1527,19 @@ async function startServer() {
             csvImportProgress.logs.push(`[${processed}/${csvImportProgress.total}] Updating details for "${gameName}"`);
             db.prepare('UPDATE games SET game_status = ?, comment = ?, owned_vaults = ? WHERE igdb_id = ?')
               .run(status_id, item.comment, item.owned_vaults || null, item.igdb_id);
+
+            const cats = db.prepare('SELECT category_id FROM status_category_map WHERE status_id = ?').all(status_id) as any[];
+            const isPlaying = cats.some(c => c.category_id === 'playing');
+            if (isPlaying) {
+              if (item.active_platform && String(item.active_platform).trim()) {
+                db.prepare(`
+                  INSERT INTO active_sessions (game_id, platform) VALUES (?, ?)
+                  ON CONFLICT(game_id) DO UPDATE SET platform = excluded.platform
+                `).run(item.igdb_id, String(item.active_platform).trim());
+              }
+            } else {
+              db.prepare('DELETE FROM active_sessions WHERE game_id = ?').run(item.igdb_id);
+            }
           }
 
           // 3. Process ptsToAdd
@@ -2329,7 +2368,7 @@ async function startServer() {
   app.put('/api/games/:id', (req, res) => {
     try {
       const { id } = req.params;
-      const { status, status_id, comment, owned_vaults, purge_rites } = req.body;
+      const { status, status_id, comment, owned_vaults, active_platform, purge_rites } = req.body;
       const finalStatus = status || status_id;
 
       db.transaction(() => {
@@ -2337,6 +2376,26 @@ async function startServer() {
           db.prepare('DELETE FROM playthroughs WHERE igdb_id = ?').run(id);
         }
         db.prepare('UPDATE games SET game_status = ?, comment = ?, owned_vaults = ?, last_updated = CURRENT_TIMESTAMP WHERE igdb_id = ?').run(finalStatus, comment, owned_vaults, id);
+        
+        // Active platform helper table sync
+        const cats = db.prepare('SELECT category_id FROM status_category_map WHERE status_id = ?').all(finalStatus) as any[];
+        const isPlaying = cats.some(c => c.category_id === 'playing');
+
+        if (isPlaying) {
+          if (active_platform !== undefined) {
+            if (active_platform && String(active_platform).trim()) {
+              db.prepare(`
+                INSERT INTO active_sessions (game_id, platform) VALUES (?, ?)
+                ON CONFLICT(game_id) DO UPDATE SET platform = excluded.platform
+              `).run(id, String(active_platform).trim());
+            } else {
+              db.prepare('DELETE FROM active_sessions WHERE game_id = ?').run(id);
+            }
+          }
+        } else {
+          db.prepare('DELETE FROM active_sessions WHERE game_id = ?').run(id);
+        }
+
         checkDatabaseConsistency();
       })();
 
@@ -2363,8 +2422,9 @@ async function startServer() {
         }
 
         // Update game status if provided, otherwise check if needs forced move to Played
-        if (finalGameStatus) {
-          db.prepare('UPDATE games SET game_status = ?, last_updated = CURRENT_TIMESTAMP WHERE igdb_id = ?').run(finalGameStatus, finalIgdbId);
+        let targetStatus = finalGameStatus;
+        if (targetStatus) {
+          db.prepare('UPDATE games SET game_status = ?, last_updated = CURRENT_TIMESTAMP WHERE igdb_id = ?').run(targetStatus, finalIgdbId);
         } else {
           const currentStatus = db.prepare(`
             SELECT game_status FROM games WHERE igdb_id = ?
@@ -2372,7 +2432,18 @@ async function startServer() {
           
           const cats = db.prepare('SELECT category_id FROM status_category_map WHERE status_id = ?').all(currentStatus.game_status) as any[];
           if (!cats.some(c => c.category_id === 'played')) {
+             targetStatus = "Completed";
              db.prepare('UPDATE games SET game_status = "Completed", last_updated = CURRENT_TIMESTAMP WHERE igdb_id = ?').run(finalIgdbId);
+          } else {
+             targetStatus = currentStatus.game_status;
+          }
+        }
+
+        // Remove active session if game moved out of playing category
+        if (targetStatus) {
+          const targetCats = db.prepare('SELECT category_id FROM status_category_map WHERE status_id = ?').all(targetStatus) as any[];
+          if (!targetCats.some(c => c.category_id === 'playing')) {
+            db.prepare('DELETE FROM active_sessions WHERE game_id = ?').run(finalIgdbId);
           }
         }
 
@@ -2460,6 +2531,10 @@ async function startServer() {
 
         if (finalGameStatus) {
           db.prepare('UPDATE games SET game_status = ?, last_updated = CURRENT_TIMESTAMP WHERE igdb_id = ?').run(finalGameStatus, p.igdb_id);
+          const targetCats = db.prepare('SELECT category_id FROM status_category_map WHERE status_id = ?').all(finalGameStatus) as any[];
+          if (!targetCats.some(c => c.category_id === 'playing')) {
+            db.prepare('DELETE FROM active_sessions WHERE game_id = ?').run(p.igdb_id);
+          }
         }
 
         checkDatabaseConsistency();
@@ -2477,6 +2552,7 @@ async function startServer() {
         SELECT 
           g.igdb_id,
           g.game_status,
+          (SELECT platform FROM active_sessions WHERE game_id = g.igdb_id) as active_platform,
           g.comment,
           g.owned_vaults,
           g.last_updated

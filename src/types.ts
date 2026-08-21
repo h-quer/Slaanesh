@@ -17,6 +17,7 @@ export interface Game {
   websites: any[];
   shops: { name: string; url: string }[];
   owned_vaults?: string | null;
+  active_platform?: string | null;
   last_updated: string;
   comment: string;
   game_rating: number | null;
