@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useLayoutEffect, useRef } from "react";
 import { Modal } from "./Dialogs";
 import {
   RefreshCw,
@@ -58,6 +58,51 @@ export function GameEditorModal({
   getSortCriteria,
 }: GameEditorModalProps) {
   const [isSummaryExpanded, setIsSummaryExpanded] = useState(false);
+  const [aspectRatio, setAspectRatio] = useState<number>(3 / 4);
+  const [rightHeight, setRightHeight] = useState<number | null>(null);
+  const [isDesktop, setIsDesktop] = useState<boolean>(() => typeof window !== "undefined" && window.innerWidth >= 1024);
+  const rightColumnRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const checkDesktop = () => setIsDesktop(window.innerWidth >= 1024);
+    checkDesktop();
+    window.addEventListener("resize", checkDesktop);
+    return () => window.removeEventListener("resize", checkDesktop);
+  }, []);
+
+  useEffect(() => {
+    setAspectRatio(3 / 4);
+  }, [selectedGame?.igdb_id]);
+
+  useLayoutEffect(() => {
+    if (rightColumnRef.current) {
+      const h = rightColumnRef.current.offsetHeight;
+      if (h > 0) {
+        setRightHeight(h);
+      }
+    }
+  }, [selectedGame?.igdb_id, isSummaryExpanded, isDesktop]);
+
+  useEffect(() => {
+    if (!rightColumnRef.current) return;
+    const observer = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        const h = rightColumnRef.current?.offsetHeight || Math.round(entry.contentRect.height);
+        if (h > 0) {
+          setRightHeight(h);
+        }
+      }
+    });
+    observer.observe(rightColumnRef.current);
+    return () => observer.disconnect();
+  }, [selectedGame?.igdb_id, isSummaryExpanded]);
+
+  const handleImageLoad = (e: React.SyntheticEvent<HTMLImageElement>) => {
+    const img = e.currentTarget;
+    if (img.naturalWidth && img.naturalHeight) {
+      setAspectRatio(img.naturalWidth / img.naturalHeight);
+    }
+  };
 
   const [isEditingVaults, setIsEditingVaults] = useState(false);
   const [isEditingComment, setIsEditingComment] = useState(false);
@@ -137,16 +182,38 @@ export function GameEditorModal({
       title={selectedGame?.name || "Examining Rite"}
     >
       <div className="flex flex-col gap-10">
-        <div className="flex flex-col lg:flex-row lg:items-stretch gap-8">
+        <div className="flex flex-col lg:flex-row lg:items-start gap-6">
           {/* Cover Section */}
-          <div className="w-full lg:w-auto aspect-[3/4] flex-shrink-0 bg-slaanesh-panel/40 rounded-sm border border-slaanesh-gold/40 shadow-[0_0_30px_rgba(224,18,139,0.15)] relative overflow-hidden flex items-center justify-center">
+          <div
+            className="flex-shrink-0 bg-slaanesh-panel/40 rounded-sm border border-slaanesh-gold/40 shadow-[0_0_30px_rgba(224,18,139,0.15)] relative overflow-hidden flex items-center justify-center"
+            style={
+              isDesktop
+                ? rightHeight
+                  ? {
+                      height: `${rightHeight}px`,
+                      width: `${Math.round(rightHeight * aspectRatio)}px`,
+                    }
+                  : {
+                      visibility: "hidden",
+                      height: "0px",
+                      width: "0px",
+                    }
+                : {
+                    width: "100%",
+                    maxWidth: "280px",
+                    aspectRatio: `${aspectRatio}`,
+                    margin: "0 auto",
+                  }
+            }
+          >
             <img
               src={`/covers/${selectedGame?.igdb_id}.jpg`}
-              className="absolute w-full h-full object-contain"
+              className="w-full h-full object-contain block"
               alt={selectedGame?.name}
+              onLoad={handleImageLoad}
             />
           </div>
-          <div className="flex-1 flex flex-col gap-8">
+          <div ref={rightColumnRef} className="flex-1 flex flex-col gap-6 min-w-0">
             {uiSettings["ui_editor_show_summary"] !== "false" && (
               <div className="flex flex-col gap-3">
                 <div className="flex items-center gap-2">
@@ -194,7 +261,7 @@ export function GameEditorModal({
               </div>
             )}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
               {/* Row 1 / Pair 1: Immaterial ID & Latest Epiphany */}
               <div className="flex flex-col gap-2">
                 <div className="flex flex-col gap-1">
