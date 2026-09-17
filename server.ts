@@ -362,8 +362,10 @@ async function startServer() {
 
   app.post('/api/games', async (req, res) => {
     try {
-      const { igdb_id, status, status_id, playthrough, active_platform } = req.body;
+      const { igdb_id, status, status_id, playthrough, active_platform, comment, game_comment, owned_vaults } = req.body;
       const finalStatus = status || status_id;
+      const finalGameComment = (game_comment !== undefined ? game_comment : comment) || null;
+      const finalVaults = owned_vaults || null;
       
       // Check if exists
       const existing = db.prepare('SELECT igdb_id FROM games WHERE igdb_id = ?').get(igdb_id);
@@ -383,12 +385,12 @@ async function startServer() {
       await downloadCover(gameData, igdb_id);
 
       const transaction = db.transaction(() => {
-        insertGameData(gameData, finalStatus, igdb_id);
+        insertGameData(gameData, finalStatus, igdb_id, finalGameComment, finalVaults);
 
         const isPlayingTarget = targetCats.some(c => c.category_id === 'playing');
         if (isPlayingTarget) {
           let platformToSet = active_platform;
-          if (!platformToSet && gameData.platforms && gameData.platforms.length > 0) {
+          if (active_platform === undefined && gameData.platforms && gameData.platforms.length > 0) {
             platformToSet = gameData.platforms[0].name;
           }
           if (platformToSet && String(platformToSet).trim()) {
@@ -1160,6 +1162,22 @@ async function startServer() {
         }
       }
     }
+
+    // 5. Active sessions must belong to games in the "playing" category
+    const activeNonPlayingGames = db.prepare(`
+      SELECT a.game_id, a.platform, g.name, g.game_status
+      FROM active_sessions a
+      JOIN games g ON a.game_id = g.igdb_id
+      WHERE NOT EXISTS (
+        SELECT 1 FROM status_category_map m
+        WHERE m.status_id = g.game_status AND m.category_id = 'playing'
+      )
+    `).all() as any[];
+
+    if (activeNonPlayingGames.length > 0) {
+      const g = activeNonPlayingGames[0];
+      throw new Error(`CONSTRAINT VIOLATION: Game "${g.name}" (ID ${g.game_id}) has an active session entry, but its status ("${g.game_status}") is not in the "playing" category.`);
+    }
   };
 
   const analyzeImportData = async (games: any[], playthroughs: any[]) => {
@@ -1928,6 +1946,32 @@ async function startServer() {
             issues.push(`Status "${s.label}" does not belong to the "played" category, but has its experience flag set to "${s.is_positive === 1 ? 'positive' : 'negative'}" instead of NULL.`);
           }
         }
+      }
+
+      // Check 4: Only games in the "playing" category may have active session entries
+      const nonPlayingActiveSessions = db.prepare(`
+        SELECT a.game_id, a.platform, g.name, g.game_status
+        FROM active_sessions a
+        JOIN games g ON a.game_id = g.igdb_id
+        WHERE NOT EXISTS (
+          SELECT 1 FROM status_category_map m
+          WHERE m.status_id = g.game_status AND m.category_id = 'playing'
+        )
+      `).all() as any[];
+
+      for (const session of nonPlayingActiveSessions) {
+        issues.push(`Game "${session.name}" (ID ${session.game_id}) has an active session entry (Platform: "${session.platform}"), but its status ("${session.game_status}") does not belong to the "playing" category.`);
+      }
+
+      const orphanActiveSessions = db.prepare(`
+        SELECT a.game_id, a.platform
+        FROM active_sessions a
+        LEFT JOIN games g ON a.game_id = g.igdb_id
+        WHERE g.igdb_id IS NULL
+      `).all() as any[];
+
+      for (const session of orphanActiveSessions) {
+        issues.push(`Active session exists for non-existent game ID ${session.game_id} (Platform: "${session.platform}").`);
       }
 
       res.json({ success: true, issues });

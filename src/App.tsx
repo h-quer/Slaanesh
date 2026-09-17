@@ -537,6 +537,9 @@ export default function App() {
  rating: undefined as number | undefined,
  version: '',
  comment: '',
+ game_comment: '',
+ owned_vaults: '',
+ active_platform: '',
  playthrough_status_id: null as string | null
  });
 
@@ -553,6 +556,9 @@ export default function App() {
    rating: undefined,
    version: '',
    comment: '',
+   game_comment: '',
+   owned_vaults: '',
+   active_platform: '',
    playthrough_status_id: playthroughId
   });
  };
@@ -1175,9 +1181,19 @@ export default function App() {
     const isPlayed = targetCategories.includes('played');
     const isPlaying = targetCategories.includes('playing');
  
- const originalPlatforms = game.platforms?.map((p: any) => p.name) || [];
+ const originalPlatforms = game.platforms?.map((p: any) => p.name || p) || [];
  const sortedPlatforms = sortOriginalPlatformsByMap(originalPlatforms, getPlatformMap(uiSettings));
- const defaultActivePlatform = isPlaying ? (sortedPlatforms[0] || null) : null;
+
+ let finalActivePlatform: string | null = null;
+ if (isPlaying) {
+  if (ritualPrepForm.active_platform !== undefined && ritualPrepForm.active_platform !== '') {
+   finalActivePlatform = ritualPrepForm.active_platform;
+  } else if (ritualPrepForm.active_platform === '') {
+   finalActivePlatform = null;
+  } else {
+   finalActivePlatform = sortedPlatforms[0] || null;
+  }
+ }
 
  let playthrough = null;
  if (isPlayed) {
@@ -1201,7 +1217,9 @@ export default function App() {
  body: JSON.stringify({ 
  igdb_id: game.id, 
  status_id: ritualPrepForm.status_id,
- active_platform: defaultActivePlatform,
+ active_platform: finalActivePlatform,
+ owned_vaults: ritualPrepForm.owned_vaults ? ritualPrepForm.owned_vaults.trim() : null,
+ comment: ritualPrepForm.game_comment ? ritualPrepForm.game_comment.trim() : null,
  playthrough
  })
  });
