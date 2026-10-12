@@ -425,9 +425,14 @@ function CsvImportTab({ onClose, fetchData }: { onClose: () => void, fetchData: 
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ games: formattedGames, playthroughs: formattedPTs })
       });
+      
       const data = await res.json();
+      if (!res.ok || data.error) {
+        throw new Error(data.error || `HTTP error ${res.status}: Failed to analyze CSV`);
+      }
+
       setAnalysisResults(data);
-      setIgdbMetadata(new Map(data.metadata));
+      setIgdbMetadata(new Map(data.metadata || []));
 
       if (data.unmappedGames && data.unmappedGames.length > 0) {
         setStep('game_mapping');
@@ -438,7 +443,7 @@ function CsvImportTab({ onClose, fetchData }: { onClose: () => void, fetchData: 
       } else if (data.platformConflicts && data.platformConflicts.length > 0) {
         setStep('platform_mapping');
       } else {
-        await executeImport(data, {}, {});
+        await executeImport(data, {}, {}, {});
       }
     } catch (e: any) {
       addLog(`ANALYSIS FAILED: ${e.message}`);
@@ -448,7 +453,12 @@ function CsvImportTab({ onClose, fetchData }: { onClose: () => void, fetchData: 
     }
   };
 
-  const executeImport = async (analysis: any, resolutions: any, pMappings: any, sOverrides: any = {}) => {
+  const executeImport = async (analysis: any, resolutions: any = {}, pMappings: any = {}, sOverrides: any = {}) => {
+    if (!analysis) {
+      addLog('EXECUTION ERROR: Analysis data missing or invalid.');
+      return;
+    }
+
     setIsProcessing(true);
     setStep('importing');
     setStatus('Final Manifestation...');
@@ -478,23 +488,25 @@ function CsvImportTab({ onClose, fetchData }: { onClose: () => void, fetchData: 
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
-          gamesToImport: analysis.gamesToImport,
-          gamesToUpdate: analysis.gamesToUpdate,
-          ptsToAdd: analysis.ptsToAdd,
-          ptConflicts: analysis.ptConflicts,
-          ptResolutions: resolutions,
-          platformMappings: pMappings,
-          statusOverrides: sOverrides
+          gamesToImport: Array.isArray(analysis?.gamesToImport) ? analysis.gamesToImport : [],
+          gamesToUpdate: Array.isArray(analysis?.gamesToUpdate) ? analysis.gamesToUpdate : [],
+          ptsToAdd: Array.isArray(analysis?.ptsToAdd) ? analysis.ptsToAdd : [],
+          ptConflicts: Array.isArray(analysis?.ptConflicts) ? analysis.ptConflicts : [],
+          ptResolutions: resolutions || {},
+          platformMappings: pMappings || {},
+          statusOverrides: sOverrides || {}
         })
       });
       
-      if (!res.ok) throw new Error(await res.text());
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        throw new Error(data.error || `HTTP error ${res.status}: Import execution failed`);
+      }
       if (data.success) {
         setStatus('Import Complete.');
         addLog('Ritual completed successfully.');
       } else {
-        addLog(`ERROR: ${data.error}`);
+        addLog(`ERROR: ${data.error || 'Unknown execution failure'}`);
       }
     } catch (e: any) {
       addLog(`FATAL: ${e.message}`);
@@ -523,7 +535,7 @@ function CsvImportTab({ onClose, fetchData }: { onClose: () => void, fetchData: 
     });
 
     if (remaining.length === 0) {
-      executeImport(analysisResults, ptResolutions, platformMappings);
+      executeImport(analysisResults, ptResolutions, platformMappings, statusOverrides);
     } else {
       setAnalysisResults({
         ...analysisResults,
@@ -942,7 +954,7 @@ function CsvImportTab({ onClose, fetchData }: { onClose: () => void, fetchData: 
                 if (analysisResults.platformConflicts?.length > 0) {
                   setStep('platform_mapping');
                 } else {
-                  executeImport(analysisResults, ptResolutions, platformMappings);
+                  executeImport(analysisResults, ptResolutions, platformMappings, statusOverrides);
                 }
               }}
               disabled={Object.keys(ptResolutions).length < analysisResults.ptConflicts.length}
