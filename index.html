@@ -3,12 +3,31 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="A Warhammer 40k themed game tracker with IGDB integration, SQLite storage, and a focus on decadent completionism." />
     <title>Slaanesh</title>
     <link rel="icon" type="image/png" sizes="64x64" href="/favicon-64.png" />
     <link rel="icon" type="image/png" sizes="128x128" href="/favicon-128.png" />
     <link rel="icon" type="image/png" sizes="256x256" href="/favicon-256.png" />
     <link rel="icon" type="image/png" sizes="512x512" href="/favicon-512.png" />
     <link rel="stylesheet" href="/custom.css" />
+    <script>
+      // Suppress Vite HMR WebSocket connection failure messages in iframe sandbox
+      window.addEventListener('error', function(e) {
+        var msg = (e && e.message) || '';
+        var filename = (e && e.filename) || '';
+        if (msg.includes('WebSocket') || msg.includes('createWebSocketModuleRunnerTransport') || filename.includes('@vite/client')) {
+          e.stopImmediatePropagation && e.stopImmediatePropagation();
+          e.preventDefault && e.preventDefault();
+        }
+      }, true);
+      window.addEventListener('unhandledrejection', function(e) {
+        var reason = e && (e.reason ? (e.reason.message || String(e.reason)) : '');
+        if (reason.includes('WebSocket') || reason.includes('createWebSocketModuleRunnerTransport')) {
+          e.stopImmediatePropagation && e.stopImmediatePropagation();
+          e.preventDefault && e.preventDefault();
+        }
+      }, true);
+    </script>
   </head>
   <body>
     <div id="root"></div>
