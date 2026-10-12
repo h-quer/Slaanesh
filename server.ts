@@ -1,3 +1,4 @@
+process.env.DISABLE_HMR = 'true';
 import express from 'express';
 import path from 'path';
 import { initDb, db, wipeAndReinitDb } from './src/lib/db.js';
@@ -1460,8 +1461,52 @@ async function startServer() {
 
   app.post('/api/import/analyze', async (req, res) => {
     try {
-      const { games, playthroughs } = req.body;
-      const results = await analyzeImportData(games, playthroughs);
+      const { games, playthroughs } = req.body || {};
+      if (!games && !playthroughs) {
+        return res.status(400).json({ error: 'Invalid CSV data: Neither games nor playthroughs payload was provided.' });
+      }
+      if (games !== undefined && !Array.isArray(games)) {
+        return res.status(400).json({ error: 'Invalid CSV data: "games" must be an array of records.' });
+      }
+      if (playthroughs !== undefined && !Array.isArray(playthroughs)) {
+        return res.status(400).json({ error: 'Invalid CSV data: "playthroughs" must be an array of records.' });
+      }
+
+      // Validate records for mandatory fields and format
+      if (games && games.length > 0) {
+        for (let i = 0; i < games.length; i++) {
+          const g = games[i];
+          if (!g || typeof g !== 'object') {
+            return res.status(400).json({ error: `Invalid CSV record in Games at row ${i + 1}: Record is not a valid object.` });
+          }
+          if (g.igdb_id === undefined || g.igdb_id === null || String(g.igdb_id).trim() === '') {
+            return res.status(400).json({ error: `Invalid CSV data in Games at row ${i + 1}: Missing required IGDB ID.` });
+          }
+        }
+      }
+
+      if (playthroughs && playthroughs.length > 0) {
+        for (let i = 0; i < playthroughs.length; i++) {
+          const pt = playthroughs[i];
+          if (!pt || typeof pt !== 'object') {
+            return res.status(400).json({ error: `Invalid CSV record in Playthroughs at row ${i + 1}: Record is not a valid object.` });
+          }
+          if (pt.igdb_id === undefined || pt.igdb_id === null || String(pt.igdb_id).trim() === '') {
+            return res.status(400).json({ error: `Invalid CSV data in Playthroughs at row ${i + 1}: Missing required IGDB ID.` });
+          }
+          if (!pt.date || String(pt.date).trim() === '') {
+            return res.status(400).json({ error: `Invalid CSV data in Playthroughs at row ${i + 1} (game ${pt.igdb_id}): Missing required date.` });
+          }
+          if (pt.rating !== null && pt.rating !== undefined && (isNaN(Number(pt.rating)) || Number(pt.rating) < 0 || Number(pt.rating) > 100)) {
+            return res.status(400).json({ error: `Invalid CSV data in Playthroughs at row ${i + 1} (game ${pt.igdb_id}): Rating must be a number between 0 and 100.` });
+          }
+          if (pt.time_played_minutes !== null && pt.time_played_minutes !== undefined && (isNaN(Number(pt.time_played_minutes)) || Number(pt.time_played_minutes) < 0)) {
+            return res.status(400).json({ error: `Invalid CSV data in Playthroughs at row ${i + 1} (game ${pt.igdb_id}): Time played minutes must be a non-negative number.` });
+          }
+        }
+      }
+
+      const results = await analyzeImportData(games || [], playthroughs || []);
       res.json(results);
     } catch (error: any) {
       console.error(error);
@@ -1471,9 +1516,36 @@ async function startServer() {
 
   app.post('/api/import/execute', async (req, res) => {
     try {
-      const { gamesToImport, gamesToUpdate, ptsToAdd, ptConflicts, ptResolutions, platformMappings, statusOverrides } = req.body;
+      if (!req.body || typeof req.body !== 'object') {
+        return res.status(400).json({ error: 'Invalid request: No payload provided to import execution.' });
+      }
+
+      const { 
+        gamesToImport = [], 
+        gamesToUpdate = [], 
+        ptsToAdd = [], 
+        ptConflicts = [], 
+        ptResolutions = {}, 
+        platformMappings = {}, 
+        statusOverrides = {} 
+      } = req.body;
+
+      if (!Array.isArray(gamesToImport)) {
+        return res.status(400).json({ error: 'Invalid import execution payload: "gamesToImport" must be an array.' });
+      }
+      if (!Array.isArray(gamesToUpdate)) {
+        return res.status(400).json({ error: 'Invalid import execution payload: "gamesToUpdate" must be an array.' });
+      }
+      if (!Array.isArray(ptsToAdd)) {
+        return res.status(400).json({ error: 'Invalid import execution payload: "ptsToAdd" must be an array.' });
+      }
+      if (!Array.isArray(ptConflicts)) {
+        return res.status(400).json({ error: 'Invalid import execution payload: "ptConflicts" must be an array.' });
+      }
       
-      const igdbIds = gamesToImport.map((g: any) => parseInt(g.igdb_id));
+      const igdbIds = gamesToImport
+        .map((g: any) => parseInt(g.igdb_id))
+        .filter((id: number) => !isNaN(id));
       const metadataMap = new Map<number, any>();
       
       csvImportProgress.active = true;
@@ -2663,7 +2735,7 @@ async function startServer() {
   if (process.env.NODE_ENV !== 'production') {
     const { createServer: createViteServer } = await import('vite');
     const vite = await createViteServer({
-      server: { middlewareMode: true },
+      server: { middlewareMode: true, hmr: false },
       appType: 'spa',
     });
     app.use(vite.middlewares);
