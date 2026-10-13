@@ -1047,6 +1047,13 @@ async function startServer() {
                 db.prepare('UPDATE games SET game_status = ?, owned_vaults = ? WHERE igdb_id = ?').run(status_id, finalVaultsStr, igdb_id);
             }
 
+            // Remove active session if game moved out of playing category
+            const cats = db.prepare('SELECT category_id FROM status_category_map WHERE status_id = ?').all(status_id) as any[];
+            const isPlaying = cats.some(c => c.category_id === 'playing');
+            if (!isPlaying) {
+              db.prepare('DELETE FROM active_sessions WHERE game_id = ?').run(igdb_id);
+            }
+
             if (last_played_date_final) {
                const platform = platformMappings?.[igdb_id] || 'PC (Microsoft Windows)';
                // Order by date DESC, then by uuid DESC to get the absolute latest if dates match
