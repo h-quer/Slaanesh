@@ -85,7 +85,7 @@ Slaanesh does not and will not include:
 - Store integration other than GOG
   - Currently, GOG import/sync is supported
   - GOG sync includes stores linked with the GOG account, so e.g. Epic and Steam work via the GOG sync as well
-  - For Steam, Slaanesh already supports data supplementation via a localconfig.vdf file, adding play dates and play times
+  - For Steam, Slaanesh already supports data supplementation via a localconfig.vdf file (previously, GOG didn't have this data, with a recent update the GOG database carries it and localconfig.vdf functionality is kept only as fallback, should be redundant now)
   - All this works fully offline / based on database files
   - Integrating more stores or e.g. Steam natively is possible, but that requires abandoning the "offline-only" approach, handling account data (potentially insecure), and is a lot of effort to maintain
   - Currently I think limiting sync to GOG (and offering Steam/Epic/etc. only via GOG linked accounts) is fine, I do not plan on expanding the supported game stores, but if there is a lot of demand for it I might some time in the future
