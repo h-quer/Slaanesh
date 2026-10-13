@@ -590,14 +590,27 @@ async function startServer() {
 
         if (matchedRefs.length > 0) {
           // Compute consolidated reference playtime
-          let refPlaytimeSum = 0;
+          // Deduplicate per provider first (taking max within provider, e.g. Epic), then sum across distinct providers
+          const refProviderPlaytimes = new Map<string, number>();
           let anyRefPlaytime = false;
           matchedRefs.forEach(r => {
             if (r.playtime_minutes !== null && r.playtime_minutes !== undefined) {
               anyRefPlaytime = true;
-              refPlaytimeSum += Number(r.playtime_minutes);
+              const provMatch = String(r.release_key).match(/^([a-z]+)_/);
+              const prov = provMatch ? provMatch[1] : String(r.release_key);
+              const pt = Number(r.playtime_minutes);
+              const current = refProviderPlaytimes.get(prov);
+              if (current === undefined || pt > current) {
+                refProviderPlaytimes.set(prov, pt);
+              }
             }
           });
+          let refPlaytimeSum = 0;
+          if (anyRefPlaytime) {
+            for (const pt of refProviderPlaytimes.values()) {
+              refPlaytimeSum += pt;
+            }
+          }
           const consolidatedRefPlaytime = anyRefPlaytime ? refPlaytimeSum : 0;
 
           // Compute consolidated reference last_played_date (latest date)
