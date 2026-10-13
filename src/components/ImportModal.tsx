@@ -6,6 +6,7 @@ import initSqlJs from 'sql.js';
 // @ts-ignore
 import sqlWasmUrl from 'sql.js/dist/sql-wasm.wasm?url';
 import Papa from 'papaparse';
+import { getSavedHandle, pickFileWithSavedPath } from '../lib/fileHandleStorage';
 
 function ConflictResolutionView({ 
   analysisResults, 
@@ -107,6 +108,21 @@ function CsvImportTab({ onClose, fetchData }: { onClose: () => void, fetchData: 
   const [status, setStatus] = useState<string>('');
   const [log, setLog] = useState<string[]>([]);
   const consoleRef = useRef<HTMLDivElement>(null);
+  const gamesFileInputRef = useRef<HTMLInputElement>(null);
+  const ptsFileInputRef = useRef<HTMLInputElement>(null);
+  const savedGamesHandleRef = useRef<any>(null);
+  const savedPtsHandleRef = useRef<any>(null);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && 'showOpenFilePicker' in window) {
+      getSavedHandle('csv_games_handle').then(h => {
+        savedGamesHandleRef.current = h;
+      });
+      getSavedHandle('csv_pts_handle').then(h => {
+        savedPtsHandleRef.current = h;
+      });
+    }
+  }, []);
 
   useEffect(() => {
     if (consoleRef.current) {
@@ -552,11 +568,65 @@ function CsvImportTab({ onClose, fetchData }: { onClose: () => void, fetchData: 
           <div className="flex flex-col gap-4">
             <div className="flex flex-col gap-1">
               <label className="text-xs tracking-wide font-bold text-slaanesh-gold/60 uppercase">Manifestation Scroll (Games CSV)</label>
-              <input type="file" accept=".csv" onChange={e => setGamesFile(e.target.files?.[0] || null)} className="csv-input" />
+              <input 
+                ref={gamesFileInputRef}
+                type="file" 
+                accept=".csv" 
+                onClick={async (e) => {
+                  if ('showOpenFilePicker' in window) {
+                    e.preventDefault();
+                    await pickFileWithSavedPath({
+                      storageKey: 'csv_games_handle',
+                      cachedHandle: savedGamesHandleRef.current,
+                      types: [{
+                        description: 'Games CSV (*.csv)',
+                        accept: {
+                          'text/csv': ['.csv'],
+                          'text/plain': ['.csv']
+                        }
+                      }],
+                      inputRef: gamesFileInputRef,
+                      onFilePicked: (pickedFile, handle) => {
+                        savedGamesHandleRef.current = handle;
+                        setGamesFile(pickedFile);
+                      }
+                    });
+                  }
+                }}
+                onChange={e => setGamesFile(e.target.files?.[0] || null)} 
+                className="csv-input" 
+              />
             </div>
             <div className="flex flex-col gap-1">
               <label className="text-xs tracking-wide font-bold text-slaanesh-gold/60 uppercase">Rites Chronicles (Playthroughs CSV)</label>
-              <input type="file" accept=".csv" onChange={e => setPlaythroughsFile(e.target.files?.[0] || null)} className="csv-input" />
+              <input 
+                ref={ptsFileInputRef}
+                type="file" 
+                accept=".csv" 
+                onClick={async (e) => {
+                  if ('showOpenFilePicker' in window) {
+                    e.preventDefault();
+                    await pickFileWithSavedPath({
+                      storageKey: 'csv_pts_handle',
+                      cachedHandle: savedPtsHandleRef.current,
+                      types: [{
+                        description: 'Playthroughs CSV (*.csv)',
+                        accept: {
+                          'text/csv': ['.csv'],
+                          'text/plain': ['.csv']
+                        }
+                      }],
+                      inputRef: ptsFileInputRef,
+                      onFilePicked: (pickedFile, handle) => {
+                        savedPtsHandleRef.current = handle;
+                        setPlaythroughsFile(pickedFile);
+                      }
+                    });
+                  }
+                }}
+                onChange={e => setPlaythroughsFile(e.target.files?.[0] || null)} 
+                className="csv-input" 
+              />
             </div>
           </div>
           <div className="flex justify-end gap-3 mt-4 border-t border-slaanesh-gold/10 pt-6">
@@ -1247,6 +1317,21 @@ function GogImportTab({ onClose, fetchData }: { onClose: () => void, fetchData: 
   const [isProcessing, setIsProcessing] = useState(false);
   const [log, setLog] = useState<string[]>([]);
   const consoleRef = useRef<HTMLDivElement>(null);
+  const gogFileInputRef = useRef<HTMLInputElement>(null);
+  const vdfFileInputRef = useRef<HTMLInputElement>(null);
+  const savedGogHandleRef = useRef<any>(null);
+  const savedVdfHandleRef = useRef<any>(null);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && 'showOpenFilePicker' in window) {
+      getSavedHandle('gog_galaxy_db_handle').then(h => {
+        savedGogHandleRef.current = h;
+      });
+      getSavedHandle('steam_vdf_handle').then(h => {
+        savedVdfHandleRef.current = h;
+      });
+    }
+  }, []);
 
   useEffect(() => {
     if (consoleRef.current) {
@@ -1790,25 +1875,43 @@ function GogImportTab({ onClose, fetchData }: { onClose: () => void, fetchData: 
         if (!primaryItem) primaryItem = grouped.find(it => it.provider === 'steam');
         if (!primaryItem) primaryItem = grouped[0];
 
-        const stores = grouped.map(it => ({
-          provider: it.provider,
-          externalId: it.externalId,
-          releaseKey: it.releaseKey,
-          playtimeMinutes: it.playtimeMinutes,
-          lastPlayedDate: it.lastPlayedDate
-        }));
+        const seenStoreKeys = new Set<string>();
+        const stores: any[] = [];
+        for (const it of grouped) {
+          if (!seenStoreKeys.has(it.releaseKey)) {
+            seenStoreKeys.add(it.releaseKey);
+            stores.push({
+              provider: it.provider,
+              externalId: it.externalId,
+              releaseKey: it.releaseKey,
+              playtimeMinutes: it.playtimeMinutes,
+              lastPlayedDate: it.lastPlayedDate
+            });
+          }
+        }
 
-        // Playtime is sum
-        let totalPlaytime: number | null = null;
+        // Deduplicate playtime per provider first (take max across duplicate keys within the same provider, e.g. Epic),
+        // then sum across distinct providers (e.g. GOG + Epic + Steam if owned/played across multiple).
+        const providerPlaytimes = new Map<string, number>();
         let anyPlaytimeVal = false;
         for (const it of grouped) {
           if (it.playtimeMinutes !== null && it.playtimeMinutes !== undefined) {
             anyPlaytimeVal = true;
-            totalPlaytime = (totalPlaytime || 0) + it.playtimeMinutes;
+            const prov = it.provider || 'unknown';
+            const val = Number(it.playtimeMinutes);
+            const current = providerPlaytimes.get(prov);
+            if (current === undefined || val > current) {
+              providerPlaytimes.set(prov, val);
+            }
           }
         }
-        if (!anyPlaytimeVal) {
-          totalPlaytime = null;
+
+        let totalPlaytime: number | null = null;
+        if (anyPlaytimeVal) {
+          totalPlaytime = 0;
+          for (const pt of providerPlaytimes.values()) {
+            totalPlaytime += pt;
+          }
         }
 
         // Play date: latest / most current date
@@ -2169,8 +2272,30 @@ function GogImportTab({ onClose, fetchData }: { onClose: () => void, fetchData: 
             </label>
             <div className="relative group">
               <input 
+                ref={gogFileInputRef}
                 type="file" 
                 accept=".db"
+                onClick={async (e) => {
+                  if ('showOpenFilePicker' in window) {
+                    e.preventDefault();
+                    await pickFileWithSavedPath({
+                      storageKey: 'gog_galaxy_db_handle',
+                      cachedHandle: savedGogHandleRef.current,
+                      types: [{
+                        description: 'GOG Galaxy Database (*.db)',
+                        accept: {
+                          'application/octet-stream': ['.db'],
+                          'application/x-sqlite3': ['.db']
+                        }
+                      }],
+                      inputRef: gogFileInputRef,
+                      onFilePicked: (pickedFile, handle) => {
+                        savedGogHandleRef.current = handle;
+                        setFile(pickedFile);
+                      }
+                    });
+                  }
+                }}
                 onChange={e => setFile(e.target.files?.[0] || null)}
                 className="w-full bg-black/40 border border-slaanesh-gold/20 rounded-sm px-4 py-4 text-sm focus:border-slaanesh-accent outline-none transition-all file:mr-4 file:py-2 file:px-4 file:rounded-sm file:border-0 file:text-xs file:font-bold file:bg-slaanesh-accent/20 file:text-slaanesh-accent hover:file:bg-slaanesh-accent/30"
                 disabled={isProcessing}
@@ -2187,8 +2312,30 @@ function GogImportTab({ onClose, fetchData }: { onClose: () => void, fetchData: 
             </div>
             <div className="relative group">
               <input 
+                ref={vdfFileInputRef}
                 type="file" 
                 accept=".vdf"
+                onClick={async (e) => {
+                  if ('showOpenFilePicker' in window) {
+                    e.preventDefault();
+                    await pickFileWithSavedPath({
+                      storageKey: 'steam_vdf_handle',
+                      cachedHandle: savedVdfHandleRef.current,
+                      types: [{
+                        description: 'Steam Configuration (*.vdf)',
+                        accept: {
+                          'text/plain': ['.vdf'],
+                          'application/octet-stream': ['.vdf']
+                        }
+                      }],
+                      inputRef: vdfFileInputRef,
+                      onFilePicked: (pickedFile, handle) => {
+                        savedVdfHandleRef.current = handle;
+                        setVdfFile(pickedFile);
+                      }
+                    });
+                  }
+                }}
                 onChange={e => setVdfFile(e.target.files?.[0] || null)}
                 className="w-full bg-black/40 border border-slaanesh-gold/20 rounded-sm px-4 py-4 text-sm focus:border-slaanesh-accent outline-none transition-all file:mr-4 file:py-2 file:px-4 file:rounded-sm file:border-0 file:text-xs file:font-bold file:bg-slaanesh-accent/20 file:text-slaanesh-accent hover:file:bg-slaanesh-accent/30"
                 disabled={isProcessing}
