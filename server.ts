@@ -310,6 +310,24 @@ async function startServer() {
     );
   };
 
+  const syncActiveSession = (gameId: number | string, statusId: string, platform?: string | null) => {
+    const cats = db.prepare('SELECT category_id FROM status_category_map WHERE status_id = ?').all(statusId) as any[];
+    const isPlaying = cats.some(c => c.category_id === 'playing');
+
+    if (!isPlaying) {
+      db.prepare('DELETE FROM active_sessions WHERE game_id = ?').run(gameId);
+    } else if (platform !== undefined) {
+      if (platform && String(platform).trim()) {
+        db.prepare(`
+          INSERT INTO active_sessions (game_id, platform) VALUES (?, ?)
+          ON CONFLICT(game_id) DO UPDATE SET platform = excluded.platform
+        `).run(gameId, String(platform).trim());
+      } else {
+        db.prepare('DELETE FROM active_sessions WHERE game_id = ?').run(gameId);
+      }
+    }
+  };
+
   const downloadImageWithFallback = async (baseUrl: string, destPath: string) => {
     const urlsToTry = [
       baseUrl.replace('t_thumb', 't_1080p'),
@@ -388,19 +406,11 @@ async function startServer() {
       const transaction = db.transaction(() => {
         insertGameData(gameData, finalStatus, igdb_id, finalGameComment, finalVaults);
 
-        const isPlayingTarget = targetCats.some(c => c.category_id === 'playing');
-        if (isPlayingTarget) {
-          let platformToSet = active_platform;
-          if (active_platform === undefined && gameData.platforms && gameData.platforms.length > 0) {
-            platformToSet = gameData.platforms[0].name;
-          }
-          if (platformToSet && String(platformToSet).trim()) {
-            db.prepare(`
-              INSERT INTO active_sessions (game_id, platform) VALUES (?, ?)
-              ON CONFLICT(game_id) DO UPDATE SET platform = excluded.platform
-            `).run(igdb_id, String(platformToSet).trim());
-          }
+        let platformToSet = active_platform;
+        if (active_platform === undefined && gameData.platforms && gameData.platforms.length > 0) {
+          platformToSet = gameData.platforms[0].name;
         }
+        syncActiveSession(igdb_id, finalStatus, platformToSet);
 
         if (playthrough) {
           db.prepare(`
@@ -1047,12 +1057,7 @@ async function startServer() {
                 db.prepare('UPDATE games SET game_status = ?, owned_vaults = ? WHERE igdb_id = ?').run(status_id, finalVaultsStr, igdb_id);
             }
 
-            // Remove active session if game moved out of playing category
-            const cats = db.prepare('SELECT category_id FROM status_category_map WHERE status_id = ?').all(status_id) as any[];
-            const isPlaying = cats.some(c => c.category_id === 'playing');
-            if (!isPlaying) {
-              db.prepare('DELETE FROM active_sessions WHERE game_id = ?').run(igdb_id);
-            }
+            syncActiveSession(igdb_id, status_id);
 
             if (last_played_date_final) {
                const platform = platformMappings?.[igdb_id] || 'PC (Microsoft Windows)';
@@ -1616,13 +1621,7 @@ async function startServer() {
               insertGameData(gameData, status_id, igdb_id, item.comment, item.owned_vaults);
 
               if (item.active_platform && String(item.active_platform).trim()) {
-                const cats = db.prepare('SELECT category_id FROM status_category_map WHERE status_id = ?').all(status_id) as any[];
-                if (cats.some(c => c.category_id === 'playing')) {
-                  db.prepare(`
-                    INSERT INTO active_sessions (game_id, platform) VALUES (?, ?)
-                    ON CONFLICT(game_id) DO UPDATE SET platform = excluded.platform
-                  `).run(igdb_id, String(item.active_platform).trim());
-                }
+                syncActiveSession(igdb_id, status_id, String(item.active_platform).trim());
               }
             }
           }
@@ -1638,18 +1637,8 @@ async function startServer() {
             db.prepare('UPDATE games SET game_status = ?, comment = ?, owned_vaults = ? WHERE igdb_id = ?')
               .run(status_id, item.comment, item.owned_vaults || null, item.igdb_id);
 
-            const cats = db.prepare('SELECT category_id FROM status_category_map WHERE status_id = ?').all(status_id) as any[];
-            const isPlaying = cats.some(c => c.category_id === 'playing');
-            if (isPlaying) {
-              if (item.active_platform && String(item.active_platform).trim()) {
-                db.prepare(`
-                  INSERT INTO active_sessions (game_id, platform) VALUES (?, ?)
-                  ON CONFLICT(game_id) DO UPDATE SET platform = excluded.platform
-                `).run(item.igdb_id, String(item.active_platform).trim());
-              }
-            } else {
-              db.prepare('DELETE FROM active_sessions WHERE game_id = ?').run(item.igdb_id);
-            }
+            const platformArg = item.active_platform && String(item.active_platform).trim() ? String(item.active_platform).trim() : undefined;
+            syncActiveSession(item.igdb_id, status_id, platformArg);
           }
 
           // 3. Process ptsToAdd
@@ -2514,23 +2503,7 @@ async function startServer() {
         db.prepare('UPDATE games SET game_status = ?, comment = ?, owned_vaults = ?, last_updated = CURRENT_TIMESTAMP WHERE igdb_id = ?').run(finalStatus, comment, owned_vaults, id);
         
         // Active platform helper table sync
-        const cats = db.prepare('SELECT category_id FROM status_category_map WHERE status_id = ?').all(finalStatus) as any[];
-        const isPlaying = cats.some(c => c.category_id === 'playing');
-
-        if (isPlaying) {
-          if (active_platform !== undefined) {
-            if (active_platform && String(active_platform).trim()) {
-              db.prepare(`
-                INSERT INTO active_sessions (game_id, platform) VALUES (?, ?)
-                ON CONFLICT(game_id) DO UPDATE SET platform = excluded.platform
-              `).run(id, String(active_platform).trim());
-            } else {
-              db.prepare('DELETE FROM active_sessions WHERE game_id = ?').run(id);
-            }
-          }
-        } else {
-          db.prepare('DELETE FROM active_sessions WHERE game_id = ?').run(id);
-        }
+        syncActiveSession(id, finalStatus, active_platform);
 
         checkDatabaseConsistency();
       })();
@@ -2577,10 +2550,7 @@ async function startServer() {
 
         // Remove active session if game moved out of playing category
         if (targetStatus) {
-          const targetCats = db.prepare('SELECT category_id FROM status_category_map WHERE status_id = ?').all(targetStatus) as any[];
-          if (!targetCats.some(c => c.category_id === 'playing')) {
-            db.prepare('DELETE FROM active_sessions WHERE game_id = ?').run(finalIgdbId);
-          }
+          syncActiveSession(finalIgdbId, targetStatus);
         }
 
         db.prepare(`
@@ -2667,10 +2637,7 @@ async function startServer() {
 
         if (finalGameStatus) {
           db.prepare('UPDATE games SET game_status = ?, last_updated = CURRENT_TIMESTAMP WHERE igdb_id = ?').run(finalGameStatus, p.igdb_id);
-          const targetCats = db.prepare('SELECT category_id FROM status_category_map WHERE status_id = ?').all(finalGameStatus) as any[];
-          if (!targetCats.some(c => c.category_id === 'playing')) {
-            db.prepare('DELETE FROM active_sessions WHERE game_id = ?').run(p.igdb_id);
-          }
+          syncActiveSession(p.igdb_id, finalGameStatus);
         }
 
         checkDatabaseConsistency();
