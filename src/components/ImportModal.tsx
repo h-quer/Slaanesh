@@ -1205,6 +1205,50 @@ function formatLocalDate(date: Date): string {
   return `${year}-${month}-${day}`;
 }
 
+function parseGogDateToLocalDate(raw: any): string | null {
+  if (raw === null || raw === undefined) return null;
+  const rawStr = String(raw).trim();
+  if (!rawStr || rawStr === '0') return null;
+
+  // 1. Numeric Unix timestamp (seconds or milliseconds)
+  const parsedNumber = Number(rawStr);
+  if (!isNaN(parsedNumber) && parsedNumber > 0) {
+    const millis = parsedNumber > 2000000000 ? parsedNumber : parsedNumber * 1000;
+    const d = new Date(millis);
+    return isNaN(d.getTime()) ? null : formatLocalDate(d);
+  }
+
+  // 2. Already in calendar date format YYYY-MM-DD
+  if (/^\d{4}-\d{2}-\d{2}$/.test(rawStr)) {
+    return rawStr;
+  }
+
+  // 3. String timestamp (e.g. "YYYY-MM-DD HH:MM:SS" or "YYYY-MM-DDTHH:MM:SS")
+  // GOG Galaxy database stores timestamps in UTC without an explicit timezone suffix.
+  // JavaScript's new Date(...) interprets strings without timezone as local time, causing off-by-one date shifts.
+  // We treat unadorned date-time strings as UTC, then formatLocalDate converts to the user's local timezone.
+  let normalizedStr = rawStr;
+  if (/^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}(:\d{2}(\.\d+)?)?$/.test(rawStr)) {
+    normalizedStr = rawStr.replace(' ', 'T') + 'Z';
+  } else if (!normalizedStr.endsWith('Z') && !/[+-]\d{2}:?\d{2}$/.test(normalizedStr)) {
+    if (normalizedStr.includes('T')) {
+      normalizedStr += 'Z';
+    }
+  }
+
+  const d = new Date(normalizedStr);
+  if (!isNaN(d.getTime())) {
+    return formatLocalDate(d);
+  }
+
+  const fallback = new Date(rawStr);
+  if (!isNaN(fallback.getTime())) {
+    return formatLocalDate(fallback);
+  }
+
+  return null;
+}
+
 
 function tokenizeVdf(text: string): string[] {
   const tokens: string[] = [];
@@ -1606,10 +1650,10 @@ function GogImportTab({ onClose, fetchData }: { onClose: () => void, fetchData: 
              if (columns.includes('minutes')) gtMinutesColumn = "gt.minutes";
              else if (columns.includes('minutesplayed')) gtMinutesColumn = "gt.minutesPlayed";
              else if (columns.includes('minutesingame')) gtMinutesColumn = "gt.minutesInGame";
-             else gtMinutesColumn = "0";
+             else gtMinutesColumn = "NULL";
          }
       } else {
-         gtMinutesColumn = "0";
+         gtMinutesColumn = "NULL";
       }
 
       const lpdTable = tables.find(t => t.toLowerCase() === 'lastplayeddates');
@@ -1734,8 +1778,8 @@ function GogImportTab({ onClose, fetchData }: { onClose: () => void, fetchData: 
            title = String(row[1]).startsWith('gog_') ? 'GOG ' + String(row[1]).substring(4) : String(row[1]);
         }
         const releaseKey = String(row[1]);
-        const playtimeMinutesDefault = Number(row[2] || 0);
-        const lastPlayed = row[3];
+        const rawPlaytime = row[2];
+        const rawLastPlayed = row[3];
         const tagsRaw = row[4] ? String(row[4]).split(',') : [];
 
         const match = releaseKey.match(/^([a-z]+)_([\w-]+)$/);
@@ -1745,55 +1789,36 @@ function GogImportTab({ onClose, fetchData }: { onClose: () => void, fetchData: 
         const externalId = match[2];
 
         if (['steam', 'gog', 'epic'].includes(provider)) {
+          const hasGogPlaytimeEntry = rawPlaytime !== null && rawPlaytime !== undefined && String(rawPlaytime).trim() !== '';
+          const hasGogLastPlayedEntry = rawLastPlayed !== null && rawLastPlayed !== undefined && String(rawLastPlayed).trim() !== '';
+
+          let playtimeMinutes = 0;
           let dateStr: string | null = null;
-          let playtimeMinutes = playtimeMinutesDefault;
-          
-          let gogLastPlayedDate: string | null = null;
-          if (lastPlayed && String(lastPlayed).trim() !== '') {
-            try {
-              const parsedNumber = Number(lastPlayed);
-              if (!isNaN(parsedNumber) && parsedNumber > 0) {
-                 if (parsedNumber > 2000000000) { 
-                    gogLastPlayedDate = formatLocalDate(new Date(parsedNumber));
-                 } else {
-                    gogLastPlayedDate = formatLocalDate(new Date(parsedNumber * 1000));
-                 }
-              } else {
-                 const maybeDate = new Date(String(lastPlayed));
-                 if (!isNaN(maybeDate.getTime())) {
-                    gogLastPlayedDate = formatLocalDate(maybeDate);
-                 }
-              }
-            } catch (e) {}
+
+          const appObj = (provider === 'steam' && vdfFile && vdfApps && vdfApps[externalId]) ? vdfApps[externalId] : null;
+
+          // 1. Playtime: use GOG Galaxy DB if an entry exists (including 0); only fall back to VDF if missing
+          if (hasGogPlaytimeEntry) {
+            playtimeMinutes = Number(rawPlaytime) || 0;
+          } else if (appObj) {
+            const parsedPt = getAppPlaytimeMinutes(appObj);
+            playtimeMinutes = parsedPt !== null ? parsedPt : 0;
+          } else {
+            playtimeMinutes = 0;
           }
 
-          if (provider === 'steam' && vdfFile) {
-            if (vdfApps && vdfApps[externalId]) {
-              const appObj = vdfApps[externalId];
-              const parsedPt = getAppPlaytimeMinutes(appObj);
-              const vdfPt = parsedPt !== null ? parsedPt : 0;
-              playtimeMinutes = playtimeMinutesDefault + vdfPt;
-              
-              const lastPlSecs = getAppLastPlayedTimestamp(appObj);
-              let vdfDateStr: string | null = null;
-              if (lastPlSecs && lastPlSecs > 0) {
-                try {
-                  vdfDateStr = formatLocalDate(new Date(lastPlSecs * 1000));
-                } catch (e) {}
-              }
-
-              if (vdfDateStr && gogLastPlayedDate) {
-                dateStr = vdfDateStr > gogLastPlayedDate ? vdfDateStr : gogLastPlayedDate;
-              } else {
-                dateStr = vdfDateStr || gogLastPlayedDate;
-              }
-            } else {
-              playtimeMinutes = playtimeMinutesDefault;
-              dateStr = gogLastPlayedDate;
+          // 2. Last played date: use GOG Galaxy DB if an entry exists; only fall back to VDF if missing
+          if (hasGogLastPlayedEntry) {
+            dateStr = parseGogDateToLocalDate(rawLastPlayed);
+          } else if (appObj) {
+            const lastPlSecs = getAppLastPlayedTimestamp(appObj);
+            if (lastPlSecs && lastPlSecs > 0) {
+              try {
+                dateStr = formatLocalDate(new Date(lastPlSecs * 1000));
+              } catch (e) {}
             }
           } else {
-            playtimeMinutes = playtimeMinutesDefault;
-            dateStr = gogLastPlayedDate;
+            dateStr = null;
           }
           
           let pre_selected_status_id = null;
